@@ -1,6 +1,6 @@
 import pygame, sys
-
 pygame.init()
+
 width, height = 1600, 900
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Street-Fighter")
