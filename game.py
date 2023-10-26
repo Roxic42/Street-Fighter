@@ -33,8 +33,8 @@ def main():
     naslov_rectangle = naslov_surface.get_rect(center = (width/2, 150))
     while True:
         mouse_position = pygame.mouse.get_pos()
-        igraj_gumb = Button(text_input = "Igraj", text_size = 70, text_color = "White", rectangle_width_and_height = (220, 120), rectangle_color = "Grey", rectangle_hovering_color = "Green", position = (width/2, 400))
-        izađi_gumb = Button(text_input = "Izađi", text_size = 70, text_color = "White", rectangle_width_and_height = (220, 120), rectangle_color = "Grey", rectangle_hovering_color = "Red", position = (width/2, 600))
+        igraj_gumb = Button("Igraj", 70, "White", (220, 120), "Grey", "Green", (width/2, 400))
+        izađi_gumb = Button("Izađi", 70, "White", (220, 120), "Grey", "Red", (width/2, 600))
         for gumb in [igraj_gumb, izađi_gumb]:
             if gumb.checkForCollision(mouse_position):
                 gumb.changeButtonColor()
