@@ -1,9 +1,12 @@
 import pygame, sys
-pygame.init()
+pygame.init() #instalira i učitava sve pygame module
 
+#Definiranje displaya
 WIDTH, HEIGHT = 1600, 900
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Street-Fighter")
+
+#Clock
 clock = pygame.time.Clock()
 FPS = 60
 
@@ -67,7 +70,7 @@ def escape_screen(tekst):
         pygame.display.update()
         clock.tick(FPS)
 
-
+#Glavna funkcija koja se počinje vrtjeti čim se program starta i hijerarhijski je najviša
 def main():
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render("Street-Figther", False, "White")
