@@ -1,11 +1,11 @@
 import pygame, sys
 pygame.init()
 
-width, height = 1600, 900
-screen = pygame.display.set_mode((width, height))
+WIDTH, HEIGHT = 1600, 900
+SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Street-Fighter")
 clock = pygame.time.Clock()
-FPS = 30
+FPS = 60
 
 class Button:
     def __init__(self, text_input, text_size, text_color, rectangle_width_and_height, rectangle_color, rectangle_hovering_color, position):
@@ -26,34 +26,83 @@ class Button:
     def changeButtonColor(self):
         self.rectangle_color = self.rectangle_hovering_color
         
+def escape_screen(tekst):
+    transparent_background = pygame.Surface((WIDTH, HEIGHT))
+    transparent_background.fill("Black")
+    transparent_background.set_alpha(100)
+    SCREEN.blit(transparent_background, (0,0))
 
-def main():
-    naslov_font = pygame.font.Font(None, 100)
-    naslov_surface = naslov_font.render("Street-Figther", False, "White")
-    naslov_rectangle = naslov_surface.get_rect(center = (width/2, 150))
+    plava_pozadina = pygame.Surface((640,360))
+    plava_pozadina.fill("Navy")
+    plava_pozadina_rectangle = plava_pozadina.get_rect(center = (WIDTH/2, HEIGHT/2))
+
+    okvir_surface = pygame.Surface((600,320))
+    okvir_rectangle = okvir_surface.get_rect(center = (WIDTH/2, HEIGHT/2))
+
+    font = pygame.font.Font(None, 30)
+    tekst_surface = font.render(tekst, False, "White")
+    tekst_rectangle = tekst_surface.get_rect(midtop = (WIDTH/2, 380))
     while True:
         mouse_position = pygame.mouse.get_pos()
-        igraj_gumb = Button("Igraj", 70, "White", (220, 120), "Grey", "Green", (width/2, 400))
-        izađi_gumb = Button("Izađi", 70, "White", (220, 120), "Grey", "Red", (width/2, 600))
-        for gumb in [igraj_gumb, izađi_gumb]:
+        SCREEN.blit(plava_pozadina, plava_pozadina_rectangle)
+        pygame.draw.rect(SCREEN,'Black', okvir_rectangle, 6)
+        SCREEN.blit(tekst_surface, tekst_rectangle)
+
+        CANCEL_GUMB = Button('Ne', 30, 'Black', (70, 40), '#475F77', '#D74B4B', (650, 500))
+        CONFIRM_GUMB = Button('Da', 30, 'Black', (70, 40), '#475F77', '#77dd77', (950, 500))
+        for gumb in [CANCEL_GUMB, CONFIRM_GUMB]:
             if gumb.checkForCollision(mouse_position):
                 gumb.changeButtonColor()
-            gumb.update(screen)
-        
-        screen.blit(naslov_surface, naslov_rectangle)
+            gumb.update(SCREEN)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if igraj_gumb.checkForCollision(mouse_position):
+                if CONFIRM_GUMB.checkForCollision(mouse_position):
+                    return True
+                if CANCEL_GUMB.checkForCollision(mouse_position):
+                    return False
+        pygame.display.update()
+        clock.tick(FPS)
+
+
+def main():
+    naslov_font = pygame.font.Font(None, 100)
+    naslov_surface = naslov_font.render("Street-Figther", False, "White")
+    naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 150))
+    while True:
+        SCREEN.fill("Black")
+        mouse_position = pygame.mouse.get_pos()
+        IGRAJ_GUMB = Button("Igraj", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 400))
+        IZADI_GUMB = Button("Izađi", 70, "White", (220, 120), "Grey", "Red", (WIDTH/2, 600))
+        for gumb in [IGRAJ_GUMB, IZADI_GUMB]:
+            if gumb.checkForCollision(mouse_position):
+                gumb.changeButtonColor()
+            gumb.update(SCREEN)
+        
+        SCREEN.blit(naslov_surface, naslov_rectangle)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if escape_screen("Želiš li izaći iz igre?"):
+                        pygame.quit()
+                        sys.exit()
+                    pass
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if IGRAJ_GUMB.checkForCollision(mouse_position):
                     #odabir_borca()
                     pass
-                if izađi_gumb.checkForCollision(mouse_position):
+                if IZADI_GUMB.checkForCollision(mouse_position):
                     pygame.quit()
                     sys.exit()
         pygame.display.update()
         clock.tick(FPS)
 
-main()
+if __name__ == "__main__":
+    main()
