@@ -125,10 +125,10 @@ def main():
 
 def igranje():
     run = True
+    pod_surface = pygame.Surface((1600, 100))
+    pod_rectangle = pod_surface.get_rect(topleft = (0,800))
     while run == True:
         SCREEN.fill("Light Blue")
-        pod_surface = pygame.Surface((1600, 100))
-        pod_rectangle = pod_surface.get_rect(topleft = (0,800))
         pygame.draw.rect(SCREEN, "Brown", pod_rectangle)
 
         for event in pygame.event.get():
