@@ -10,6 +10,19 @@ pygame.display.set_caption("Street-Fighter")
 clock = pygame.time.Clock()
 FPS = 60
 
+#class Borac(pygame.sprite.Group):
+#    def __init__(self):
+#        super(Borac, self).__init__()
+
+#class BoracNoge(pygame.sprite.Sprite):
+#    def __init__(self):
+#        super(BoracNoge, self).__init__()
+#        noge_surface = pygame.Surface((300,200), pygame.SRCALPHA)
+#        noge_rectangle = noge_surface.get_rect()
+
+        
+#borac = Borac()
+
 class Button:
     def __init__(self, text_input, text_size, text_color, rectangle_width_and_height, rectangle_color, rectangle_hovering_color, position):
         #rectangle ispod teksta
@@ -67,6 +80,9 @@ def escape_screen(tekst):
                     return True
                 if CANCEL_GUMB.checkForCollision(mouse_position):
                     return False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return False
         pygame.display.update()
         clock.tick(FPS)
 
@@ -100,12 +116,33 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if IGRAJ_GUMB.checkForCollision(mouse_position):
                     #odabir_borca()
-                    pass
+                    igranje()
                 if IZADI_GUMB.checkForCollision(mouse_position):
                     pygame.quit()
                     sys.exit()
         pygame.display.update()
         clock.tick(FPS)
+
+def igranje():
+    run = True
+    while run == True:
+        SCREEN.fill("Light Blue")
+        pod_surface = pygame.Surface((1600, 100))
+        pod_rectangle = pod_surface.get_rect(topleft = (0,800))
+        pygame.draw.rect(SCREEN, "Brown", pod_rectangle)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if escape_screen("Želiš li izaći iz igre?"):
+                        run = False
+
+        pygame.display.update()
+        clock.tick(FPS)
+
 
 if __name__ == "__main__":
     main()
