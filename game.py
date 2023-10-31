@@ -10,18 +10,37 @@ pygame.display.set_caption("Street-Fighter")
 clock = pygame.time.Clock()
 FPS = 60
 
-#class Borac(pygame.sprite.Group):
-#    def __init__(self):
-#        super(Borac, self).__init__()
+#Borac
+#pojedinačni spriteovi koji će se dodati u sprite grupu koja označava borca
+class BoracNoge(pygame.sprite.Sprite):
+    def __init__(self, poz):
+        super(BoracNoge, self).__init__()
+        self.image = pygame.Surface((218,296))
+        self.image.fill("Blue")
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = poz
 
-#class BoracNoge(pygame.sprite.Sprite):
-#    def __init__(self):
-#        super(BoracNoge, self).__init__()
-#        noge_surface = pygame.Surface((300,200), pygame.SRCALPHA)
-#        noge_rectangle = noge_surface.get_rect()
+class BoracTrup(pygame.sprite.Sprite):
+    def __init__(self, poz):
+        super(BoracTrup, self).__init__()
+        self.image = pygame.Surface((138,194))
+        self.image.fill("Yellow")
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = poz
 
-        
-#borac = Borac()
+
+class Borac(pygame.sprite.Group):
+    def __init__(self, poz):
+        super(Borac, self).__init__()
+        self.borac_noge = BoracNoge(poz)
+        self.borac_trup = BoracTrup(poz)
+        self.add(self.borac_noge)
+        self.add(self.borac_trup)
+
+noge = BoracNoge((400,800))
+trup = BoracTrup((400+((218-138)/2),800-296))
+
+borac = Borac((400, 800))
 
 class Button:
     def __init__(self, text_input, text_size, text_color, rectangle_width_and_height, rectangle_color, rectangle_hovering_color, position):
@@ -130,6 +149,9 @@ def igranje():
         pod_surface = pygame.Surface((1600, 100))
         pod_rectangle = pod_surface.get_rect(topleft = (0,800))
         pygame.draw.rect(SCREEN, "Brown", pod_rectangle)
+
+        borac.update()
+        borac.draw(SCREEN)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
