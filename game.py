@@ -15,20 +15,109 @@ FPS = 60
 class BoracNoge(pygame.sprite.Sprite):
     def __init__(self, poz):
         super(BoracNoge, self).__init__()
+        self.pozicija = poz
         self.image = pygame.Surface((218,296))
         self.image.fill("Blue")
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = poz
+        self.rect.bottomleft = self.pozicija
+        self.gravitacija = 0
+
+    def skakanje(self):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_w] and self.rect.bottom >= 800:
+            self.gravitacija = -23
+
+    def crouch(self):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_s] and self.rect.bottom < 800:
+            self.gravitacija += 3
+
+    def dodajGravitaciju(self):
+        self.gravitacija += 1
+        self.rect.y += self.gravitacija
+        if self.rect.bottom >= 800:
+            self.rect.bottom = 800
+
+    def kretanjePrvog(self):
+        brzina = 15
+        dx = 0
+        key = pygame.key.get_pressed()
+
+        #micanje lijevo desno
+        if key[pygame.K_a]:
+            dx = -brzina
+        if key[pygame.K_d]:
+            dx = brzina
+
+
+
+        #osigurava da ne ispadnemo iz screena
+        if self.rect.left + dx < 0:
+            dx = -self.rect.left
+        if self.rect.right + dx > WIDTH:
+            dx = WIDTH - self.rect.right
+        
+        self.rect.x += dx
+
+
+    def update(self):
+        self.kretanjePrvog()
+        self.skakanje()
+        self.dodajGravitaciju()
+        self.crouch()
 
 class BoracTrup(pygame.sprite.Sprite):
     def __init__(self, poz):
         super(BoracTrup, self).__init__()
+        self.pozicija = poz
         self.image = pygame.Surface((138,194))
         self.image.fill("Yellow")
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = poz
+        self.rect.bottomleft = (self.pozicija[0]+((218-138)/2), self.pozicija[1]-296)
+        self.gravitacija = 0
 
+    def skakanje(self):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_w] and self.rect.bottom >= 800-296:
+            self.gravitacija = -23
 
+    def crouch(self):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_s] and self.rect.bottom < 800-296:
+            self.gravitacija += 3
+
+    def dodajGravitaciju(self):
+        self.gravitacija += 1
+        self.rect.y += self.gravitacija
+        if self.rect.bottom >= 800-296:
+            self.rect.bottom = 800-296
+
+    def kretanjePrvog(self):
+        brzina = 15
+        dx = 0
+        key = pygame.key.get_pressed()
+
+        #micanje lijevo desno
+        if key[pygame.K_a]:
+            dx = -brzina
+        if key[pygame.K_d]:
+            dx = brzina
+
+        #osigurava da ne ispadnemo iz screena
+        if self.rect.left + dx < 0:
+            dx = -self.rect.left
+        if self.rect.right + dx > WIDTH:
+            dx = WIDTH - self.rect.right
+        
+        self.rect.x += dx
+
+    def update(self):
+        self.kretanjePrvog()
+        self.skakanje()
+        self.dodajGravitaciju()
+        self.crouch()
+
+#klasa Borac je zapravo sprite group u koju stavljamo pojedinačne spriteove (dijelove tijela)
 class Borac(pygame.sprite.Group):
     def __init__(self, poz):
         super(Borac, self).__init__()
@@ -38,7 +127,7 @@ class Borac(pygame.sprite.Group):
         self.add(self.borac_trup)
 
 noge = BoracNoge((400,800))
-trup = BoracTrup((400+((218-138)/2),800-296))
+trup = BoracTrup((400,800))
 
 borac = Borac((400, 800))
 
@@ -150,8 +239,8 @@ def igranje():
         pod_rectangle = pod_surface.get_rect(topleft = (0,800))
         pygame.draw.rect(SCREEN, "Brown", pod_rectangle)
 
-        borac.update()
         borac.draw(SCREEN)
+        borac.update()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -159,7 +248,7 @@ def igranje():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if escape_screen("Želiš li izaći iz igre?"):
+                    if escape_screen("Želiš li izaći u početni zaslon?"):
                         run = False
 
         pygame.display.update()
