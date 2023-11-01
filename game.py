@@ -14,37 +14,85 @@ FPS = 60
 class Borac(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.Surface((416, 590))  # Adjust the size as needed
-        self.image.fill((255, 0, 0))  # Red color placeholder
+        self.image = pygame.Surface((416, 590)) 
+        self.image.fill((255, 0, 0))
         self.rect = self.image.get_rect()
         self.rect.bottomleft = (x, y)
+        self.gravitacija = 0
         
-        # Define hitbox rectangles
-        self.legs_rect = pygame.Rect(x, y, 218, 296)
-        self.torso_rect = pygame.Rect(x - 91, y - 296, 138, 194)
-        self.head_rect = pygame.Rect(x - 131, y - 490, 160, 105)
-        self.arms_rect = pygame.Rect(x - 91, y - 296, 270, 158)
-
-    def micanje(self):
-        # Update the hitbox positions based on the sprite's position (if it moves)
-        self.legs_rect.bottomleft = self.rect.bottomleft
-        self.torso_rect.bottomleft = (self.rect.left + 91, self.rect.bottom + 296)
-        self.head_rect.bottomleft = (self.rect.left + 131, self.rect.bottom + 490)
-        self.arms_rect.bottomleft = (self.rect.left + 91, self.rect.bottom + 296)
+        self.legs_rect = pygame.Rect(x + (416/2 - 218/2), y - 296, 218, 296)
+        self.torso_rect = pygame.Rect(x + (416/2 - 138/2), y - 490, 138, 194)
+        self.head_rect = pygame.Rect(x + (416/2 - 160/2), y - 595, 160, 105)
+        self.arms_rect = pygame.Rect(x + (416/2 - 279/2), y - 475, 270, 158)
 
     def draw_hitboxes(self, screen):
-        # This function can be used to draw hitboxes for debugging
-        pygame.draw.rect(screen, (0, 255, 0), self.legs_rect, 2)  # Green legs hitbox
-        pygame.draw.rect(screen, (0, 0, 255), self.torso_rect, 2)  # Blue torso hitbox
-        pygame.draw.rect(screen, (255, 0, 0), self.head_rect, 2)  # Red head hitbox
-        pygame.draw.rect(screen, (255, 255, 0), self.arms_rect, 2)  # Yellow arms hitbox
+        pygame.draw.rect(screen, (0, 255, 0), self.legs_rect, 2)  
+        pygame.draw.rect(screen, (0, 0, 255), self.torso_rect, 2)  
+        pygame.draw.rect(screen, (0, 0, 0), self.head_rect, 2)  
+        pygame.draw.rect(screen, (255, 255, 0), self.arms_rect, 2)
+
+    def skakanje(self):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_w] and self.rect.bottom >= 800:
+            self.gravitacija = -23
+
+    def crouch(self):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_s] and self.rect.bottom < 800:
+            self.gravitacija += 3
+
+            self.legs_rect.y += 3
+            self.torso_rect.y += 3
+            self.head_rect.y += 3
+            self.arms_rect.y += 3
+
+    def dodajGravitaciju(self):
+        self.gravitacija += 1
+        self.rect.y += self.gravitacija
+        self.legs_rect.y += self.gravitacija
+        self.torso_rect.y += self.gravitacija
+        self.head_rect.y += self.gravitacija
+        self.arms_rect.y += self.gravitacija
+        if self.rect.bottom >= 800:
+            self.rect.bottom = 800
+            self.legs_rect.bottom = 800
+            self.torso_rect.top = 800 - 490
+            self.head_rect.top = 800 - 595
+            self.arms_rect.top = 800 - 475
+
+
+    def kretanjePrvog(self):
+        brzina = 15
+        dx = 0
+        key = pygame.key.get_pressed()
+
+        
+        if key[pygame.K_a]:
+            dx = -brzina
+        if key[pygame.K_d]:
+            dx = brzina
+
+        
+        if self.rect.left + dx < 0:
+            dx = -self.rect.left
+        if self.rect.right + dx > WIDTH:
+            dx = WIDTH - self.rect.right
+        
+        self.rect.x += dx
+        self.legs_rect.x += dx
+        self.torso_rect.x += dx
+        self.head_rect.x += dx
+        self.arms_rect.x += dx
 
     def update(self):
-        self.micanje
         self.draw_hitboxes(SCREEN)
+        self.skakanje()
+        self.dodajGravitaciju()
+        self.kretanjePrvog()
+        self.crouch()
 
-borac = pygame.sprite.GroupSingle()
-borac.add(Borac(400, 800))
+borac = pygame.sprite.Group()
+borac.add(Borac(200, 800))
 
 
 
