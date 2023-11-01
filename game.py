@@ -20,12 +20,14 @@ class Borac(pygame.sprite.Sprite):
         self.rect.bottomleft = (x, y)
         self.gravitacija = 0
         
+        #Ovdje radimo rectanglove za svkai dio tijela
         self.legs_rect = pygame.Rect(x + (416/2 - 218/2), y - 296, 218, 296)
         self.torso_rect = pygame.Rect(x + (416/2 - 138/2), y - 490, 138, 194)
         self.head_rect = pygame.Rect(x + (416/2 - 160/2), y - 595, 160, 105)
         self.arms_rect = pygame.Rect(x + (416/2 - 279/2), y - 475, 270, 158)
 
     def draw_hitboxes(self, screen):
+        #crtanje tih hitboxeva (samo za testiranje i developanje)
         pygame.draw.rect(screen, (0, 255, 0), self.legs_rect, 2)  
         pygame.draw.rect(screen, (0, 0, 255), self.torso_rect, 2)  
         pygame.draw.rect(screen, (0, 0, 0), self.head_rect, 2)  
@@ -66,13 +68,11 @@ class Borac(pygame.sprite.Sprite):
         dx = 0
         key = pygame.key.get_pressed()
 
-        
         if key[pygame.K_a]:
             dx = -brzina
         if key[pygame.K_d]:
             dx = brzina
 
-        
         if self.rect.left + dx < 0:
             dx = -self.rect.left
         if self.rect.right + dx > WIDTH:
@@ -93,8 +93,6 @@ class Borac(pygame.sprite.Sprite):
 
 borac = pygame.sprite.Group()
 borac.add(Borac(200, 800))
-
-
 
 class Button:
     def __init__(self, text_input, text_size, text_color, rectangle_width_and_height, rectangle_color, rectangle_hovering_color, position):
