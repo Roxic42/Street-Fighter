@@ -11,36 +11,42 @@ clock = pygame.time.Clock()
 FPS = 60
 
 #Borac
-#pojedinačni spriteovi koji će se dodati u sprite grupu koja označava borca
-class BoracNoge(pygame.sprite.Sprite):
-    def __init__(self, poz):
-        super(BoracNoge, self).__init__()
-        self.image = pygame.Surface((218,296))
-        self.image.fill("Blue")
+class Borac(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.Surface((416, 590))  # Adjust the size as needed
+        self.image.fill((255, 0, 0))  # Red color placeholder
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = poz
+        self.rect.bottomleft = (x, y)
+        
+        # Define hitbox rectangles
+        self.legs_rect = pygame.Rect(x, y, 218, 296)
+        self.torso_rect = pygame.Rect(x - 91, y - 296, 138, 194)
+        self.head_rect = pygame.Rect(x - 131, y - 490, 160, 105)
+        self.arms_rect = pygame.Rect(x - 91, y - 296, 270, 158)
 
-class BoracTrup(pygame.sprite.Sprite):
-    def __init__(self, poz):
-        super(BoracTrup, self).__init__()
-        self.image = pygame.Surface((138,194))
-        self.image.fill("Yellow")
-        self.rect = self.image.get_rect()
-        self.rect.bottomleft = poz
+    def micanje(self):
+        # Update the hitbox positions based on the sprite's position (if it moves)
+        self.legs_rect.bottomleft = self.rect.bottomleft
+        self.torso_rect.bottomleft = (self.rect.left + 91, self.rect.bottom + 296)
+        self.head_rect.bottomleft = (self.rect.left + 131, self.rect.bottom + 490)
+        self.arms_rect.bottomleft = (self.rect.left + 91, self.rect.bottom + 296)
+
+    def draw_hitboxes(self, screen):
+        # This function can be used to draw hitboxes for debugging
+        pygame.draw.rect(screen, (0, 255, 0), self.legs_rect, 2)  # Green legs hitbox
+        pygame.draw.rect(screen, (0, 0, 255), self.torso_rect, 2)  # Blue torso hitbox
+        pygame.draw.rect(screen, (255, 0, 0), self.head_rect, 2)  # Red head hitbox
+        pygame.draw.rect(screen, (255, 255, 0), self.arms_rect, 2)  # Yellow arms hitbox
+
+    def update(self):
+        self.micanje
+        self.draw_hitboxes(SCREEN)
+
+borac = pygame.sprite.GroupSingle()
+borac.add(Borac(400, 800))
 
 
-class Borac(pygame.sprite.Group):
-    def __init__(self, poz):
-        super(Borac, self).__init__()
-        self.borac_noge = BoracNoge(poz)
-        self.borac_trup = BoracTrup(poz)
-        self.add(self.borac_noge)
-        self.add(self.borac_trup)
-
-noge = BoracNoge((400,800))
-trup = BoracTrup((400+((218-138)/2),800-296))
-
-borac = Borac((400, 800))
 
 class Button:
     def __init__(self, text_input, text_size, text_color, rectangle_width_and_height, rectangle_color, rectangle_hovering_color, position):
@@ -150,8 +156,8 @@ def igranje():
         pod_rectangle = pod_surface.get_rect(topleft = (0,800))
         pygame.draw.rect(SCREEN, "Brown", pod_rectangle)
 
-        borac.update()
         borac.draw(SCREEN)
+        borac.update()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -159,7 +165,7 @@ def igranje():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if escape_screen("Želiš li izaći iz igre?"):
+                    if escape_screen("Želiš li izaći u početni zaslon?"):
                         run = False
 
         pygame.display.update()
