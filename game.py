@@ -42,7 +42,6 @@ class Borac(pygame.sprite.Sprite):
         key = pygame.key.get_pressed()
         if key[pygame.K_s] and self.rect.bottom < 800:
             self.gravitacija += 3
-
             self.legs_rect.y += 3
             self.torso_rect.y += 3
             self.head_rect.y += 3
@@ -62,7 +61,6 @@ class Borac(pygame.sprite.Sprite):
             self.head_rect.top = 800 - 595
             self.arms_rect.top = 800 - 475
 
-
     def kretanjePrvog(self):
         brzina = 15
         dx = 0
@@ -72,12 +70,12 @@ class Borac(pygame.sprite.Sprite):
             dx = -brzina
         if key[pygame.K_d]:
             dx = brzina
-
+        #Ovo osigurava da ne ispadnemo iz screena
         if self.rect.left + dx < 0:
             dx = -self.rect.left
         if self.rect.right + dx > WIDTH:
             dx = WIDTH - self.rect.right
-        
+        #Ovo zapravo daje brzinu svim rectanglovima
         self.rect.x += dx
         self.legs_rect.x += dx
         self.torso_rect.x += dx
@@ -90,7 +88,7 @@ class Borac(pygame.sprite.Sprite):
         self.dodajGravitaciju()
         self.kretanjePrvog()
         self.crouch()
-
+        
 borac = pygame.sprite.Group()
 borac.add(Borac(200, 800))
 
