@@ -11,16 +11,27 @@ clock = pygame.time.Clock()
 FPS = 60
 
 #Borac
-#pojedinačni spriteovi koji će se dodati u sprite grupu koja označava borca
-class BoracNoge(pygame.sprite.Sprite):
-    def __init__(self, poz):
-        super(BoracNoge, self).__init__()
-        self.pozicija = poz
-        self.image = pygame.Surface((218,296))
-        self.image.fill("Blue")
+class Borac(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.Surface((416, 590)) 
+        self.image.fill((255, 0, 0))
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = self.pozicija
+        self.rect.bottomleft = (x, y)
         self.gravitacija = 0
+        
+        #Ovdje radimo rectanglove za svkai dio tijela
+        self.legs_rect = pygame.Rect(x + (416/2 - 218/2), y - 296, 218, 296)
+        self.torso_rect = pygame.Rect(x + (416/2 - 138/2), y - 490, 138, 194)
+        self.head_rect = pygame.Rect(x + (416/2 - 160/2), y - 595, 160, 105)
+        self.arms_rect = pygame.Rect(x + (416/2 - 279/2), y - 475, 270, 158)
+
+    def draw_hitboxes(self, screen):
+        #crtanje tih hitboxeva (samo za testiranje i developanje)
+        pygame.draw.rect(screen, (0, 255, 0), self.legs_rect, 2)  
+        pygame.draw.rect(screen, (0, 0, 255), self.torso_rect, 2)  
+        pygame.draw.rect(screen, (0, 0, 0), self.head_rect, 2)  
+        pygame.draw.rect(screen, (255, 255, 0), self.arms_rect, 2)
 
     def skakanje(self):
         key = pygame.key.get_pressed()
@@ -31,105 +42,55 @@ class BoracNoge(pygame.sprite.Sprite):
         key = pygame.key.get_pressed()
         if key[pygame.K_s] and self.rect.bottom < 800:
             self.gravitacija += 3
+            self.legs_rect.y += 3
+            self.torso_rect.y += 3
+            self.head_rect.y += 3
+            self.arms_rect.y += 3
 
     def dodajGravitaciju(self):
         self.gravitacija += 1
         self.rect.y += self.gravitacija
+        self.legs_rect.y += self.gravitacija
+        self.torso_rect.y += self.gravitacija
+        self.head_rect.y += self.gravitacija
+        self.arms_rect.y += self.gravitacija
         if self.rect.bottom >= 800:
             self.rect.bottom = 800
+            self.legs_rect.bottom = 800
+            self.torso_rect.top = 800 - 490
+            self.head_rect.top = 800 - 595
+            self.arms_rect.top = 800 - 475
 
     def kretanjePrvog(self):
         brzina = 15
         dx = 0
         key = pygame.key.get_pressed()
 
-        #micanje lijevo desno
         if key[pygame.K_a]:
             dx = -brzina
         if key[pygame.K_d]:
             dx = brzina
-
-
-
-        #osigurava da ne ispadnemo iz screena
+        #Ovo osigurava da ne ispadnemo iz screena
         if self.rect.left + dx < 0:
             dx = -self.rect.left
         if self.rect.right + dx > WIDTH:
             dx = WIDTH - self.rect.right
-        
+        #Ovo zapravo daje brzinu svim rectanglovima
         self.rect.x += dx
-
+        self.legs_rect.x += dx
+        self.torso_rect.x += dx
+        self.head_rect.x += dx
+        self.arms_rect.x += dx
 
     def update(self):
-        self.kretanjePrvog()
+        self.draw_hitboxes(SCREEN)
         self.skakanje()
         self.dodajGravitaciju()
+        self.kretanjePrvog()
         self.crouch()
-
-class BoracTrup(pygame.sprite.Sprite):
-    def __init__(self, poz):
-        super(BoracTrup, self).__init__()
-        self.pozicija = poz
-        self.image = pygame.Surface((138,194))
-        self.image.fill("Yellow")
-        self.rect = self.image.get_rect()
-        self.rect.bottomleft = (self.pozicija[0]+((218-138)/2), self.pozicija[1]-296)
-        self.gravitacija = 0
-
-    def skakanje(self):
-        key = pygame.key.get_pressed()
-        if key[pygame.K_w] and self.rect.bottom >= 800-296:
-            self.gravitacija = -23
-
-    def crouch(self):
-        key = pygame.key.get_pressed()
-        if key[pygame.K_s] and self.rect.bottom < 800-296:
-            self.gravitacija += 3
-
-    def dodajGravitaciju(self):
-        self.gravitacija += 1
-        self.rect.y += self.gravitacija
-        if self.rect.bottom >= 800-296:
-            self.rect.bottom = 800-296
-
-    def kretanjePrvog(self):
-        brzina = 15
-        dx = 0
-        key = pygame.key.get_pressed()
-
-        #micanje lijevo desno
-        if key[pygame.K_a]:
-            dx = -brzina
-        if key[pygame.K_d]:
-            dx = brzina
-
-        #osigurava da ne ispadnemo iz screena
-        if self.rect.left + dx < 0:
-            dx = -self.rect.left
-        if self.rect.right + dx > WIDTH:
-            dx = WIDTH - self.rect.right
         
-        self.rect.x += dx
-
-    def update(self):
-        self.kretanjePrvog()
-        self.skakanje()
-        self.dodajGravitaciju()
-        self.crouch()
-
-#klasa Borac je zapravo sprite group u koju stavljamo pojedinačne spriteove (dijelove tijela)
-class Borac(pygame.sprite.Group):
-    def __init__(self, poz):
-        super(Borac, self).__init__()
-        self.borac_noge = BoracNoge(poz)
-        self.borac_trup = BoracTrup(poz)
-        self.add(self.borac_noge)
-        self.add(self.borac_trup)
-
-noge = BoracNoge((400,800))
-trup = BoracTrup((400,800))
-
-borac = Borac((400, 800))
+borac = pygame.sprite.Group()
+borac.add(Borac(200, 800))
 
 class Button:
     def __init__(self, text_input, text_size, text_color, rectangle_width_and_height, rectangle_color, rectangle_hovering_color, position):
