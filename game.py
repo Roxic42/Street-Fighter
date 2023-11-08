@@ -12,19 +12,27 @@ FPS = 60
 
 #Borac
 class Borac(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, poz, odabir):
         super().__init__()
+        self.pocetpoz = poz
         self.image = pygame.Surface((416, 590)) 
         self.image.fill((255, 0, 0))
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = (x, y)
+        self.rect.bottomleft = ((self.pocetpoz))
         self.gravitacija = 0
+        self.odabir = odabir
         
         #Ovdje radimo rectanglove za svkai dio tijela
-        self.legs_rect = pygame.Rect(x + (416/2 - 218/2), y - 296, 218, 296)
-        self.torso_rect = pygame.Rect(x + (416/2 - 138/2), y - 490, 138, 194)
-        self.head_rect = pygame.Rect(x + (416/2 - 160/2), y - 595, 160, 105)
-        self.arms_rect = pygame.Rect(x + (416/2 - 279/2), y - 475, 270, 158)
+        if self.odabir == 1:
+            self.legs_rect = pygame.Rect(self.pocetpoz[0] + 3, self.pocetpoz[1], 218, 296)
+            self.torso_rect = pygame.Rect(self.pocetpoz[0] + 43, self.pocetpoz[1] - 486, 138, 194)
+            self.head_rect = pygame.Rect(self.pocetpoz[0] + 63, self.pocetpoz[1] - 590, 120, 100)
+            self.arms_rect = pygame.Rect(self.pocetpoz[0], self.pocetpoz[1] - 493, 270, 158)
+        elif self.odabir == 2:
+            self.legs_rect = pygame.Rect(self.pocetpoz[0] + (416-218) - 3, self.pocetpoz[1], 218, 296)
+            self.torso_rect = pygame.Rect(self.pocetpoz[0] + (416-138) - 43, self.pocetpoz[1] - 486, 138, 194)
+            self.head_rect = pygame.Rect(self.pocetpoz[0] + (416-120) - 63, self.pocetpoz[1] - 590, 120, 100)
+            self.arms_rect = pygame.Rect(self.pocetpoz[0] + (416-270), self.pocetpoz[1] - 493, 270, 158)
 
     def draw_hitboxes(self, screen):
         #crtanje tih hitboxeva (samo za testiranje i developanje)
@@ -36,16 +44,7 @@ class Borac(pygame.sprite.Sprite):
     def skakanje(self):
         key = pygame.key.get_pressed()
         if key[pygame.K_w] and self.rect.bottom >= 800:
-            self.gravitacija = -23
-
-    def crouch(self):
-        key = pygame.key.get_pressed()
-        if key[pygame.K_s] and self.rect.bottom < 800:
-            self.gravitacija += 3
-            self.legs_rect.y += 3
-            self.torso_rect.y += 3
-            self.head_rect.y += 3
-            self.arms_rect.y += 3
+            self.gravitacija = -17
 
     def dodajGravitaciju(self):
         self.gravitacija += 1
@@ -62,14 +61,21 @@ class Borac(pygame.sprite.Sprite):
             self.arms_rect.top = 800 - 475
 
     def kretanjePrvog(self):
-        brzina = 15
+        brzina = 9
         dx = 0
         key = pygame.key.get_pressed()
 
-        if key[pygame.K_a]:
-            dx = -brzina
-        if key[pygame.K_d]:
-            dx = brzina
+        if self.rect.bottom == 800:
+            if key[pygame.K_a]:
+                dx = -brzina
+            if key[pygame.K_d]:
+                dx = brzina
+        elif self.rect.bottom < 800:
+            if key[pygame.K_a]:
+                dx = -brzina/2
+            if key[pygame.K_d]:
+                dx = brzina/2
+
         #Ovo osigurava da ne ispadnemo iz screena
         if self.rect.left + dx < 0:
             dx = -self.rect.left
@@ -87,10 +93,9 @@ class Borac(pygame.sprite.Sprite):
         self.skakanje()
         self.dodajGravitaciju()
         self.kretanjePrvog()
-        self.crouch()
         
 borac = pygame.sprite.Group()
-borac.add(Borac(200, 800))
+borac.add(Borac((200,800), 1))
 
 class Button:
     def __init__(self, text_input, text_size, text_color, rectangle_width_and_height, rectangle_color, rectangle_hovering_color, position):
@@ -196,6 +201,7 @@ def igranje():
     run = True
     while run == True:
         SCREEN.fill("Light Blue")
+        pygame.mouse.set_visible(False)
         pod_surface = pygame.Surface((1600, 100))
         pod_rectangle = pod_surface.get_rect(topleft = (0,800))
         pygame.draw.rect(SCREEN, "Brown", pod_rectangle)
@@ -209,6 +215,7 @@ def igranje():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
+                    pygame.mouse.set_visible(True)
                     if escape_screen("Želiš li izaći u početni zaslon?"):
                         run = False
 
