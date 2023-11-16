@@ -21,32 +21,35 @@ class Borac(pygame.sprite.Sprite):
         self.rect.bottomleft = ((self.pocetpoz))
         self.gravitacija = 0
         self.odabir = odabir
+        self.zadnji_skok = pygame.time.get_ticks()
+        self.jump_cooldown = 1000
         
-        #Ovdje radimo rectanglove za svkai dio tijela
         if self.odabir == 1:
             self.legs_rect = pygame.Rect(self.pocetpoz[0] + 3, self.pocetpoz[1], 218, 296)
-            self.torso_rect = pygame.Rect(self.pocetpoz[0] + 43, self.pocetpoz[1] - 486, 138, 194)
-            self.head_rect = pygame.Rect(self.pocetpoz[0] + 63, self.pocetpoz[1] - 590, 120, 100)
-            self.arms_rect = pygame.Rect(self.pocetpoz[0], self.pocetpoz[1] - 493, 270, 158)
+            self.torso_rect = pygame.Rect(self.pocetpoz[0] + 43, self.pocetpoz[1], 138, 194)
+            self.head_rect = pygame.Rect(self.pocetpoz[0] + 63, self.pocetpoz[1], 120, 100)
+            self.arms_rect = pygame.Rect(self.pocetpoz[0], self.pocetpoz[1], 270, 158)
         elif self.odabir == 2:
             self.legs_rect = pygame.Rect(self.pocetpoz[0] + (416-218) - 3, self.pocetpoz[1], 218, 296)
             self.torso_rect = pygame.Rect(self.pocetpoz[0] + (416-138) - 43, self.pocetpoz[1] - 486, 138, 194)
             self.head_rect = pygame.Rect(self.pocetpoz[0] + (416-120) - 63, self.pocetpoz[1] - 590, 120, 100)
             self.arms_rect = pygame.Rect(self.pocetpoz[0] + (416-270), self.pocetpoz[1] - 493, 270, 158)
 
-    def draw_hitboxes(self, screen):
-        #crtanje tih hitboxeva (samo za testiranje i developanje)
-        pygame.draw.rect(screen, (0, 255, 0), self.legs_rect, 2)  
-        pygame.draw.rect(screen, (0, 0, 255), self.torso_rect, 2)  
-        pygame.draw.rect(screen, (0, 0, 0), self.head_rect, 2)  
-        pygame.draw.rect(screen, (255, 255, 0), self.arms_rect, 2)
+    def draw_hitboxes(self):
+        pygame.draw.rect(SCREEN, (0, 255, 0), self.legs_rect, 2)  
+        pygame.draw.rect(SCREEN, (0, 0, 255), self.torso_rect, 2)  
+        pygame.draw.rect(SCREEN, (0, 0, 0), self.head_rect, 2)  
+        pygame.draw.rect(SCREEN, (255, 255, 0), self.arms_rect, 2)
 
-    def skakanje(self):
+    def punch(self):
+        self.punch_rect = pygame.Rect(self.rect.left + 266, self.rect.bottom - 502, 130, 78)
+        pygame.draw.rect(SCREEN, (255, 255, 255), self.punch_rect, 2)
+
+    def kretanjePrvog(self):
+        brzina = 9
+        dx = 0
         key = pygame.key.get_pressed()
-        if key[pygame.K_w] and self.rect.bottom >= 800:
-            self.gravitacija = -17
 
-    def dodajGravitaciju(self):
         self.gravitacija += 1
         self.rect.y += self.gravitacija
         self.legs_rect.y += self.gravitacija
@@ -56,14 +59,14 @@ class Borac(pygame.sprite.Sprite):
         if self.rect.bottom >= 800:
             self.rect.bottom = 800
             self.legs_rect.bottom = 800
-            self.torso_rect.top = 800 - 490
-            self.head_rect.top = 800 - 595
-            self.arms_rect.top = 800 - 475
+            self.torso_rect.top = 800 - 486
+            self.head_rect.top = 800 - 590
+            self.arms_rect.top = 800 - 493
 
-    def kretanjePrvog(self):
-        brzina = 9
-        dx = 0
-        key = pygame.key.get_pressed()
+        trenutacno_vrijeme = pygame.time.get_ticks()
+        if key[pygame.K_w] and self.rect.bottom >= 800 and trenutacno_vrijeme - self.zadnji_skok >= self.jump_cooldown:
+            self.gravitacija = -15
+            self.zadnji_skok = trenutacno_vrijeme
 
         if self.rect.bottom == 800:
             if key[pygame.K_a]:
@@ -76,12 +79,18 @@ class Borac(pygame.sprite.Sprite):
             if key[pygame.K_d]:
                 dx = brzina/2
 
-        #Ovo osigurava da ne ispadnemo iz screena
         if self.rect.left + dx < 0:
             dx = -self.rect.left
         if self.rect.right + dx > WIDTH:
             dx = WIDTH - self.rect.right
-        #Ovo zapravo daje brzinu svim rectanglovima
+
+        if key[pygame.K_r]:
+            self.punch()
+            self.punch_rect.y += self.gravitacija
+            if self.rect.bottom >= 800:
+                self.punch_rect.top = 800 - 503
+            self.punch_rect.x += dx
+
         self.rect.x += dx
         self.legs_rect.x += dx
         self.torso_rect.x += dx
@@ -89,9 +98,7 @@ class Borac(pygame.sprite.Sprite):
         self.arms_rect.x += dx
 
     def update(self):
-        self.draw_hitboxes(SCREEN)
-        self.skakanje()
-        self.dodajGravitaciju()
+        self.draw_hitboxes()
         self.kretanjePrvog()
         
 borac = pygame.sprite.Group()
