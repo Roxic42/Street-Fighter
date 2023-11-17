@@ -12,9 +12,10 @@ FPS = 60
 
 #Borac
 class Borac(pygame.sprite.Sprite):
-    def __init__(self, poz, odabir):
+    def __init__(self, poz, odabir, protivnik):
         super().__init__()
         self.pocetpoz = poz
+        self.protivnik = protivnik
         self.image = pygame.Surface((416, 590)) 
         self.image.fill((255, 0, 0))
         self.rect = self.image.get_rect()
@@ -23,6 +24,9 @@ class Borac(pygame.sprite.Sprite):
         self.odabir = odabir
         self.zadnji_skok = pygame.time.get_ticks()
         self.jump_cooldown = 1000
+        self.health = 100
+        self.napad = False
+        self.okreni = False
         
         if self.odabir == 1:
             self.legs_rect = pygame.Rect(self.pocetpoz[0] + 3, self.pocetpoz[1], 218, 296)
@@ -42,8 +46,11 @@ class Borac(pygame.sprite.Sprite):
         pygame.draw.rect(SCREEN, (255, 255, 0), self.arms_rect, 2)
 
     def punch(self):
+        self.napad = True
         self.punch_rect = pygame.Rect(self.rect.left + 266, self.rect.bottom - 502, 130, 78)
         pygame.draw.rect(SCREEN, (255, 255, 255), self.punch_rect, 2)
+        if self.punch_rect.colliderect(self.protivnik.legs_rect) or self.punch_rect.colliderect(self.protivnik.torso_rect) or self.punch_rect.colliderect(self.protivnik.head_rect) or self.punch_rect.colliderect(self.protivnik.arms_rect):
+            self.protivnik.health -= 10
 
     def kretanjePrvog(self):
         brzina = 9
@@ -64,32 +71,40 @@ class Borac(pygame.sprite.Sprite):
             self.arms_rect.top = 800 - 493
 
         trenutacno_vrijeme = pygame.time.get_ticks()
-        if key[pygame.K_w] and self.rect.bottom >= 800 and trenutacno_vrijeme - self.zadnji_skok >= self.jump_cooldown:
-            self.gravitacija = -15
-            self.zadnji_skok = trenutacno_vrijeme
 
-        if self.rect.bottom == 800:
-            if key[pygame.K_a]:
-                dx = -brzina
-            if key[pygame.K_d]:
-                dx = brzina
-        elif self.rect.bottom < 800:
-            if key[pygame.K_a]:
-                dx = -brzina/2
-            if key[pygame.K_d]:
-                dx = brzina/2
+        if self.napad == False:
 
-        if self.rect.left + dx < 0:
-            dx = -self.rect.left
-        if self.rect.right + dx > WIDTH:
-            dx = WIDTH - self.rect.right
+            if key[pygame.K_w] and self.rect.bottom >= 800 and trenutacno_vrijeme - self.zadnji_skok >= self.jump_cooldown:
+                self.gravitacija = -15
+                self.zadnji_skok = trenutacno_vrijeme
 
-        if key[pygame.K_r]:
-            self.punch()
-            self.punch_rect.y += self.gravitacija
-            if self.rect.bottom >= 800:
-                self.punch_rect.top = 800 - 503
-            self.punch_rect.x += dx
+            if self.rect.bottom == 800:
+                if key[pygame.K_a]:
+                    dx = -brzina
+                if key[pygame.K_d]:
+                    dx = brzina
+            elif self.rect.bottom < 800:
+                if key[pygame.K_a]:
+                    dx = -brzina/2
+                if key[pygame.K_d]:
+                    dx = brzina/2
+
+            if self.rect.left + dx < 0:
+                dx = -self.rect.left
+            if self.rect.right + dx > WIDTH:
+                dx = WIDTH - self.rect.right
+
+            if self.protivnik.rect.centerx > self.rect.centerx:
+                self.flip = False
+            else:
+                self.flip = True
+
+            if key[pygame.K_r]:
+                self.punch()
+                self.punch_rect.y += self.gravitacija
+                if self.rect.bottom >= 800:
+                    self.punch_rect.top = 800 - 503
+                self.punch_rect.x += dx
 
         self.rect.x += dx
         self.legs_rect.x += dx
@@ -102,7 +117,10 @@ class Borac(pygame.sprite.Sprite):
         self.kretanjePrvog()
         
 borac = pygame.sprite.Group()
-borac.add(Borac((200,800), 1))
+borac2 = Borac((200,800), 1, borac1)
+borac1 = Borac((200,800), 1, borac2)
+borac.add(borac1)
+borac.add(borac2)
 
 class Button:
     def __init__(self, text_input, text_size, text_color, rectangle_width_and_height, rectangle_color, rectangle_hovering_color, position):
