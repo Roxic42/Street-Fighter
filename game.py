@@ -12,10 +12,9 @@ FPS = 60
 
 #Borac
 class Borac(pygame.sprite.Sprite):
-    def __init__(self, poz, odabir, protivnik):
+    def __init__(self, poz, odabir):
         super().__init__()
         self.pocetpoz = poz
-        self.protivnik = protivnik
         self.image = pygame.Surface((416, 590)) 
         self.image.fill((255, 0, 0))
         self.rect = self.image.get_rect()
@@ -23,10 +22,10 @@ class Borac(pygame.sprite.Sprite):
         self.gravitacija = 0
         self.odabir = odabir
         self.zadnji_skok = pygame.time.get_ticks()
+        self.zadnji_punch = pygame.time.get_ticks()
         self.jump_cooldown = 1000
+        self.punch_cooldown = 500
         self.health = 100
-        self.napad = False
-        self.okreni = False
         
         if self.odabir == 1:
             self.legs_rect = pygame.Rect(self.pocetpoz[0] + 3, self.pocetpoz[1], 218, 296)
@@ -34,7 +33,7 @@ class Borac(pygame.sprite.Sprite):
             self.head_rect = pygame.Rect(self.pocetpoz[0] + 63, self.pocetpoz[1], 120, 100)
             self.arms_rect = pygame.Rect(self.pocetpoz[0], self.pocetpoz[1], 270, 158)
         elif self.odabir == 2:
-            self.legs_rect = pygame.Rect(self.pocetpoz[0] + (416-218) - 3, self.pocetpoz[1], 218, 296)
+            self.legs_rect = pygame.Rect(self.pocetpoz[0] + (416-218) - 3, self.pocetpoz[1] - 296, 218, 296)
             self.torso_rect = pygame.Rect(self.pocetpoz[0] + (416-138) - 43, self.pocetpoz[1] - 486, 138, 194)
             self.head_rect = pygame.Rect(self.pocetpoz[0] + (416-120) - 63, self.pocetpoz[1] - 590, 120, 100)
             self.arms_rect = pygame.Rect(self.pocetpoz[0] + (416-270), self.pocetpoz[1] - 493, 270, 158)
@@ -45,14 +44,14 @@ class Borac(pygame.sprite.Sprite):
         pygame.draw.rect(SCREEN, (0, 0, 0), self.head_rect, 2)  
         pygame.draw.rect(SCREEN, (255, 255, 0), self.arms_rect, 2)
 
-    def punch(self):
-        self.napad = True
+    def punch(self, protivnik):
         self.punch_rect = pygame.Rect(self.rect.left + 266, self.rect.bottom - 502, 130, 78)
         pygame.draw.rect(SCREEN, (255, 255, 255), self.punch_rect, 2)
-        if self.punch_rect.colliderect(self.protivnik.legs_rect) or self.punch_rect.colliderect(self.protivnik.torso_rect) or self.punch_rect.colliderect(self.protivnik.head_rect) or self.punch_rect.colliderect(self.protivnik.arms_rect):
-            self.protivnik.health -= 10
+        if self.punch_rect.colliderect(protivnik.legs_rect) or self.punch_rect.colliderect(protivnik.torso_rect) or self.punch_rect.colliderect(protivnik.head_rect) or self.punch_rect.colliderect(protivnik.arms_rect):
+            protivnik.health -= 5
+            print(protivnik.health)
 
-    def kretanjePrvog(self):
+    def kretanjePrvog(self, protivnik):
         brzina = 9
         dx = 0
         key = pygame.key.get_pressed()
@@ -72,39 +71,34 @@ class Borac(pygame.sprite.Sprite):
 
         trenutacno_vrijeme = pygame.time.get_ticks()
 
-        if self.napad == False:
+        if key[pygame.K_w] and self.rect.bottom >= 800 and trenutacno_vrijeme - self.zadnji_skok >= self.jump_cooldown:
+            self.gravitacija = -17
+            self.zadnji_skok = trenutacno_vrijeme
 
-            if key[pygame.K_w] and self.rect.bottom >= 800 and trenutacno_vrijeme - self.zadnji_skok >= self.jump_cooldown:
-                self.gravitacija = -15
-                self.zadnji_skok = trenutacno_vrijeme
 
-            if self.rect.bottom == 800:
-                if key[pygame.K_a]:
-                    dx = -brzina
-                if key[pygame.K_d]:
-                    dx = brzina
-            elif self.rect.bottom < 800:
-                if key[pygame.K_a]:
-                    dx = -brzina/2
-                if key[pygame.K_d]:
-                    dx = brzina/2
+        if self.rect.bottom == 800:
+            if key[pygame.K_a]:
+                dx = -brzina
+            if key[pygame.K_d]:
+                dx = brzina
+        elif self.rect.bottom < 800:
+            if key[pygame.K_a]:
+                dx = -brzina/2
+            if key[pygame.K_d]:
+                dx = brzina/2
 
-            if self.rect.left + dx < 0:
-                dx = -self.rect.left
-            if self.rect.right + dx > WIDTH:
-                dx = WIDTH - self.rect.right
+        if self.rect.left + dx < 0:
+            dx = -self.rect.left
+        if self.rect.right + dx > WIDTH:
+            dx = WIDTH - self.rect.right
 
-            if self.protivnik.rect.centerx > self.rect.centerx:
-                self.flip = False
-            else:
-                self.flip = True
-
-            if key[pygame.K_r]:
-                self.punch()
-                self.punch_rect.y += self.gravitacija
-                if self.rect.bottom >= 800:
-                    self.punch_rect.top = 800 - 503
-                self.punch_rect.x += dx
+        if key[pygame.K_r] and trenutacno_vrijeme - self.zadnji_punch >= self.punch_cooldown:
+            self.punch(protivnik)
+            self.zadnji_punch = trenutacno_vrijeme
+            self.punch_rect.y += self.gravitacija
+            if self.rect.bottom >= 800:
+                self.punch_rect.top = 800 - 503
+            self.punch_rect.x += dx
 
         self.rect.x += dx
         self.legs_rect.x += dx
@@ -114,11 +108,10 @@ class Borac(pygame.sprite.Sprite):
 
     def update(self):
         self.draw_hitboxes()
-        self.kretanjePrvog()
         
 borac = pygame.sprite.Group()
-borac2 = Borac((200,800), 1, borac1)
-borac1 = Borac((200,800), 1, borac2)
+borac1 = Borac((200, 800), 1)
+borac2 = Borac((800, 800), 2)
 borac.add(borac1)
 borac.add(borac2)
 
@@ -233,6 +226,7 @@ def igranje():
 
         borac.draw(SCREEN)
         borac.update()
+        borac1.kretanjePrvog(borac2)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
