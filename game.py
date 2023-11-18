@@ -59,7 +59,10 @@ class Borac(pygame.sprite.Sprite):
         pygame.draw.rect(SCREEN, (255, 255, 0), self.arms_rect, 2)
 
     def punch(self, protivnik):
-        self.punch_rect = pygame.Rect(self.rect.left + 266, self.rect.bottom - 502, 130, 78)
+        if self.pocetpoz[0] < 800:
+            self.punch_rect = pygame.Rect(self.rect.left + 266, self.rect.bottom - 502, 130, 78)
+        elif self.pocetpoz[0] >= 800:
+            self.punch_rect = pygame.Rect(self.rect.left + (416 - 130) - 266, self.rect.bottom - 502, 130, 78)
         pygame.draw.rect(SCREEN, (255, 255, 255), self.punch_rect, 2)
         if self.punch_rect.colliderect(protivnik.legs_rect) or self.punch_rect.colliderect(protivnik.torso_rect) or self.punch_rect.colliderect(protivnik.head_rect) or self.punch_rect.colliderect(protivnik.arms_rect):
             protivnik.health -= 5
@@ -90,7 +93,6 @@ class Borac(pygame.sprite.Sprite):
             self.torso_rect.topleft = (self.rect.x + 43, self.rect.y)
             self.head_rect.topleft = (self.rect.x + 63, self.rect.y)
             self.arms_rect.topleft = (self.rect.x, self.rect.y)
-
 
         self.gravitacija += 1
         self.rect.y += self.gravitacija
@@ -131,6 +133,15 @@ class Borac(pygame.sprite.Sprite):
                 dx = WIDTH - self.rect.right
 
             if key[pygame.K_r] and trenutacno_vrijeme - self.zadnji_punch >= self.punch_cooldown:
+                if self.pocetpoz[0] < 800 and self.rect.right < protivnik.rect.right:
+                    self.punch_rect = (self.rect.x + 266, self.rect.y)
+                elif self.pocetpoz[0] < 800 and self.rect.right > protivnik.rect.right:
+                    self.punch_rect = (self.rect.x + (416 - 130) - 266, self.rect.y)
+                elif self.pocetpoz[0] >= 800 and self.rect.left > protivnik.rect.left:
+                    self.punch_rect = (self.rect.x + (416 - 130) - 266, self.rect.y)
+                elif self.pocetpoz[0] >= 800 and self.rect.left < protivnik.rect.left:
+                    self.punch_rect = (self.rect.x + 266, self.rect.y)
+
                 self.punch(protivnik)
                 self.zadnji_punch = trenutacno_vrijeme
                 self.punch_rect.y += self.gravitacija
@@ -263,6 +274,7 @@ def igranje():
         pod_surface = pygame.Surface((1600, 100))
         pod_rectangle = pod_surface.get_rect(topleft = (0,800))
         pygame.draw.rect(SCREEN, "Brown", pod_rectangle)
+        borac.draw(SCREEN)
         borac.update()
 
         borac1.kretanje(borac2)
