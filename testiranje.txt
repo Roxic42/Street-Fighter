@@ -1,0 +1,1 @@
+uočena greška prilikom skoka--> trebalo je rectangleove na left staviti a ne na topleft
