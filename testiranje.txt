@@ -1,1 +1,2 @@
 uočena greška prilikom skoka--> trebalo je rectangleove na left staviti a ne na topleft
+rectangle za punch je prekratko vidljiv - ako će to biti trajanje animacije treba produljiti vrijeme puncha, likovi se čudno kreću odnosno kontrole vrijede za oba lika(nije greška samo se još nije napravilo)
