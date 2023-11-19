@@ -12,7 +12,7 @@ FPS = 60
 
 #Borac
 class Borac(pygame.sprite.Sprite):
-    def __init__(self, poz, odabir):
+    def __init__(self, poz):
         super().__init__()
         self.pocetpoz = poz
         self.image = pygame.Surface((416, 590)) 
@@ -20,34 +20,90 @@ class Borac(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.bottomleft = ((self.pocetpoz))
         self.gravitacija = 0
-        self.odabir = odabir
+        self.zadnji_skok = pygame.time.get_ticks()
+        self.zadnji_punch = pygame.time.get_ticks()
+        self.jump_cooldown = 1000
+        self.punch_cooldown = 500
+        self.health = 100
+        self.ziv = True
         
-        #Ovdje radimo rectanglove za svkai dio tijela
-        if self.odabir == 1:
+        if self.pocetpoz[0] < 800:
             self.legs_rect = pygame.Rect(self.pocetpoz[0] + 3, self.pocetpoz[1], 218, 296)
-            self.torso_rect = pygame.Rect(self.pocetpoz[0] + 43, self.pocetpoz[1] - 486, 138, 194)
-            self.head_rect = pygame.Rect(self.pocetpoz[0] + 63, self.pocetpoz[1] - 590, 120, 100)
-            self.arms_rect = pygame.Rect(self.pocetpoz[0], self.pocetpoz[1] - 493, 270, 158)
-        elif self.odabir == 2:
-            self.legs_rect = pygame.Rect(self.pocetpoz[0] + (416-218) - 3, self.pocetpoz[1], 218, 296)
+            self.torso_rect = pygame.Rect(self.pocetpoz[0] + 43, self.pocetpoz[1], 138, 194)
+            self.head_rect = pygame.Rect(self.pocetpoz[0] + 63, self.pocetpoz[1], 120, 100)
+            self.arms_rect = pygame.Rect(self.pocetpoz[0], self.pocetpoz[1], 270, 158)
+        elif self.pocetpoz[0] >= 800:
+            self.legs_rect = pygame.Rect(self.pocetpoz[0] + (416-218) - 3, self.pocetpoz[1] - 296, 218, 296)
             self.torso_rect = pygame.Rect(self.pocetpoz[0] + (416-138) - 43, self.pocetpoz[1] - 486, 138, 194)
             self.head_rect = pygame.Rect(self.pocetpoz[0] + (416-120) - 63, self.pocetpoz[1] - 590, 120, 100)
             self.arms_rect = pygame.Rect(self.pocetpoz[0] + (416-270), self.pocetpoz[1] - 493, 270, 158)
 
-    def draw_hitboxes(self, screen):
-        #crtanje tih hitboxeva (samo za testiranje i developanje)
-        pygame.draw.rect(screen, (0, 255, 0), self.legs_rect, 2)  
-        pygame.draw.rect(screen, (0, 0, 255), self.torso_rect, 2)  
-        pygame.draw.rect(screen, (0, 0, 0), self.head_rect, 2)  
-        pygame.draw.rect(screen, (255, 255, 0), self.arms_rect, 2)
+    def reset(self):
+        if self.pocetpoz[0] < 800:
+            self.rect.bottomleft = ((self.pocetpoz))
+            self.legs_rect = pygame.Rect(self.pocetpoz[0] + 3, self.pocetpoz[1] - 296, 218, 296)
+            self.torso_rect = pygame.Rect(self.pocetpoz[0] + 43, self.pocetpoz[1] - 486, 138, 194)
+            self.head_rect = pygame.Rect(self.pocetpoz[0] + 63, self.pocetpoz[1] - 590, 120, 100)
+            self.arms_rect = pygame.Rect(self.pocetpoz[0], self.pocetpoz[1] - 493, 270, 158)
+        elif self.pocetpoz[0] >= 800:
+            self.rect.bottomleft = ((self.pocetpoz))
+            self.legs_rect = pygame.Rect(self.pocetpoz[0] + (416-218) - 3, self.pocetpoz[1] - 296, 218, 296)
+            self.torso_rect = pygame.Rect(self.pocetpoz[0] + (416-138) - 43, self.pocetpoz[1] - 486, 138, 194)
+            self.head_rect = pygame.Rect(self.pocetpoz[0] + (416-120) - 63, self.pocetpoz[1] - 590, 120, 100)
+            self.arms_rect = pygame.Rect(self.pocetpoz[0] + (416-270), self.pocetpoz[1] - 493, 270, 158)
 
-    def skakanje(self):
+    def draw_hitboxes(self):
+        pygame.draw.rect(SCREEN, (0, 255, 0), self.legs_rect, 2)  
+        pygame.draw.rect(SCREEN, (0, 0, 255), self.torso_rect, 2)  
+        pygame.draw.rect(SCREEN, (0, 0, 0), self.head_rect, 2)  
+        pygame.draw.rect(SCREEN, (255, 255, 0), self.arms_rect, 2)
+
+    def punch(self, protivnik):
+        if self.pocetpoz[0] < 800:
+            self.punch_rect = pygame.Rect(self.rect.left + 266, self.rect.bottom - 502, 130, 78)
+        elif self.pocetpoz[0] >= 800:
+            self.punch_rect = pygame.Rect(self.rect.left + (416 - 130) - 266, self.rect.bottom - 502, 130, 78)
+        if self.pocetpoz[0] < 800 and self.rect.right < protivnik.rect.right:
+            self.punch_rect.left = (self.rect.x + 266)
+        elif self.pocetpoz[0] < 800 and self.rect.right > protivnik.rect.right:
+            self.punch_rect.left = (self.rect.x + (416 - 130) - 266)
+        elif self.pocetpoz[0] >= 800 and self.rect.left > protivnik.rect.left:
+            self.punch_rect.left = (self.rect.x + (416 - 130) - 266)
+        elif self.pocetpoz[0] >= 800 and self.rect.left < protivnik.rect.left:
+            self.punch_rect.left = (self.rect.x + 266)
+        pygame.draw.rect(SCREEN, (255, 255, 255), self.punch_rect, 2)
+        if self.punch_rect.colliderect(protivnik.legs_rect) or self.punch_rect.colliderect(protivnik.torso_rect) or self.punch_rect.colliderect(protivnik.head_rect) or self.punch_rect.colliderect(protivnik.arms_rect):
+            protivnik.health -= 5
+            print(protivnik.health)
+
+    def kretanje(self, protivnik):
+        brzina = 9
+        dx = 0
         key = pygame.key.get_pressed()
-        if key[pygame.K_w] and self.rect.bottom >= 800:
-            self.gravitacija = -17
-
-    def dodajGravitaciju(self):
         self.gravitacija += 1
+
+        if self.pocetpoz[0] < 800 and self.rect.right < protivnik.rect.right and self.rect.bottom >= 800:
+            self.legs_rect.left = (self.rect.x + 3)
+            self.torso_rect.left = (self.rect.x + 43)
+            self.head_rect.left = (self.rect.x + 63)
+            self.arms_rect.left = (self.rect.x)
+        elif self.pocetpoz[0] < 800 and self.rect.right > protivnik.rect.right and self.rect.bottom >= 800:
+            self.legs_rect.left = (self.rect.x + (416-219) - 3)
+            self.torso_rect.left = (self.rect.x + (416-139) - 43)
+            self.head_rect.left = (self.rect.x + (416-121) - 63)
+            self.arms_rect.left = (self.rect.x + (416-271))
+        elif self.pocetpoz[0] >= 800 and self.rect.left > protivnik.rect.left and self.rect.bottom >= 800:
+            self.legs_rect.left = (self.rect.x + (416-219) - 3)
+            self.torso_rect.left = (self.rect.x + (416-139) - 43)
+            self.head_rect.left = (self.rect.x + (416-121) - 63)
+            self.arms_rect.left = (self.rect.x + (416-271))
+        elif self.pocetpoz[0] >= 800 and self.rect.left < protivnik.rect.left and self.rect.bottom >= 800:
+            self.legs_rect.left = (self.rect.x + 3)
+            self.torso_rect.left = (self.rect.x + 43)
+            self.head_rect.left = (self.rect.x + 63)
+            self.arms_rect.left = (self.rect.x)
+
+        
         self.rect.y += self.gravitacija
         self.legs_rect.y += self.gravitacija
         self.torso_rect.y += self.gravitacija
@@ -56,46 +112,60 @@ class Borac(pygame.sprite.Sprite):
         if self.rect.bottom >= 800:
             self.rect.bottom = 800
             self.legs_rect.bottom = 800
-            self.torso_rect.top = 800 - 490
-            self.head_rect.top = 800 - 595
-            self.arms_rect.top = 800 - 475
+            self.torso_rect.top = 800 - 486
+            self.head_rect.top = 800 - 590
+            self.arms_rect.top = 800 - 493
 
-    def kretanjePrvog(self):
-        brzina = 9
-        dx = 0
-        key = pygame.key.get_pressed()
+        trenutacno_vrijeme = pygame.time.get_ticks()
 
-        if self.rect.bottom == 800:
-            if key[pygame.K_a]:
-                dx = -brzina
-            if key[pygame.K_d]:
-                dx = brzina
-        elif self.rect.bottom < 800:
-            if key[pygame.K_a]:
-                dx = -brzina/2
-            if key[pygame.K_d]:
-                dx = brzina/2
+        if self.ziv == False:
+            return
+        else:
+            if key[pygame.K_w] and self.rect.bottom >= 800 and trenutacno_vrijeme - self.zadnji_skok >= self.jump_cooldown:
+                self.gravitacija = -17
+                self.zadnji_skok = trenutacno_vrijeme
 
-        #Ovo osigurava da ne ispadnemo iz screena
-        if self.rect.left + dx < 0:
-            dx = -self.rect.left
-        if self.rect.right + dx > WIDTH:
-            dx = WIDTH - self.rect.right
-        #Ovo zapravo daje brzinu svim rectanglovima
-        self.rect.x += dx
-        self.legs_rect.x += dx
-        self.torso_rect.x += dx
-        self.head_rect.x += dx
-        self.arms_rect.x += dx
+            if self.rect.bottom == 800:
+                if key[pygame.K_a]:
+                    dx = -brzina
+                if key[pygame.K_d]:
+                    dx = brzina
+            elif self.rect.bottom < 800:
+                if key[pygame.K_a]:
+                    dx = -brzina/2
+                if key[pygame.K_d]:
+                    dx = brzina/2
+
+            if self.rect.left + dx < 0:
+                dx = -self.rect.left
+            if self.rect.right + dx > WIDTH:
+                dx = WIDTH - self.rect.right
+
+            if key[pygame.K_r] and trenutacno_vrijeme - self.zadnji_punch >= self.punch_cooldown:
+                self.punch(protivnik)
+
+                self.zadnji_punch = trenutacno_vrijeme
+                self.punch_rect.y += self.gravitacija
+                if self.rect.bottom >= 800:
+                    self.punch_rect.top = 800 - 503
+                self.punch_rect.x += dx
+
+            self.rect.x += dx
+            self.legs_rect.x += dx
+            self.torso_rect.x += dx
+            self.head_rect.x += dx
+            self.arms_rect.x += dx
 
     def update(self):
-        self.draw_hitboxes(SCREEN)
-        self.skakanje()
-        self.dodajGravitaciju()
-        self.kretanjePrvog()
+        self.draw_hitboxes()
+        if self.health <= 0:
+            self.ziv = False
         
 borac = pygame.sprite.Group()
-borac.add(Borac((200,800), 1))
+borac1 = Borac((900, 800))
+borac2 = Borac((200, 800))
+borac.add(borac1)
+borac.add(borac2)
 
 class Button:
     def __init__(self, text_input, text_size, text_color, rectangle_width_and_height, rectangle_color, rectangle_hovering_color, position):
@@ -205,10 +275,12 @@ def igranje():
         pod_surface = pygame.Surface((1600, 100))
         pod_rectangle = pod_surface.get_rect(topleft = (0,800))
         pygame.draw.rect(SCREEN, "Brown", pod_rectangle)
-
         borac.draw(SCREEN)
         borac.update()
 
+        borac2.kretanje(borac1)
+        borac1.kretanje(borac2)
+    
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -217,6 +289,8 @@ def igranje():
                 if event.key == pygame.K_ESCAPE:
                     pygame.mouse.set_visible(True)
                     if escape_screen("Želiš li izaći u početni zaslon?"):
+                        borac2.reset()
+                        borac1.reset()
                         run = False
 
         pygame.display.update()
