@@ -78,6 +78,26 @@ class Borac(pygame.sprite.Sprite):
         if self.punch_rect.colliderect(protivnik.legs_rect) or self.punch_rect.colliderect(protivnik.torso_rect) or self.punch_rect.colliderect(protivnik.head_rect) or self.punch_rect.colliderect(protivnik.arms_rect):
             protivnik.health -= 5
             print(protivnik.health)
+
+    def kick(self, protivnik):
+        if self.pocetpoz[0] < 800:
+            self.kick_rect = pygame.Rect(self.rect.left + 256, self.rect.bottom - 349, 160, 105)
+        elif self.pocetpoz[0] >= 800:
+            self.kick_rect = pygame.Rect(self.rect.left + (416 - 160) - 256, self.rect.bottom - 349, 160, 105)
+        if self.pocetpoz[0] < 800 and self.rect.right < protivnik.rect.right:
+            self.kick_rect.left = (self.rect.x + 256)
+        elif self.pocetpoz[0] < 800 and self.rect.right > protivnik.rect.right:
+            self.kick_rect.left = (self.rect.x + (416 - 160) - 256)
+        elif self.pocetpoz[0] >= 800 and self.rect.left > protivnik.rect.left:
+            self.kick_rect.left = (self.rect.x + (416 - 160) - 256)
+        elif self.pocetpoz[0] >= 800 and self.rect.left < protivnik.rect.left:
+            self.kick_rect.left = (self.rect.x + 256)
+        pygame.draw.rect(SCREEN, (255, 255, 255), self.kick_rect, 2)
+        if self.kick_rect.colliderect(protivnik.legs_rect) or self.kick_rect.colliderect(protivnik.torso_rect) or self.kick_rect.colliderect(protivnik.head_rect) or self.kick_rect.colliderect(protivnik.arms_rect):
+            protivnik.health -= 10
+            print(protivnik.health)
+
+
     #Funkcija koja omogućava kretanje lika, pali punch metodu
     def kretanje(self, protivnik):
         brzina = 9
@@ -85,22 +105,22 @@ class Borac(pygame.sprite.Sprite):
         key = pygame.key.get_pressed()
         self.gravitacija += 1
 
-        if self.pocetpoz[0] < 800 and self.rect.right < protivnik.rect.right and self.rect.bottom >= 800:
+        if self.pocetpoz[0] < 800 and self.rect.right < protivnik.rect.right:
             self.legs_rect.left = (self.rect.x + 3)
             self.torso_rect.left = (self.rect.x + 43)
             self.head_rect.left = (self.rect.x + 63)
             self.arms_rect.left = (self.rect.x)
-        elif self.pocetpoz[0] < 800 and self.rect.right > protivnik.rect.right and self.rect.bottom >= 800:
+        elif self.pocetpoz[0] < 800 and self.rect.right > protivnik.rect.right:
             self.legs_rect.left = (self.rect.x + (416-219) - 3)
             self.torso_rect.left = (self.rect.x + (416-139) - 43)
             self.head_rect.left = (self.rect.x + (416-121) - 63)
             self.arms_rect.left = (self.rect.x + (416-271))
-        elif self.pocetpoz[0] >= 800 and self.rect.left > protivnik.rect.left and self.rect.bottom >= 800:
+        elif self.pocetpoz[0] >= 800 and self.rect.left > protivnik.rect.left:
             self.legs_rect.left = (self.rect.x + (416-219) - 3)
             self.torso_rect.left = (self.rect.x + (416-139) - 43)
             self.head_rect.left = (self.rect.x + (416-121) - 63)
             self.arms_rect.left = (self.rect.x + (416-271))
-        elif self.pocetpoz[0] >= 800 and self.rect.left < protivnik.rect.left and self.rect.bottom >= 800:
+        elif self.pocetpoz[0] >= 800 and self.rect.left < protivnik.rect.left:
             self.legs_rect.left = (self.rect.x + 3)
             self.torso_rect.left = (self.rect.x + 43)
             self.head_rect.left = (self.rect.x + 63)
@@ -160,6 +180,15 @@ class Borac(pygame.sprite.Sprite):
             self.torso_rect.x += dx
             self.head_rect.x += dx
             self.arms_rect.x += dx
+
+            if key[pygame.K_f] and trenutacno_vrijeme - self.zadnji_punch >= self.punch_cooldown:
+                self.kick(protivnik)
+
+                self.zadnji_punch = trenutacno_vrijeme
+                self.kick_rect.y += self.gravitacija
+                if self.rect.bottom >= 800:
+                    self.kick_rect.top = 800 - 349
+                self.kick_rect.x += dx
     
     #Provjerava životni status lika
     def update(self):
@@ -288,7 +317,6 @@ def igranje():
         borac.update()
 
         borac2.kretanje(borac1)
-        borac1.kretanje(borac2)
     
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
