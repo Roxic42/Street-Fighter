@@ -47,12 +47,14 @@ class Borac(pygame.sprite.Sprite):
             self.torso_rect = pygame.Rect(self.pocetpoz[0] + 43, self.pocetpoz[1] - 486, 138, 194)
             self.head_rect = pygame.Rect(self.pocetpoz[0] + 63, self.pocetpoz[1] - 590, 120, 100)
             self.arms_rect = pygame.Rect(self.pocetpoz[0], self.pocetpoz[1] - 493, 270, 158)
+            self.health = 100
         elif self.pocetpoz[0] >= 800:
             self.rect.bottomleft = ((self.pocetpoz))
             self.legs_rect = pygame.Rect(self.pocetpoz[0] + (416-218) - 3, self.pocetpoz[1] - 296, 218, 296)
             self.torso_rect = pygame.Rect(self.pocetpoz[0] + (416-138) - 43, self.pocetpoz[1] - 486, 138, 194)
             self.head_rect = pygame.Rect(self.pocetpoz[0] + (416-120) - 63, self.pocetpoz[1] - 590, 120, 100)
             self.arms_rect = pygame.Rect(self.pocetpoz[0] + (416-270), self.pocetpoz[1] - 493, 270, 158)
+            self.health = 100
 
     def draw_hitboxes(self):
         pygame.draw.rect(SCREEN, (0, 255, 0), self.legs_rect, 2)  
@@ -317,7 +319,34 @@ def igranje():
         borac.update()
 
         borac2.kretanje(borac1)
+        if borac1.health <= 0:
+            winscreen()
     
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.mouse.set_visible(True)
+                    if escape_screen("Želiš li izaći u početni zaslon?"):
+                        borac2.reset()
+                        borac1.reset()
+                        run = False
+
+        pygame.display.update()
+        clock.tick(FPS)
+
+def winscreen():
+    transparent_background = pygame.Surface((WIDTH, HEIGHT))
+    transparent_background.fill("Light Blue")
+    transparent_background.set_alpha(100)
+    SCREEN.blit(transparent_background, (0,0))
+    run = True
+    while run == True:
+
+
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
