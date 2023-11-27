@@ -27,8 +27,6 @@ class Borac(pygame.sprite.Sprite):
         self.health = 100
         self.blokiranje = False
         self.blok_pocetak = 0
-        self.blok_max_drzanje = 5000
-        self.blok_cooldown = 10000
         self.blok_health = 4
         self.blok_health_regeneracija = 10000
         self.blok_health_oduzet = pygame.time.get_ticks()
@@ -81,17 +79,10 @@ class Borac(pygame.sprite.Sprite):
         if self.keybind == 1:
             if key[pygame.K_e] and not self.blokiranje:
                 self.blokiranje = True
-                self.blok_pocetak = trenutacno_vrijeme
 
         if self.keybind == 2:
             if key[pygame.K_i] and not self.blokiranje:
                 self.blokiranje = True
-                self.blok_pocetak = trenutacno_vrijeme
-
-        if self.blokiranje:
-            if trenutacno_vrijeme - self.blok_pocetak > self.blok_max_drzanje:
-                self.blokiranje = False
-                self.blok_pocetak = trenutacno_vrijeme
 
         if self.blok_health <= 0:
             if trenutacno_vrijeme - self.blok_health_oduzet > self.blok_health_regeneracija:
@@ -100,9 +91,6 @@ class Borac(pygame.sprite.Sprite):
             else:
                 self.blokiranje = False
                 self.blok_pocetak = trenutacno_vrijeme
-
-        if not self.blokiranje and trenutacno_vrijeme - self.blok_pocetak > self.blok_cooldown:
-            self.blok_pocetak = trenutacno_vrijeme
 
 
     #Dodaje se punch attack, i oduzima se health na uspješnom udarcu
@@ -156,6 +144,7 @@ class Borac(pygame.sprite.Sprite):
 
     #Funkcija koja omogućava kretanje lika, pali punch metodu
     def kretanje(self, protivnik):
+        global brzina
         brzina = 9
         dx = 0
         key = pygame.key.get_pressed()
@@ -214,6 +203,11 @@ class Borac(pygame.sprite.Sprite):
                     if key[pygame.K_d]:
                         dx = brzina
                 elif self.rect.bottom < 800:
+                    if key[pygame.K_a]:
+                        dx = -brzina/2
+                    if key[pygame.K_d]:
+                        dx = brzina/2
+                if self.blokiranje:
                     if key[pygame.K_a]:
                         dx = -brzina/2
                     if key[pygame.K_d]:
@@ -452,8 +446,7 @@ def odabir_igraca():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     if escape_screen("Želiš li se vratiti nazad?"):
-                        run = False
-                    pass
+                        main()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if DALJE_GUMB.checkForCollision(mouse_position):
@@ -489,9 +482,8 @@ def odabir_borca():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if escape_screen("Želiš li se vratiti nazad?"):
-                        run = False
-                    pass
+                    if escape_screen("Želiš li se vratiti na početnu stranicu?"):
+                        main()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if NAZAD_GUMB.checkForCollision(mouse_position):
@@ -507,7 +499,49 @@ def odabir_borca():
                     borac2 = Borac((900, 800))
                     borac2.keybind = 2
                     borac.add(borac2)
+                    odabir_rundi()
+                
+        pygame.display.update()
+        clock.tick(FPS)
+
+def odabir_rundi():
+    naslov_font = pygame.font.Font(None, 100)
+    naslov_surface = naslov_font.render("Na koliko rundi se igra?", False, "White")
+    naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 100))
+    while True:
+        SCREEN.fill("Black")
+        mouse_position = pygame.mouse.get_pos()
+        JEDNA_GUMB = Button("1", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 300))
+        TRI_GUMB = Button("3", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 500))
+        SEDAM_GUMB = Button("7", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 700))
+        NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
+        for gumb in [JEDNA_GUMB, SEDAM_GUMB, TRI_GUMB, NAZAD_GUMB]:
+            if gumb.checkForCollision(mouse_position):
+                gumb.changeButtonColor()
+            gumb.update(SCREEN)
+
+        SCREEN.blit(naslov_surface, naslov_rectangle)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if escape_screen("Želiš li se vratiti na početnu stranicu?"):
+                        main()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if JEDNA_GUMB.checkForCollision(mouse_position):
                     igranje()
+                if TRI_GUMB.checkForCollision(mouse_position):
+                    #igranje3()
+                    pass
+                if SEDAM_GUMB.checkForCollision(mouse_position):
+                    #igranje7()
+                    pass
+                if NAZAD_GUMB.checkForCollision(mouse_position):
+                    odabir_borca()
                 
         pygame.display.update()
         clock.tick(FPS)
@@ -524,6 +558,7 @@ def igranje():
         pod_rectangle = pod_surface.get_rect(topleft = (0,800))
         pygame.draw.rect(SCREEN, "Brown", pod_rectangle)
         borac.update
+        borac.draw(SCREEN)
     
         borac1.kretanje(borac2)
         borac1.draw_hitboxes()
@@ -546,15 +581,14 @@ def igranje():
         pygame.display.update()
         clock.tick(FPS)
 
-def winscreen1():
+def winscreen():
     pygame.mouse.set_visible(True)
+    transparent_background = pygame.Surface((WIDTH, HEIGHT))
+    transparent_background.fill("Light Blue")
+    transparent_background.set_alpha(100)
+    SCREEN.blit(transparent_background, (0,0))
     run = True
     while run == True:
-        transparent_background = pygame.Surface((WIDTH, HEIGHT))
-        transparent_background.fill("Light Blue")
-        transparent_background.set_alpha(100)
-        SCREEN.blit(transparent_background, (0,0))
-
 
 
         for event in pygame.event.get():
