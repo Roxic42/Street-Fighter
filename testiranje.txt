@@ -2,3 +2,4 @@ uočena greška prilikom skoka--> trebalo je rectangleove na left staviti a ne n
 rectangle za punch je prekratko vidljiv - ako će to biti trajanje animacije treba produljiti vrijeme puncha, likovi se čudno kreću odnosno kontrole vrijede za oba lika(nije greška samo se još nije napravilo)
 desni lik nestane ako su jedan na drugom i miču se desno
 ako se preskače lik koji stoji izgleda kao da se teleportira
+cooldown blocka ne radi 
