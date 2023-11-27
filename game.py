@@ -25,7 +25,13 @@ class Borac(pygame.sprite.Sprite):
         self.jump_cooldown = 1000
         self.punch_cooldown = 500
         self.health = 100
+        self.blokiranje = False
+        self.blok_pocetak = 0
+        self.blok_health = 4
+        self.blok_health_regeneracija = 10000
+        self.blok_health_oduzet = pygame.time.get_ticks()
         self.ziv = True
+        self.keybind = 0
         
         #Pozicioniranje rectangleova dijelova tijela
         if self.pocetpoz[0] < 800:
@@ -47,19 +53,46 @@ class Borac(pygame.sprite.Sprite):
             self.torso_rect = pygame.Rect(self.pocetpoz[0] + 43, self.pocetpoz[1] - 486, 138, 194)
             self.head_rect = pygame.Rect(self.pocetpoz[0] + 63, self.pocetpoz[1] - 590, 120, 100)
             self.arms_rect = pygame.Rect(self.pocetpoz[0], self.pocetpoz[1] - 493, 270, 158)
+            self.health = 100
+            self.blok_health = 4
         elif self.pocetpoz[0] >= 800:
             self.rect.bottomleft = ((self.pocetpoz))
             self.legs_rect = pygame.Rect(self.pocetpoz[0] + (416-218) - 3, self.pocetpoz[1] - 296, 218, 296)
             self.torso_rect = pygame.Rect(self.pocetpoz[0] + (416-138) - 43, self.pocetpoz[1] - 486, 138, 194)
             self.head_rect = pygame.Rect(self.pocetpoz[0] + (416-120) - 63, self.pocetpoz[1] - 590, 120, 100)
             self.arms_rect = pygame.Rect(self.pocetpoz[0] + (416-270), self.pocetpoz[1] - 493, 270, 158)
+            self.health = 100
+            self.blok_health = 4
+
 
     def draw_hitboxes(self):
         pygame.draw.rect(SCREEN, (0, 255, 0), self.legs_rect, 2)  
         pygame.draw.rect(SCREEN, (0, 0, 255), self.torso_rect, 2)  
         pygame.draw.rect(SCREEN, (0, 0, 0), self.head_rect, 2)  
         pygame.draw.rect(SCREEN, (255, 255, 0), self.arms_rect, 2)
-    
+
+
+    def blok(self):
+        trenutacno_vrijeme = pygame.time.get_ticks()
+        key = pygame.key.get_pressed()
+
+        if self.keybind == 1:
+            if key[pygame.K_e] and not self.blokiranje:
+                self.blokiranje = True
+
+        if self.keybind == 2:
+            if key[pygame.K_i] and not self.blokiranje:
+                self.blokiranje = True
+
+        if self.blok_health <= 0:
+            if trenutacno_vrijeme - self.blok_health_oduzet > self.blok_health_regeneracija:
+                self.blok_health = 4
+                self.blok_health_oduzet = trenutacno_vrijeme
+            else:
+                self.blokiranje = False
+                self.blok_pocetak = trenutacno_vrijeme
+
+
     #Dodaje se punch attack, i oduzima se health na uspješnom udarcu
     def punch(self, protivnik):
         if self.pocetpoz[0] < 800:
@@ -75,9 +108,15 @@ class Borac(pygame.sprite.Sprite):
         elif self.pocetpoz[0] >= 800 and self.rect.left < protivnik.rect.left:
             self.punch_rect.left = (self.rect.x + 266)
         pygame.draw.rect(SCREEN, (255, 255, 255), self.punch_rect, 2)
-        if self.punch_rect.colliderect(protivnik.legs_rect) or self.punch_rect.colliderect(protivnik.torso_rect) or self.punch_rect.colliderect(protivnik.head_rect) or self.punch_rect.colliderect(protivnik.arms_rect):
+        if protivnik.blokiranje:
+            protivnik.blok_health -= 1
+            print(protivnik.blok_health)
+            return
+        elif self.punch_rect.colliderect(protivnik.legs_rect) or self.punch_rect.colliderect(protivnik.torso_rect) or self.punch_rect.colliderect(protivnik.head_rect) or self.punch_rect.colliderect(protivnik.arms_rect):
             protivnik.health -= 5
             print(protivnik.health)
+            print(protivnik.blok_health)
+           
 
     def kick(self, protivnik):
         if self.pocetpoz[0] < 800:
@@ -93,17 +132,25 @@ class Borac(pygame.sprite.Sprite):
         elif self.pocetpoz[0] >= 800 and self.rect.left < protivnik.rect.left:
             self.kick_rect.left = (self.rect.x + 256)
         pygame.draw.rect(SCREEN, (255, 255, 255), self.kick_rect, 2)
-        if self.kick_rect.colliderect(protivnik.legs_rect) or self.kick_rect.colliderect(protivnik.torso_rect) or self.kick_rect.colliderect(protivnik.head_rect) or self.kick_rect.colliderect(protivnik.arms_rect):
+        if protivnik.blokiranje:
+            protivnik.blok_health -= 1
+            print(protivnik.blok_health)
+            return
+        elif self.kick_rect.colliderect(protivnik.legs_rect) or self.kick_rect.colliderect(protivnik.torso_rect) or self.kick_rect.colliderect(protivnik.head_rect) or self.kick_rect.colliderect(protivnik.arms_rect):
             protivnik.health -= 10
             print(protivnik.health)
+            print(protivnik.blok_health)
 
 
     #Funkcija koja omogućava kretanje lika, pali punch metodu
     def kretanje(self, protivnik):
+        global brzina
         brzina = 9
         dx = 0
         key = pygame.key.get_pressed()
         self.gravitacija += 1
+
+        self.blok()
 
         if self.pocetpoz[0] < 800 and self.rect.right < protivnik.rect.right:
             self.legs_rect.left = (self.rect.x + 3)
@@ -142,38 +189,53 @@ class Borac(pygame.sprite.Sprite):
         trenutacno_vrijeme = pygame.time.get_ticks()
 
         #Movement
-        if self.ziv == False:
-            return
-        else:
-            if key[pygame.K_w] and self.rect.bottom >= 800 and trenutacno_vrijeme - self.zadnji_skok >= self.jump_cooldown:
-                self.gravitacija = -17
-                self.zadnji_skok = trenutacno_vrijeme
+        if self.keybind == 1:
+            if self.ziv == False:
+                return
+            else:
+                if key[pygame.K_w] and self.rect.bottom >= 800 and trenutacno_vrijeme - self.zadnji_skok >= self.jump_cooldown:
+                    self.gravitacija = -17
+                    self.zadnji_skok = trenutacno_vrijeme
 
-            if self.rect.bottom == 800:
-                if key[pygame.K_a]:
-                    dx = -brzina
-                if key[pygame.K_d]:
-                    dx = brzina
-            elif self.rect.bottom < 800:
-                if key[pygame.K_a]:
-                    dx = -brzina/2
-                if key[pygame.K_d]:
-                    dx = brzina/2
+                if self.rect.bottom == 800:
+                    if key[pygame.K_a]:
+                        dx = -brzina
+                    if key[pygame.K_d]:
+                        dx = brzina
+                elif self.rect.bottom < 800:
+                    if key[pygame.K_a]:
+                        dx = -brzina/2
+                    if key[pygame.K_d]:
+                        dx = brzina/2
+                if self.blokiranje:
+                    if key[pygame.K_a]:
+                        dx = -brzina/2
+                    if key[pygame.K_d]:
+                        dx = brzina/2
 
-            if self.rect.left + dx < 0:
-                dx = -self.rect.left
-            if self.rect.right + dx > WIDTH:
-                dx = WIDTH - self.rect.right
+                if self.rect.left + dx < 0:
+                    dx = -self.rect.left
+                if self.rect.right + dx > WIDTH:
+                    dx = WIDTH - self.rect.right
 
-            #Punch
-            if key[pygame.K_r] and trenutacno_vrijeme - self.zadnji_punch >= self.punch_cooldown:
-                self.punch(protivnik)
+                #Punch
+                if key[pygame.K_r] and trenutacno_vrijeme - self.zadnji_punch >= self.punch_cooldown:
+                    self.punch(protivnik)
 
-                self.zadnji_punch = trenutacno_vrijeme
-                self.punch_rect.y += self.gravitacija
-                if self.rect.bottom >= 800:
-                    self.punch_rect.top = 800 - 503
-                self.punch_rect.x += dx
+                    self.zadnji_punch = trenutacno_vrijeme
+                    self.punch_rect.y += self.gravitacija
+                    if self.rect.bottom >= 800:
+                        self.punch_rect.top = 800 - 503
+                    self.punch_rect.x += dx
+
+                if key[pygame.K_f] and trenutacno_vrijeme - self.zadnji_punch >= self.punch_cooldown:
+                    self.kick(protivnik)
+
+                    self.zadnji_punch = trenutacno_vrijeme
+                    self.kick_rect.y += self.gravitacija
+                    if self.rect.bottom >= 800:
+                        self.kick_rect.top = 800 - 349
+                    self.kick_rect.x += dx
 
             self.rect.x += dx
             self.legs_rect.x += dx
@@ -181,14 +243,54 @@ class Borac(pygame.sprite.Sprite):
             self.head_rect.x += dx
             self.arms_rect.x += dx
 
-            if key[pygame.K_f] and trenutacno_vrijeme - self.zadnji_punch >= self.punch_cooldown:
-                self.kick(protivnik)
+        if self.keybind == 2:
+            if self.ziv == False:
+                return
+            else:
+                if key[pygame.K_u] and self.rect.bottom >= 800 and trenutacno_vrijeme - self.zadnji_skok >= self.jump_cooldown:
+                    self.gravitacija = -17
+                    self.zadnji_skok = trenutacno_vrijeme
 
-                self.zadnji_punch = trenutacno_vrijeme
-                self.kick_rect.y += self.gravitacija
-                if self.rect.bottom >= 800:
-                    self.kick_rect.top = 800 - 349
-                self.kick_rect.x += dx
+                if self.rect.bottom == 800:
+                    if key[pygame.K_h]:
+                        dx = -brzina
+                    if key[pygame.K_k]:
+                        dx = brzina
+                elif self.rect.bottom < 800:
+                    if key[pygame.K_h]:
+                        dx = -brzina/2
+                    if key[pygame.K_k]:
+                        dx = brzina/2
+
+                if self.rect.left + dx < 0:
+                    dx = -self.rect.left
+                if self.rect.right + dx > WIDTH:
+                    dx = WIDTH - self.rect.right
+
+                #Punch
+                if key[pygame.K_o] and trenutacno_vrijeme - self.zadnji_punch >= self.punch_cooldown:
+                    self.punch(protivnik)
+
+                    self.zadnji_punch = trenutacno_vrijeme
+                    self.punch_rect.y += self.gravitacija
+                    if self.rect.bottom >= 800:
+                        self.punch_rect.top = 800 - 503
+                    self.punch_rect.x += dx
+
+                if key[pygame.K_l] and trenutacno_vrijeme - self.zadnji_punch >= self.punch_cooldown:
+                    self.kick(protivnik)
+
+                    self.zadnji_punch = trenutacno_vrijeme
+                    self.kick_rect.y += self.gravitacija
+                    if self.rect.bottom >= 800:
+                        self.kick_rect.top = 800 - 349
+                    self.kick_rect.x += dx
+
+            self.rect.x += dx
+            self.legs_rect.x += dx
+            self.torso_rect.x += dx
+            self.head_rect.x += dx
+            self.arms_rect.x += dx
     
     #Provjerava životni status lika
     def update(self):
@@ -196,12 +298,28 @@ class Borac(pygame.sprite.Sprite):
         if self.health <= 0:
             self.ziv = False
 
+class Player:
+    def __init__(self, ime):
+        self.ime = ime
+        self.Ws = 0
+        self.Ls = 0
+
+    def zapis(self, igrac, protivnik):
+        if protivnik.health <= 0:
+            self.Ws += 1
+        elif igrac.health <= 0:
+            self.Ls += 1
+
+    def postotak(self):
+        ukupno_igara = self.Ws + self.Ls
+        return (self.Ws / ukupno_igara) * 100 if ukupno_igara > 0 else 0
+
+    #def achievements()
+
+
+
 #Definiranje objekata (likova) iz klase Borac i dodavanje u Sprite Grupu        
 borac = pygame.sprite.Group()
-borac1 = Borac((900, 800))
-borac2 = Borac((200, 800))
-borac.add(borac1)
-borac.add(borac2)
 
 #Definira se klasa gumb sa svojim metodama
 class Button:
@@ -270,14 +388,15 @@ def escape_screen(tekst):
 #Glavna funkcija koja se počinje vrtjeti čim se program starta i hijerarhijski je najviša
 def main():
     naslov_font = pygame.font.Font(None, 100)
-    naslov_surface = naslov_font.render("Street-Figther", False, "White")
-    naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 150))
+    naslov_surface = naslov_font.render("Podzemne borbe", False, "White")
+    naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 100))
     while True:
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
-        IGRAJ_GUMB = Button("Igraj", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 400))
-        IZADI_GUMB = Button("Izađi", 70, "White", (220, 120), "Grey", "Red", (WIDTH/2, 600))
-        for gumb in [IGRAJ_GUMB, IZADI_GUMB]:
+        IGRAJ_GUMB = Button("Igraj", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 300))
+        ACHIEVEMENTS_GUMB = Button("Achievements", 70, "White", (350, 120), "Grey", "Yellow", (WIDTH/2, 500))
+        IZADI_GUMB = Button("Izađi", 70, "White", (220, 120), "Grey", "Red", (WIDTH/2, 700))
+        for gumb in [IGRAJ_GUMB, IZADI_GUMB, ACHIEVEMENTS_GUMB]:
             if gumb.checkForCollision(mouse_position):
                 gumb.changeButtonColor()
             gumb.update(SCREEN)
@@ -296,16 +415,141 @@ def main():
                     pass
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if IGRAJ_GUMB.checkForCollision(mouse_position):
-                    #odabir_borca()
-                    igranje()
+                    odabir_igraca()
                 if IZADI_GUMB.checkForCollision(mouse_position):
                     pygame.quit()
                     sys.exit()
         pygame.display.update()
         clock.tick(FPS)
 
+def odabir_igraca():
+    naslov_font = pygame.font.Font(None, 100)
+    naslov_surface = naslov_font.render("Odabir igraca", False, "White")
+    naslov_rectangle = naslov_surface.get_rect(center = (250, 50))
+    run = True
+    while run == True:
+        SCREEN.fill("Black")
+        mouse_position = pygame.mouse.get_pos()
+        DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Green", (1500, 850))
+        NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
+        for gumb in [DALJE_GUMB, NAZAD_GUMB]:
+            if gumb.checkForCollision(mouse_position):
+                gumb.changeButtonColor()
+            gumb.update(SCREEN)
+
+        SCREEN.blit(naslov_surface, naslov_rectangle)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if escape_screen("Želiš li se vratiti nazad?"):
+                        main()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if DALJE_GUMB.checkForCollision(mouse_position):
+                    odabir_borca()
+                if NAZAD_GUMB.checkForCollision(mouse_position):
+                    main()
+                
+        pygame.display.update()
+        clock.tick(FPS)
+
+
+def odabir_borca():
+    naslov_font = pygame.font.Font(None, 100)
+    naslov_surface = naslov_font.render("Odabir Borca", False, "White")
+    naslov_rectangle = naslov_surface.get_rect(center = (250, 50))
+    run = True
+    while run == True:
+        SCREEN.fill("Black")
+        mouse_position = pygame.mouse.get_pos()
+        NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
+        BORAC1_GUMB = Button("Borac1", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 400))
+        BORAC2_GUMB = Button("Borac2", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 600))
+        for gumb in [NAZAD_GUMB, BORAC1_GUMB, BORAC2_GUMB]:
+            if gumb.checkForCollision(mouse_position):
+                gumb.changeButtonColor()
+            gumb.update(SCREEN)
+
+        SCREEN.blit(naslov_surface, naslov_rectangle)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if escape_screen("Želiš li se vratiti na početnu stranicu?"):
+                        main()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if NAZAD_GUMB.checkForCollision(mouse_position):
+                    main()
+                if BORAC1_GUMB.checkForCollision(mouse_position):
+                    global borac1
+                    borac1 = Borac((200, 800))
+                    borac1.keybind = 1
+                    borac.add(borac1)
+                    odabir_igraca()
+                if BORAC2_GUMB.checkForCollision(mouse_position):
+                    global borac2
+                    borac2 = Borac((900, 800))
+                    borac2.keybind = 2
+                    borac.add(borac2)
+                    odabir_rundi()
+                
+        pygame.display.update()
+        clock.tick(FPS)
+
+def odabir_rundi():
+    naslov_font = pygame.font.Font(None, 100)
+    naslov_surface = naslov_font.render("Na koliko rundi se igra?", False, "White")
+    naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 100))
+    while True:
+        SCREEN.fill("Black")
+        mouse_position = pygame.mouse.get_pos()
+        JEDNA_GUMB = Button("1", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 300))
+        TRI_GUMB = Button("3", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 500))
+        SEDAM_GUMB = Button("7", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 700))
+        NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
+        for gumb in [JEDNA_GUMB, SEDAM_GUMB, TRI_GUMB, NAZAD_GUMB]:
+            if gumb.checkForCollision(mouse_position):
+                gumb.changeButtonColor()
+            gumb.update(SCREEN)
+
+        SCREEN.blit(naslov_surface, naslov_rectangle)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if escape_screen("Želiš li se vratiti na početnu stranicu?"):
+                        main()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if JEDNA_GUMB.checkForCollision(mouse_position):
+                    igranje()
+                if TRI_GUMB.checkForCollision(mouse_position):
+                    #igranje3()
+                    pass
+                if SEDAM_GUMB.checkForCollision(mouse_position):
+                    #igranje7()
+                    pass
+                if NAZAD_GUMB.checkForCollision(mouse_position):
+                    odabir_borca()
+                
+        pygame.display.update()
+        clock.tick(FPS)
+
+
 #Funkcija u kojoj se odvija sama igra
 def igranje():
+    global borac1, borac2
     run = True
     while run == True:
         SCREEN.fill("Light Blue")
@@ -313,11 +557,14 @@ def igranje():
         pod_surface = pygame.Surface((1600, 100))
         pod_rectangle = pod_surface.get_rect(topleft = (0,800))
         pygame.draw.rect(SCREEN, "Brown", pod_rectangle)
+        borac.update
         borac.draw(SCREEN)
-        borac.update()
-
-        borac2.kretanje(borac1)
     
+        borac1.kretanje(borac2)
+        borac1.draw_hitboxes()
+        borac2.kretanje(borac1)
+        borac2.draw_hitboxes()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -326,9 +573,33 @@ def igranje():
                 if event.key == pygame.K_ESCAPE:
                     pygame.mouse.set_visible(True)
                     if escape_screen("Želiš li izaći u početni zaslon?"):
-                        borac2.reset()
-                        borac1.reset()
+                        borac1.reset
+                        borac2.reset
+                        main()
                         run = False
+
+        pygame.display.update()
+        clock.tick(FPS)
+
+def winscreen():
+    pygame.mouse.set_visible(True)
+    transparent_background = pygame.Surface((WIDTH, HEIGHT))
+    transparent_background.fill("Light Blue")
+    transparent_background.set_alpha(100)
+    SCREEN.blit(transparent_background, (0,0))
+    run = True
+    while run == True:
+
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if escape_screen("Želiš li izaći u početni zaslon?"):
+                        run = False
+                        main()
 
         pygame.display.update()
         clock.tick(FPS)
