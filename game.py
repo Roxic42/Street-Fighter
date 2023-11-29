@@ -313,10 +313,20 @@ class Player:
     def postotak(self):
         ukupno_igara = self.Ws + self.Ls
         return (self.Ws / ukupno_igara) * 100 if ukupno_igara > 0 else 0
+    
+    def save(self, path):
+        with open(path, "w", encoding="utf-8") as datoteka:
+            datoteka.write(f"{self.ime},{self.Ws},{self.Ls}\n")
+
+    def load(self, path):
+        with open(path, "r", encoding="utf-8") as datoteka:
+            for line in datoteka:
+                ime, ws, ls = line.strip().split(",")
+                if ime == self.ime:
+                    self.Ws = int(ws)
+                    self.Ls = int(ls)
 
     #def achievements()
-
-
 
 #Definiranje objekata (likova) iz klase Borac i dodavanje u Sprite Grupu        
 borac = pygame.sprite.Group()
@@ -341,6 +351,37 @@ class Button:
     def changeButtonColor(self):
         self.rectangle_color = self.rectangle_hovering_color
         
+class PlayerButton:
+    def __init__(self, text_input, text_size, text_color, rectangle_width_and_height, rectangle_color, rectangle_hovering_color, position):
+        self.rectangle = pygame.Rect((position[0] - (rectangle_width_and_height[0] / 2), position[1] - (rectangle_width_and_height[1] / 2)), rectangle_width_and_height)
+        self.rectangle_color, self.rectangle_hovering_color = rectangle_color, rectangle_hovering_color
+        self.font = pygame.font.Font(None, text_size)
+        self.text_surface = self.font.render(text_input, False, text_color)
+        self.text_rectangle = self.text_surface.get_rect(center=self.rectangle.center)
+        self.active = False
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.rectangle_color, self.rectangle)
+        screen.blit(self.text_surface, self.text_rectangle)
+
+    def checkForCollision(self, mouse_position):
+        if mouse_position[0] in range(self.rectangle.left, self.rectangle.right) and mouse_position[1] in range(self.rectangle.top, self.rectangle.bottom):
+            return True
+        return False
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rectangle.collidepoint(event.pos):
+                self.active = not self.active
+            else:
+                self.active = False
+
+    def changeButtonColor(self):
+        self.rectangle_color = self.rectangle_hovering_color
+
+    def get_text(self):
+        return self.text_surface.get_text()
+
 def escape_screen(tekst):
     transparent_background = pygame.Surface((WIDTH, HEIGHT))
     transparent_background.fill("Black")
@@ -423,10 +464,17 @@ def main():
         clock.tick(FPS)
 
 def odabir_igraca():
+    gumbi = []
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render("Odabir igraca", False, "White")
     naslov_rectangle = naslov_surface.get_rect(center = (250, 50))
     run = True
+
+    for row in range(4):
+        for col in range(2):
+            player_button = PlayerButton("Mipi", 70, "White", (480, 120), "Grey", "Green", (350 + col * 650, 175 + row * 200))
+            gumbi.append(player_button)
+
     while run == True:
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
@@ -439,6 +487,9 @@ def odabir_igraca():
 
         SCREEN.blit(naslov_surface, naslov_rectangle)
 
+        for player_button in gumbi:
+            player_button.draw(SCREEN)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -447,7 +498,6 @@ def odabir_igraca():
                 if event.key == pygame.K_ESCAPE:
                     if escape_screen("Želiš li se vratiti nazad?"):
                         main()
-
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if DALJE_GUMB.checkForCollision(mouse_position):
                     odabir_borca()
@@ -457,8 +507,16 @@ def odabir_igraca():
         pygame.display.update()
         clock.tick(FPS)
 
+brojac = 0
+borcici = []
 
 def odabir_borca():
+    global brojac
+    global borcici
+    global borac1l
+    global borac1r
+    global borac2l
+    global borac2r
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render("Odabir Borca", False, "White")
     naslov_rectangle = naslov_surface.get_rect(center = (250, 50))
@@ -489,17 +547,33 @@ def odabir_borca():
                 if NAZAD_GUMB.checkForCollision(mouse_position):
                     main()
                 if BORAC1_GUMB.checkForCollision(mouse_position):
-                    global borac1
-                    borac1 = Borac((200, 800))
-                    borac1.keybind = 1
-                    borac.add(borac1)
-                    odabir_igraca()
+                    if brojac == 0:
+                        borac1l = Borac((200, 800))
+                        borac1l.keybind = 1
+                        borac.add(borac1l)
+                        borcici.append(borac1l)
+                        brojac += 1
+                    elif brojac == 1:
+                        borac1r = Borac((900, 800))
+                        borac1r.keybind = 2
+                        borac.add(borac1r)
+                        borcici.append(borac1r)
+                        brojac -= 1
+                        odabir_rundi()
                 if BORAC2_GUMB.checkForCollision(mouse_position):
-                    global borac2
-                    borac2 = Borac((900, 800))
-                    borac2.keybind = 2
-                    borac.add(borac2)
-                    odabir_rundi()
+                    if brojac == 0:
+                        borac2l = Borac((200, 800))
+                        borac2l.keybind = 1
+                        borac.add(borac2l)
+                        borcici.append(borac2l)
+                        brojac += 1
+                    elif brojac == 1:
+                        borac2r = Borac((900, 800))
+                        borac2r.keybind = 2
+                        borac.add(borac2r)
+                        borcici.append(borac2r)
+                        brojac -= 1
+                        odabir_rundi()
                 
         pygame.display.update()
         clock.tick(FPS)
@@ -549,7 +623,7 @@ def odabir_rundi():
 
 #Funkcija u kojoj se odvija sama igra
 def igranje():
-    global borac1, borac2
+    global borac1l, borac1r, borac2l, borac2r, borcici
     run = True
     while run == True:
         SCREEN.fill("Light Blue")
@@ -557,13 +631,15 @@ def igranje():
         pod_surface = pygame.Surface((1600, 100))
         pod_rectangle = pod_surface.get_rect(topleft = (0,800))
         pygame.draw.rect(SCREEN, "Brown", pod_rectangle)
-        borac.update
+        borac.update()
         borac.draw(SCREEN)
-    
-        borac1.kretanje(borac2)
-        borac1.draw_hitboxes()
-        borac2.kretanje(borac1)
-        borac2.draw_hitboxes()
+
+        for i in range(0, len(borcici), 2):
+            borcici[i].kretanje(borcici[i + 1])
+            borcici[i + 1].kretanje(borcici[i])
+
+            borcici[i].draw_hitboxes()
+            borcici[i + 1].draw_hitboxes()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -573,8 +649,10 @@ def igranje():
                 if event.key == pygame.K_ESCAPE:
                     pygame.mouse.set_visible(True)
                     if escape_screen("Želiš li izaći u početni zaslon?"):
-                        borac1.reset
-                        borac2.reset
+                        for i in range(0, len(borcici), 2):
+                            borcici[i].reset()
+                            borcici[i + 1].reset()
+                            
                         main()
                         run = False
 
