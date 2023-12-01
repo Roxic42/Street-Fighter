@@ -3,3 +3,6 @@ rectangle za punch je prekratko vidljiv - ako će to biti trajanje animacije tre
 desni lik nestane ako su jedan na drugom i miču se desno
 ako se preskače lik koji stoji izgleda kao da se teleportira
 cooldown blocka ne radi 
+nakon ubijanja lika igra nije završena
+profili ne rade odnosno ne mogu se odabrati
+achievments gumb ne radi
