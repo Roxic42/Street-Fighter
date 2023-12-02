@@ -313,18 +313,6 @@ class Player:
     def postotak(self):
         ukupno_igara = self.Ws + self.Ls
         return (self.Ws / ukupno_igara) * 100 if ukupno_igara > 0 else 0
-    
-    def save(self, path):
-        with open(path, "w", encoding="utf-8") as datoteka:
-            datoteka.write(f"{self.ime},{self.Ws},{self.Ls}\n")
-
-    def load(self, path):
-        with open(path, "r", encoding="utf-8") as datoteka:
-            for line in datoteka:
-                ime, ws, ls = line.strip().split(",")
-                if ime == self.ime:
-                    self.Ws = int(ws)
-                    self.Ls = int(ls)
 
     #def achievements()
 
@@ -341,46 +329,19 @@ class Button:
         self.font = pygame.font.Font(None, text_size)
         self.text_surface = self.font.render(text_input, False, text_color)
         self.text_rectangle = self.text_surface.get_rect(center = self.rectangle.center)
+
     def update(self, screen):
         pygame.draw.rect(screen, self.rectangle_color, self.rectangle)
         screen.blit(self.text_surface, self.text_rectangle)
+
     def checkForCollision(self, mouse_position):
         if mouse_position[0] in range(self.rectangle.left, self.rectangle.right) and mouse_position[1] in range(self.rectangle.top, self.rectangle.bottom):
             return True
         return False
+    
     def changeButtonColor(self):
         self.rectangle_color = self.rectangle_hovering_color
         
-class PlayerButton:
-    def __init__(self, text_input, text_size, text_color, rectangle_width_and_height, rectangle_color, rectangle_hovering_color, position):
-        self.rectangle = pygame.Rect((position[0] - (rectangle_width_and_height[0] / 2), position[1] - (rectangle_width_and_height[1] / 2)), rectangle_width_and_height)
-        self.rectangle_color, self.rectangle_hovering_color = rectangle_color, rectangle_hovering_color
-        self.font = pygame.font.Font(None, text_size)
-        self.text_surface = self.font.render(text_input, False, text_color)
-        self.text_rectangle = self.text_surface.get_rect(center=self.rectangle.center)
-        self.active = False
-
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.rectangle_color, self.rectangle)
-        screen.blit(self.text_surface, self.text_rectangle)
-
-    def checkForCollision(self, mouse_position):
-        if mouse_position[0] in range(self.rectangle.left, self.rectangle.right) and mouse_position[1] in range(self.rectangle.top, self.rectangle.bottom):
-            return True
-        return False
-
-    def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.rectangle.collidepoint(event.pos):
-                self.active = not self.active
-            else:
-                self.active = False
-
-    def changeButtonColor(self):
-        self.rectangle_color = self.rectangle_hovering_color
-
-    def get_text(self):
-        return self.text_surface.get_text()
 
 def escape_screen(tekst):
     transparent_background = pygame.Surface((WIDTH, HEIGHT))
@@ -456,56 +417,263 @@ def main():
                     pass
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if IGRAJ_GUMB.checkForCollision(mouse_position):
-                    odabir_igraca()
+                    imenovanje_profila()
                 if IZADI_GUMB.checkForCollision(mouse_position):
                     pygame.quit()
                     sys.exit()
         pygame.display.update()
         clock.tick(FPS)
 
-def odabir_igraca():
-    gumbi = []
+PLAYERI_SELEKTIRANI = {}
+PLAYERI_IMENA = {}
+PLAYERI_LISTA_GUMBOVA = []
+
+selektirani_profili = []
+with open("Podzemne borbe\profili.txt",encoding="utf-8") as datoteka:
+        profili = datoteka.readlines()
+
+imenovanje_profila_bool = True
+biranje_profila_bool = True
+
+def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezultata
+    global profili
+    global PLAYERI_IMENA
+    global PLAYERI_SELEKTIRANI
+    global biranje_profila_bool
+    global imenovanje_profila_bool
+    global trenutno_ime_upis
+    global Player1, Player2, Player3, Player4, Player5, Player6, Player7, Player8
+    imenovanje_profila_bool = True
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render("Odabir igraca", False, "White")
     naslov_rectangle = naslov_surface.get_rect(center = (250, 50))
-    run = True
-
-    for row in range(4):
-        for col in range(2):
-            player_button = PlayerButton("Mipi", 70, "White", (480, 120), "Grey", "Green", (350 + col * 650, 175 + row * 200))
-            gumbi.append(player_button)
-
-    while run == True:
+    trenutno_ime_upis = ""
+    for i in range(1,9):
+        PLAYERI_SELEKTIRANI.update({f"player_{i}":False})
+        PLAYERI_IMENA.update({f"player{i}": profili[i-1][:-1]})
+    
+    while imenovanje_profila_bool == True:
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
-        DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Green", (1500, 850))
-        NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
-        for gumb in [DALJE_GUMB, NAZAD_GUMB]:
-            if gumb.checkForCollision(mouse_position):
-                gumb.changeButtonColor()
-            gumb.update(SCREEN)
-
         SCREEN.blit(naslov_surface, naslov_rectangle)
 
-        for player_button in gumbi:
-            player_button.draw(SCREEN)
+
+        PLAYER_BUTTON1 = Button(PLAYERI_IMENA.get("player1"), 70, "White", (480, 120), "Grey", "Green", (350, 175))
+        PLAYER_BUTTON2 = Button(PLAYERI_IMENA.get("player2"), 70, "White", (480, 120), "Grey", "Green", (350, 175 + 200))
+        PLAYER_BUTTON3 = Button(PLAYERI_IMENA.get("player3"), 70, "White", (480, 120), "Grey", "Green", (350, 175 + 200*2))
+        PLAYER_BUTTON4 = Button(PLAYERI_IMENA.get("player4"), 70, "White", (480, 120), "Grey", "Green", (350, 175 + 200*3))
+        
+        PLAYER_BUTTON5 = Button(PLAYERI_IMENA.get("player5"), 70, "White", (480, 120), "Grey", "Green", (1000, 175)) 
+        PLAYER_BUTTON6 = Button(PLAYERI_IMENA.get("player6"), 70, "White", (480, 120), "Grey", "Green", (1000, 175 + 200))        
+        PLAYER_BUTTON7 = Button(PLAYERI_IMENA.get("player7"), 70, "White", (480, 120), "Grey", "Green", (1000, 175 + 200*2))
+        PLAYER_BUTTON8 = Button(PLAYERI_IMENA.get("player8"), 70, "White", (480, 120), "Grey", "Green", (1000, 175 + 200*3))
+
+
+        Player1 = Player(PLAYERI_IMENA.get("player1")) 
+        Player2 = Player(PLAYERI_IMENA.get("player2"))
+        Player3 = Player(PLAYERI_IMENA.get("player3"))
+        Player4 = Player(PLAYERI_IMENA.get("player4"))
+
+        Player5 = Player(PLAYERI_IMENA.get("player5")) 
+        Player6 = Player(PLAYERI_IMENA.get("player6"))
+        Player7 = Player(PLAYERI_IMENA.get("player7"))
+        Player8 = Player(PLAYERI_IMENA.get("player8"))
+
+        
+        PLAYERI_LISTA_GUMBOVA = [PLAYER_BUTTON1,PLAYER_BUTTON2,PLAYER_BUTTON3,PLAYER_BUTTON4,PLAYER_BUTTON5,PLAYER_BUTTON6,PLAYER_BUTTON7,PLAYER_BUTTON8]
+        
+        
+        NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
+        NAZAD_GUMB.update(SCREEN)
+        if NAZAD_GUMB.checkForCollision(mouse_position):
+            NAZAD_GUMB.changeButtonColor()
+        NAZAD_GUMB.update(SCREEN)
+        for gumb in PLAYERI_LISTA_GUMBOVA:
+            if gumb.checkForCollision(mouse_position):
+                gumb.changeButtonColor()
+            gumb.update(SCREEN)                    
+        if list(PLAYERI_IMENA.values()).count("Napravi profil") <= 6:
+            DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Green", (1500, 850))
+        else:
+            DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Green", (1500, 850))
+        DALJE_GUMB.update(SCREEN)
+        if DALJE_GUMB.checkForCollision(mouse_position):
+            DALJE_GUMB.changeButtonColor()
+        DALJE_GUMB.update(SCREEN)
+        
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for i in range (8):
+                    PLAYERI_SELEKTIRANI.update({f"player_{i+1}":False})
+                    if PLAYERI_IMENA.get(f"player{i+1}") == "":
+                        PLAYERI_IMENA.update({f"player{i+1}":"Napravi profil"})
+                    if PLAYERI_IMENA.get(f"player{i+1}") + "\n" == profili[i]:
+                        pass
+
+
+                if NAZAD_GUMB.checkForCollision(mouse_position):
+                    imenovanje_profila_bool = False
+                    main()
+                    
+                for i in range(8):
+                    
+                    if PLAYERI_LISTA_GUMBOVA[i].checkForCollision(mouse_position):
+                        
+                        for k in range (8):
+                            if PLAYERI_IMENA.get(f"player{k+1}") == "" and PLAYERI_SELEKTIRANI.get(f"player{k+1}") == False:
+                                PLAYERI_IMENA.update({f"player{k+1}":"Napravi profil"})
+                            PLAYERI_SELEKTIRANI.update({f"player_{k+1}":False})
+
+                        
+                        PLAYERI_SELEKTIRANI.update({f"player_{i+1}":True})
+                        trenutno_ime_upis = ""                    
+                        PLAYERI_IMENA.update({f"player{i+1}":""})
+                    if DALJE_GUMB.checkForCollision(mouse_position):
+                        if list(PLAYERI_IMENA.values()).count("Napravi profil") <= 6:
+                            if PLAYERI_IMENA.get(f"player{i+1}")+"\n"== profili[i]:
+                                biranje_profila()
+                                biranje_profila_bool = True
+                            
+                            with open("Podzemne borbe\profili.txt", encoding="utf-8") as datoteka:
+                                profili = []
+                                profili = datoteka.readlines()
+                                for z in range (8):
+                                    profili[z] = PLAYERI_IMENA.get(f"player{z+1}") + "\n"
+                            with open("Podzemne borbe\profili.txt","wt",encoding="utf-8",) as datoteka:
+                                datoteka.writelines(profili)      
+                            imenovanje_profila_bool = False
+                        
+                        
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if escape_screen("Želiš li se vratiti nazad?"):
-                        main()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if DALJE_GUMB.checkForCollision(mouse_position):
-                    odabir_borca()
-                if NAZAD_GUMB.checkForCollision(mouse_position):
-                    main()
-                
+                    escape_screen('Želiš li se vratiti nazad?')
+                    imenovanje_profila_bool = False
+
+
+                for i in range(8):
+                    if PLAYERI_SELEKTIRANI.get(f"player_{i+1}") == True:
+                        
+                        if event.key == pygame.K_BACKSPACE:
+                            trenutno_ime_upis = PLAYERI_IMENA.get(f"player{i+1}")
+                            trenutno_ime_upis = trenutno_ime_upis[:-1]
+                            PLAYERI_IMENA.update({f"player{i+1}": trenutno_ime_upis})
+                        elif event.key == pygame.K_RETURN:
+                            PLAYERI_SELEKTIRANI.update({f"player_{i+1}":False})
+                            if PLAYERI_IMENA.get(f"player{i+1}") == "" :
+                                PLAYERI_IMENA.update({f"player{i+1}":"Napravi profil"})
+                            trenutno_ime_upis = ""
+                        else:
+                            if len(trenutno_ime_upis) < 8:
+                                trenutno_ime_upis = PLAYERI_IMENA.get(f"player{i+1}")
+                                trenutno_ime_upis += event.unicode
+                                if trenutno_ime_upis not in list(PLAYERI_IMENA.values()):
+                                    PLAYERI_IMENA.update({f"player{i+1}": trenutno_ime_upis})
+
         pygame.display.update()
         clock.tick(FPS)
+
+def biranje_profila():
+    global selektirani_profili
+    global PLAYERI_IMENA
+    global PLAYERI_SELEKTIRANI
+    global PLAYERI_LISTA_GUMBOVA
+    global Player1, Player2, Player3, Player4, Player5, Player6, Player7, Player8
+    global LISTA_IGRACA
+    biranje_profila_bool = True
+    SCREEN.fill('Black')
+
+    PLAYER_BUTTON1 = Button(PLAYERI_IMENA.get("player1"), 70, "White", (480, 120), "Grey", "Green", (350, 175))
+    PLAYER_BUTTON2 = Button(PLAYERI_IMENA.get("player2"), 70, "White", (480, 120), "Grey", "Green", (350, 175 + 200))
+    PLAYER_BUTTON3 = Button(PLAYERI_IMENA.get("player3"), 70, "White", (480, 120), "Grey", "Green", (350, 175 + 200*2))
+    PLAYER_BUTTON4 = Button(PLAYERI_IMENA.get("player4"), 70, "White", (480, 120), "Grey", "Green", (350, 175 + 200*3))
+         
+    PLAYER_BUTTON5 = Button(PLAYERI_IMENA.get("player5"), 70, "White", (480, 120), "Grey", "Green", (1000, 175)) 
+    PLAYER_BUTTON6 = Button(PLAYERI_IMENA.get("player6"), 70, "White", (480, 120), "Grey", "Green", (1000, 175 + 200))        
+    PLAYER_BUTTON7 = Button(PLAYERI_IMENA.get("player7"), 70, "White", (480, 120), "Grey", "Green", (1000, 175 + 200*2))
+    PLAYER_BUTTON8 = Button(PLAYERI_IMENA.get("player8"), 70, "White", (480, 120), "Grey", "Green", (1000, 175 + 200*3))
+
+    LISTA_IGRACA = [Player1, Player2, Player3, Player4, Player5, Player6, Player7, Player8]
+  
+    font = pygame.font.Font(None, 60)
+    
+    GUMBOVI_POZICIJE = [(350, 175),(350, 175+200),(350, 175+200*2),((350, 175+200*3)),((1000, 175)),(1000, 175+200),(1000, 175+200*2),(1000, 175+200*3)]
+    PLAYERI_LISTA_GUMBOVA=[PLAYER_BUTTON1,PLAYER_BUTTON2,PLAYER_BUTTON3,PLAYER_BUTTON4,PLAYER_BUTTON5,PLAYER_BUTTON6,PLAYER_BUTTON7,PLAYER_BUTTON8]
+    GUMBOVI_METAMORFOZA = {PLAYER_BUTTON1:0, PLAYER_BUTTON2:0, PLAYER_BUTTON3:0, PLAYER_BUTTON4:0 ,PLAYER_BUTTON5:0 ,PLAYER_BUTTON6:0 ,PLAYER_BUTTON7:0 ,PLAYER_BUTTON8:0}
+    SCREEN.fill('Black')
+
+    while biranje_profila_bool == True:
+        SCREEN.fill('Black')
+        mouse_position = pygame.mouse.get_pos()
+        Choose_profile = font.render("Izaberi profile",1,'White')
+        Choose_profile_rect = Choose_profile.get_rect(center=(630,45))
+        SCREEN.blit(Choose_profile,Choose_profile_rect)
+        for gumb in PLAYERI_LISTA_GUMBOVA:
+            if GUMBOVI_METAMORFOZA.get(gumb) == 0:
+                if PLAYERI_IMENA.get(f"player{PLAYERI_LISTA_GUMBOVA.index(gumb)+1}") == "Napravi profil":
+                    gumb = Button("N/A", 70, 'Black', (480, 120), '#475F77', '#77dd77', GUMBOVI_POZICIJE[PLAYERI_LISTA_GUMBOVA.index(gumb)])
+                    gumb.update(SCREEN)         
+                else:
+                    gumb = Button(PLAYERI_IMENA.get(f"player{PLAYERI_LISTA_GUMBOVA.index(gumb)+1}"), 70, 'Black', (480, 120), '#DADBDD', '#77dd77',GUMBOVI_POZICIJE[PLAYERI_LISTA_GUMBOVA.index(gumb)])
+                    gumb.update(SCREEN)
+                    if gumb.checkForCollision(mouse_position):
+                        gumb.changeButtonColor()
+                    gumb.update(SCREEN)
+            else:
+                gumb = Button(PLAYERI_IMENA.get(f"player{PLAYERI_LISTA_GUMBOVA.index(gumb)+1}"), 70, 'Black', (480, 120), '#D74B4B', '#D74B4B',GUMBOVI_POZICIJE[PLAYERI_LISTA_GUMBOVA.index(gumb)])
+                gumb.update(SCREEN) 
+
+        NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
+        NAZAD_GUMB.update(SCREEN)
+        if NAZAD_GUMB.checkForCollision(mouse_position):
+            NAZAD_GUMB.changeButtonColor()
+        NAZAD_GUMB.update(SCREEN)
+        DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Green", (1500, 850))        
+        DALJE_GUMB.update(SCREEN)
+        if DALJE_GUMB.checkForCollision(mouse_position):
+            DALJE_GUMB.changeButtonColor()
+        DALJE_GUMB.update(SCREEN)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()   
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    escape_screen('Želiš li izaći iz igre?', SCREEN)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if DALJE_GUMB.checkForCollision(mouse_position):
+                    if len(selektirani_profili) == 2:
+                        odabir_borca()
+                        biranje_profila_bool = False
+                if NAZAD_GUMB.checkForCollision(mouse_position):
+                    imenovanje_profila()
+                if len(selektirani_profili) <= 2:
+                    for i in range(8):
+                        if PLAYERI_LISTA_GUMBOVA[i].checkForCollision(mouse_position):
+                            if PLAYERI_IMENA.get(f"player{i+1}") == "Napravi profil":
+                                pass
+                            else:
+                                if len(selektirani_profili)<2:
+                                    PLAYERI_LISTA_GUMBOVA[i] = Button(PLAYERI_IMENA.get(f"player{i+1}"), 70, 'Black', (480, 120), '#D74B4B', '#77dd77',GUMBOVI_POZICIJE[i])
+                                    PLAYERI_LISTA_GUMBOVA[i].update(SCREEN)
+                                    GUMBOVI_METAMORFOZA.update({PLAYERI_LISTA_GUMBOVA[i]:1})
+                                if PLAYERI_IMENA.get(f"player{i+1}") in selektirani_profili:
+                                    selektirani_profili.remove(PLAYERI_IMENA.get(f"player{i+1}")) 
+                                    PLAYERI_LISTA_GUMBOVA[i] = Button(PLAYERI_IMENA.get(f"player{i+1}"), 35, 'Black', (480, 120), '#475F77', '#77dd77',GUMBOVI_POZICIJE[i])
+                                    PLAYERI_LISTA_GUMBOVA[i].update(SCREEN)
+                                    GUMBOVI_METAMORFOZA.update({PLAYERI_LISTA_GUMBOVA[i]:0})
+                                elif PLAYERI_IMENA.get(f"player{i+1}") not in selektirani_profili:
+                                    selektirani_profili.append(PLAYERI_IMENA.get(f"player{i+1}"))
+                                if len(selektirani_profili) == 3:
+                                    selektirani_profili.remove(selektirani_profili[2])
+                    
+                
+                            
+        pygame.display.update()
 
 brojac = 0
 borcici = []
@@ -517,6 +685,7 @@ def odabir_borca():
     global borac1r
     global borac2l
     global borac2r
+    global LISTA_IGRACA
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render("Odabir Borca", False, "White")
     naslov_rectangle = naslov_surface.get_rect(center = (250, 50))
@@ -526,7 +695,7 @@ def odabir_borca():
         mouse_position = pygame.mouse.get_pos()
         NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
         BORAC1_GUMB = Button("Borac1", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 400))
-        BORAC2_GUMB = Button("Borac2", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 600))
+        BORAC2_GUMB = Button("Borac2", 70, "White", (220, 120), "Grey", "Blue", (WIDTH/2, 600))
         for gumb in [NAZAD_GUMB, BORAC1_GUMB, BORAC2_GUMB]:
             if gumb.checkForCollision(mouse_position):
                 gumb.changeButtonColor()
