@@ -30,6 +30,7 @@ class Borac(pygame.sprite.Sprite):
         self.stunned = False
         self.stun_trajanje = 300
         self.stun_pocetak = 0
+
         
         #Pozicioniranje rectangleova dijelova tijela
         if self.pocetpoz[0] < 800:
@@ -46,7 +47,9 @@ class Borac(pygame.sprite.Sprite):
     def stun(self):
         self.stunned = True
         self.stun_pocetak = pygame.time.get_ticks()
+
     
+
     #Rectangleovi se vraćaju na početnu poziciju
     def reset(self):
         if self.pocetpoz[0] < 800:
@@ -74,7 +77,7 @@ class Borac(pygame.sprite.Sprite):
 
     #Dodaje se punch attack, i oduzima se health na uspješnom udarcu
     def punch(self, protivnik):
-        if not self.stunned and not self.blokiranje:
+        if not self.stunned:
             if self.pocetpoz[0] < 800:
                 self.punch_rect = pygame.Rect(self.rect.left + 266, self.rect.bottom - 502, 130, 78)
             elif self.pocetpoz[0] >= 800:
@@ -89,13 +92,13 @@ class Borac(pygame.sprite.Sprite):
                 self.punch_rect.left = (self.rect.x + 266)
             pygame.draw.rect(SCREEN, (255, 255, 255), self.punch_rect, 2)
         if self.punch_rect.colliderect(protivnik.legs_rect) or self.punch_rect.colliderect(protivnik.torso_rect) or self.punch_rect.colliderect(protivnik.head_rect) or self.punch_rect.colliderect(protivnik.arms_rect):
-            protivnik.health -= 5
+            protivnik.health -= 10
             protivnik.stun()
             print(protivnik.health)
            
 
     def kick(self, protivnik):
-        if not self.stunned and not self.blokiranje:
+        if not self.stunned:
             if self.pocetpoz[0] < 800:
                 self.kick_rect = pygame.Rect(self.rect.left + 256, self.rect.bottom - 349, 160, 105)
             elif self.pocetpoz[0] >= 800:
@@ -291,6 +294,7 @@ class Player:
     def postotak(self):
         ukupno_igara = self.Ws + self.Ls
         return (self.Ws / ukupno_igara) * 100 if ukupno_igara > 0 else 0
+    
 
     #def achievements()
 
@@ -405,6 +409,7 @@ def main():
 PLAYERI_SELEKTIRANI = {}
 PLAYERI_IMENA = {}
 PLAYERI_LISTA_GUMBOVA = []
+KLASE_PLAYER = {}
 
 selektirani_profili = []
 with open("Podzemne borbe\profili.txt",encoding="utf-8") as datoteka:
@@ -417,10 +422,10 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
     global profili
     global PLAYERI_IMENA
     global PLAYERI_SELEKTIRANI
+    global KLASE_PLAYER
     global biranje_profila_bool
     global imenovanje_profila_bool
     global trenutno_ime_upis
-    global Player1, Player2, Player3, Player4, Player5, Player6, Player7, Player8
     imenovanje_profila_bool = True
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render("Odabir igraca", False, "White")
@@ -447,17 +452,6 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
         PLAYER_BUTTON8 = Button(PLAYERI_IMENA.get("player8"), 70, "White", (480, 120), "Grey", "Green", (1000, 175 + 200*3))
 
 
-        Player1 = Player(PLAYERI_IMENA.get("player1")) 
-        Player2 = Player(PLAYERI_IMENA.get("player2"))
-        Player3 = Player(PLAYERI_IMENA.get("player3"))
-        Player4 = Player(PLAYERI_IMENA.get("player4"))
-
-        Player5 = Player(PLAYERI_IMENA.get("player5")) 
-        Player6 = Player(PLAYERI_IMENA.get("player6"))
-        Player7 = Player(PLAYERI_IMENA.get("player7"))
-        Player8 = Player(PLAYERI_IMENA.get("player8"))
-
-        
         PLAYERI_LISTA_GUMBOVA = [PLAYER_BUTTON1,PLAYER_BUTTON2,PLAYER_BUTTON3,PLAYER_BUTTON4,PLAYER_BUTTON5,PLAYER_BUTTON6,PLAYER_BUTTON7,PLAYER_BUTTON8]
         
         
@@ -560,8 +554,7 @@ def biranje_profila():
     global PLAYERI_IMENA
     global PLAYERI_SELEKTIRANI
     global PLAYERI_LISTA_GUMBOVA
-    global Player1, Player2, Player3, Player4, Player5, Player6, Player7, Player8
-    global LISTA_IGRACA
+    global KLASE_PLAYER
     biranje_profila_bool = True
     SCREEN.fill('Black')
 
@@ -575,7 +568,6 @@ def biranje_profila():
     PLAYER_BUTTON7 = Button(PLAYERI_IMENA.get("player7"), 70, "White", (480, 120), "Grey", "Green", (1000, 175 + 200*2))
     PLAYER_BUTTON8 = Button(PLAYERI_IMENA.get("player8"), 70, "White", (480, 120), "Grey", "Green", (1000, 175 + 200*3))
 
-    LISTA_IGRACA = [Player1, Player2, Player3, Player4, Player5, Player6, Player7, Player8]
   
     font = pygame.font.Font(None, 60)
     
@@ -600,6 +592,7 @@ def biranje_profila():
                     gumb.update(SCREEN)
                     if gumb.checkForCollision(mouse_position):
                         gumb.changeButtonColor()
+
                     gumb.update(SCREEN)
             else:
                 gumb = Button(PLAYERI_IMENA.get(f"player{PLAYERI_LISTA_GUMBOVA.index(gumb)+1}"), 70, 'Black', (480, 120), '#D74B4B', '#D74B4B',GUMBOVI_POZICIJE[PLAYERI_LISTA_GUMBOVA.index(gumb)])
@@ -625,7 +618,7 @@ def biranje_profila():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if DALJE_GUMB.checkForCollision(mouse_position):
                     if len(selektirani_profili) == 2:
-                        odabir_borca()
+                        odabir_borca1()
                         biranje_profila_bool = False
                 if NAZAD_GUMB.checkForCollision(mouse_position):
                     imenovanje_profila()
@@ -653,28 +646,24 @@ def biranje_profila():
                             
         pygame.display.update()
 
-brojac = 0
 borcici = []
 
-def odabir_borca():
-    global brojac
+def odabir_borca1():
+    global borac1l, borac1r, borac2l, borac2r, borcici
     global borcici
-    global borac1l
-    global borac1r
-    global borac2l
-    global borac2r
     global LISTA_IGRACA
     naslov_font = pygame.font.Font(None, 100)
-    naslov_surface = naslov_font.render("Odabir Borca", False, "White")
-    naslov_rectangle = naslov_surface.get_rect(center = (250, 50))
+    naslov_surface = naslov_font.render(f"{selektirani_profili[0]}, IZABERI BORCA", False, "White")
+    naslov_rectangle = naslov_surface.get_rect(topleft = (50, 50))
     run = True
     while run == True:
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
         NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
+        DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Red", (1500, 850))
         BORAC1_GUMB = Button("Borac1", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 400))
         BORAC2_GUMB = Button("Borac2", 70, "White", (220, 120), "Grey", "Blue", (WIDTH/2, 600))
-        for gumb in [NAZAD_GUMB, BORAC1_GUMB, BORAC2_GUMB]:
+        for gumb in [NAZAD_GUMB, DALJE_GUMB, BORAC1_GUMB, BORAC2_GUMB]:
             if gumb.checkForCollision(mouse_position):
                 gumb.changeButtonColor()
             gumb.update(SCREEN)
@@ -693,35 +682,72 @@ def odabir_borca():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if NAZAD_GUMB.checkForCollision(mouse_position):
                     main()
+                    run = False
                 if BORAC1_GUMB.checkForCollision(mouse_position):
-                    if brojac == 0:
-                        borac1l = Borac((200, 800))
-                        borac1l.keybind = 1
-                        borac.add(borac1l)
-                        borcici.append(borac1l)
-                        brojac += 1
-                    elif brojac == 1:
-                        borac1r = Borac((900, 800))
-                        borac1r.keybind = 2
-                        borac.add(borac1r)
-                        borcici.append(borac1r)
-                        brojac -= 1
-                        odabir_rundi()
+                    borac1l = Borac((200, 800))
+                    borac1l.keybind = 1
+                    borac.add(borac1l)
+                    borcici.append(borac1l)
+                    odabir_borca2()
                 if BORAC2_GUMB.checkForCollision(mouse_position):
-                    if brojac == 0:
-                        borac2l = Borac((200, 800))
-                        borac2l.keybind = 1
-                        borac.add(borac2l)
-                        borcici.append(borac2l)
-                        brojac += 1
-                    elif brojac == 1:
-                        borac2r = Borac((900, 800))
-                        borac2r.keybind = 2
-                        borac.add(borac2r)
-                        borcici.append(borac2r)
-                        brojac -= 1
-                        odabir_rundi()
+                    borac2l = Borac((200, 800))
+                    borac2l.keybind = 1
+                    borac.add(borac2l)
+                    borcici.append(borac2l)
+                    odabir_borca2()
                 
+        pygame.display.update()
+        clock.tick(FPS)
+
+def odabir_borca2():
+    global borac1l, borac1r, borac2l, borac2r, borcici
+    global borcici
+    global LISTA_IGRACA
+    naslov_font = pygame.font.Font(None, 100)
+    naslov_surface = naslov_font.render(f"{selektirani_profili[1]}, IZABERI BORCA", False, "White")
+    naslov_rectangle = naslov_surface.get_rect(topleft = (50, 50))
+    run = True
+    while run == True:
+        SCREEN.fill("Black")
+        mouse_position = pygame.mouse.get_pos()
+        NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
+        DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Red", (1500, 850))
+        BORAC1_GUMB = Button("Borac1", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 400))
+        BORAC2_GUMB = Button("Borac2", 70, "White", (220, 120), "Grey", "Blue", (WIDTH/2, 600))
+        for gumb in [NAZAD_GUMB, DALJE_GUMB, BORAC1_GUMB, BORAC2_GUMB]:
+            if gumb.checkForCollision(mouse_position):
+                gumb.changeButtonColor()
+            gumb.update(SCREEN)
+
+        SCREEN.blit(naslov_surface, naslov_rectangle)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if escape_screen("Želiš li se vratiti na početnu stranicu?"):
+                        main()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if NAZAD_GUMB.checkForCollision(mouse_position):
+                    main()
+                    run = False
+                if BORAC1_GUMB.checkForCollision(mouse_position):
+                    borac1r = Borac((900, 800))
+                    borac1r.keybind = 2
+                    borac.add(borac1r)
+                    borcici.append(borac1r)
+                    odabir_rundi()
+                if BORAC2_GUMB.checkForCollision(mouse_position):
+                    borac2r = Borac((900, 800))
+                    borac2r.keybind = 2
+                    borac.add(borac2r)
+                    borcici.append(borac2r)
+                    odabir_rundi()
+
+       
         pygame.display.update()
         clock.tick(FPS)
 
@@ -762,7 +788,7 @@ def odabir_rundi():
                     #igranje7()
                     pass
                 if NAZAD_GUMB.checkForCollision(mouse_position):
-                    odabir_borca()
+                    odabir_borca1()
                 
         pygame.display.update()
         clock.tick(FPS)
@@ -771,8 +797,8 @@ def odabir_rundi():
 #Funkcija u kojoj se odvija sama igra
 def igranje():
     global borac1l, borac1r, borac2l, borac2r, borcici
-    run = True
-    while run == True:
+    igranje = True
+    while igranje == True:
         SCREEN.fill("Light Blue")
         pygame.mouse.set_visible(False)
         pod_surface = pygame.Surface((1600, 100))
@@ -796,12 +822,11 @@ def igranje():
                 if event.key == pygame.K_ESCAPE:
                     pygame.mouse.set_visible(True)
                     if escape_screen("Želiš li izaći u početni zaslon?"):
-                        for i in range(0, len(borcici), 2):
-                            borcici[i].reset()
-                            borcici[i + 1].reset()
-                            
+                        borcici.clear()
+                        borac.empty()
+
                         main()
-                        run = False
+                        igranje = False
 
         pygame.display.update()
         clock.tick(FPS)
