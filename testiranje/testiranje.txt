@@ -8,3 +8,4 @@ profili ne rade odnosno ne mogu se odabrati
 achievments gumb ne radi
 ogromna greška tri borca se pojave nakon što se izađe iz runde u kojoj je jedan igrač poražen (slika dodana)
 broj rundi još nije funkcionalan
+profili se ne saveaju ni kad se ugasi ni kada se izađe iz runde, iz nekog razloga treba 2 puta kliknuti profil da se odabere
