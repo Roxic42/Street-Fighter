@@ -51,37 +51,37 @@ class Andrej(pygame.sprite.Sprite):
         self.kick_timer_start = "kreiran eto da postoji"
         self.windmill_timer_start = "kreiran eto da postoji"
 
-#        self.airkick = []
-#        for image in range(3):
-#            self.airkick.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "airkick", f"airkick{image + 1}.png"), "/Podzemne_Borbe").convert_alpha())
-#        self.airpunch = []
-#        for image in range(3):
-#            self.airpunch.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "airpunch", f"airpunch{image + 1}.png")).convert_alpha())
-#        self.crouchpunch = []
-#        for image in range(3):
-#            self.crouchpunch.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "crouchpunch", f"crouchpunch{image + 1}.png")).convert_alpha())
-#        self.crouchwalk = []
-#        for image in range(2):
-#            self.crouchwalk.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "crouchwalk", f"crouchwalk{image + 1}.png")).convert_alpha())
-#        self.idle = []
-#        for image in range(4):
-#            self.idle.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "idle", f"idle{image + 1}.png")).convert_alpha())
-#        self.jump = []
-#        for image in range(2):
-#            self.jump.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "jump", f"jump{image + 1}.png")).convert_alpha())
-#        self.kick = []
-#        for image in range(4):
-#            self.kick.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "kick", f"kick{image + 1}.png")).convert_alpha())
-#        self.punch = []
-#        for image in range(3):
-#            self.punch.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "punch", f"punch{image + 1}.png")).convert_alpha())
-#        self.walk = []
-#        for image in range(3):
-#            self.walk.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "walk", f"walk{image + 1}.png")).convert_alpha())
-#        self.block = pygame.image.load(os.path.join("Assets", "andrej_animacije", "block.png")).convert_alpha()
-#        self.crouch = pygame.image.load(os.path.join("Assets", "andrej_animacije", "crouch.png")).convert_alpha()
-#        self.fatality = pygame.image.load(os.path.join("Assets", "andrej_animacije", "fatality.png")).convert_alpha()
-#        self.stun = pygame.image.load(os.path.join("Assets", "andrej_animacije", "stun.png")).convert_alpha()
+        self.airkick = []
+        for image in range(3):
+            self.airkick.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "airkick", f"airkick{image + 1}.png")).convert_alpha())
+        self.airpunch = []
+        for image in range(3):
+            self.airpunch.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "airpunch", f"airpunch{image + 1}.png")).convert_alpha())
+        self.crouchpunch = []
+        for image in range(3):
+            self.crouchpunch.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "crouchpunch", f"crouchpunch{image + 1}.png")).convert_alpha())
+        self.crouchwalk = []
+        for image in range(2):
+            self.crouchwalk.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "crouchwalk", f"crouchwalk{image + 1}.png")).convert_alpha())
+        self.idle = []
+        for image in range(4):
+            self.idle.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "idle", f"idle{image + 1}.png")).convert_alpha())
+        self.jump = []
+        for image in range(2):
+            self.jump.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "jump", f"jump{image + 1}.png")).convert_alpha())
+        self.kick = []
+        for image in range(4):
+            self.kick.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "kick", f"kick{image + 1}.png")).convert_alpha())
+        self.punch = []
+        for image in range(3):
+            self.punch.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "punch", f"punch{image + 1}.png")).convert_alpha())
+        self.walk = []
+        for image in range(3):
+            self.walk.append(pygame.image.load(os.path.join("Assets", "andrej_animacije", "walk", f"walk{image + 1}.png")).convert_alpha())
+        self.block = pygame.image.load(os.path.join("Assets", "andrej_animacije", "block.png")).convert_alpha()
+        self.crouch = pygame.image.load(os.path.join("Assets", "andrej_animacije", "crouch.png")).convert_alpha()
+        self.fatality = pygame.image.load(os.path.join("Assets", "andrej_animacije", "fatality.png")).convert_alpha()
+        self.stun = pygame.image.load(os.path.join("Assets", "andrej_animacije", "stun.png")).convert_alpha()
 
     def resetBeforeGame(self):
         for key in self.varijable:
@@ -342,6 +342,31 @@ class Andrej(pygame.sprite.Sprite):
             elif self.varijable["blocking"] == True:
                 self.pomak = self.pomak/2
             self.baseRectX += self.pomak
+
+def crtanjeHealthaIImena(igrac, pozicija):
+    transparent_back = pygame.Surface((400, 30))
+    transparent_back.fill("Black")
+    transparent_back.set_alpha(100)
+    if pozicija == "lijevo":
+        x = 30
+        ime = selektirani_profili[0]
+    elif pozicija == "desno":
+        x = 1170
+        ime = selektirani_profili[1]
+    SCREEN.blit(transparent_back, (x, 35))
+    if igrac.health < 4:
+        boja = "Red"
+    elif igrac.health < 8:
+        boja = "Yellow"
+    else:
+        boja = "Green"
+    health_bar = pygame.Surface(((0.1 * igrac.health * 400), 30))
+    health_bar.fill(boja)
+    SCREEN.blit(health_bar, (x, 35))
+    ime_font = pygame.font.Font(None, 40)
+    ime_surface = ime_font.render(ime, True, "White")
+    ime_rectangle = ime_surface.get_rect(topleft = (x, 5))
+    SCREEN.blit(ime_surface, ime_rectangle)
 
 def provjeraPozicijeZaObrnuto(left, right):
     global obrnuto
@@ -637,7 +662,6 @@ def escape_screen(tekst):
 
 #Glavna funkcija koja se počinje vrtjeti čim se program starta i hijerarhijski je najviša
 def main():
-    global jelibio
     global selektirani_profili
     selektirani_profili = [] 
     naslov_font = pygame.font.Font(None, 100)
@@ -670,11 +694,8 @@ def main():
                 if IGRAJ_GUMB.checkForCollision(mouse_position):
                     imenovanje_profila()
                     biranje_profila()
-                    if jelibio == 0:
-                        pass
-                    else:
-                        odabir_borca1()
-                        odabir_borca2()
+                    odabir_borca1()
+                    odabir_borca2()
                     igranje()
                 if IZADI_GUMB.checkForCollision(mouse_position):
                     pygame.quit()
@@ -686,7 +707,6 @@ PLAYERI_SELEKTIRANI = {}
 PLAYERI_IMENA = {}
 PLAYERI_LISTA_GUMBOVA = []
 KLASE_PLAYER = {}
-jelibio = 0
 
 selektirani_profili = []
 with open("Podzemne borbe\profili.txt",encoding="utf-8") as datoteka:
@@ -836,7 +856,6 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
         clock.tick(FPS)
 
 def biranje_profila():
-    global jelibio
     global selektirani_profili
     global PLAYERI_IMENA
     global PLAYERI_SELEKTIRANI
@@ -906,7 +925,6 @@ def biranje_profila():
                 if DALJE_GUMB.checkForCollision(mouse_position):
                     if len(selektirani_profili) == 2:
                         biranje_profila_bool = False
-                        jelibio += 1
                 if NAZAD_GUMB.checkForCollision(mouse_position):
                     main()
                     break
@@ -1106,6 +1124,9 @@ def igranje():
         BORCI["igrac1"].crtanjeRectangleova()
         BORCI["igrac2"].crtanjeRectangleova()
 
+        crtanjeHealthaIImena(BORCI["igrac1"], "lijevo")
+        crtanjeHealthaIImena(BORCI["igrac2"], "desno")
+
         keys_pressed = pygame.key.get_pressed()
 
         provjeraCrouchanja(BORCI["igrac1"], keys_pressed, pygame.K_s)
@@ -1143,7 +1164,7 @@ def igranje():
         pygame.display.update()
         clock.tick(FPS)
 
-def winscreen():
+def winscreen():  #Nije upogonjeno
     pygame.mouse.set_visible(True)
     transparent_background = pygame.Surface((WIDTH, HEIGHT))
     transparent_background.fill("Light Blue")
