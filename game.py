@@ -721,21 +721,28 @@ def provjeraNogeINogatanje(igrac, pritisnuta_tipka, trazena_tipka):
 
                  
 class Player:
-    def __init__(self, ime, Ws, Ls, achievements):
+    def __init__(self, ime, Ws, Ls, achievements, profil_broj):
         self.ime = ime                       
         self.Ws = Ws
         self.Ls = Ls
         self.achievements = achievements
+        self.profil_broj = profil_broj
 
     def postotak(self):
         ukupno_igara = self.Ws + self.Ls
         return (self.Ws / ukupno_igara) * 100 if ukupno_igara > 0 else 0
+    
+    def ispisi(self):
+        print(self.achievements)
 
-    def achievement(self, achievement_number):
-        if 1 <= achievement_number <= len(self.achievements):
-            self.achievements[achievement_number - 1] = "da"
+    def achievement(self, broj_achievementa):
+        if 1 <= broj_achievementa <= len(self.achievements):
+            self.achievements[broj_achievementa - 1] = "da"
 
-IGRACI = {}
+odabranAndrej = False
+odabranBroz = False
+
+IGRACI = []
 def read_data():
     global selektirani_profili
     global IGRACI
@@ -753,24 +760,28 @@ def read_data():
         if ime in selektirani_profili:
             ws, ls = map(int, score_line.split(','))
             achievements = achievements_line
-            igrac = Player(ime, ws, ls, achievements)
-            key = f"player{i}"
-            IGRACI[key] = igrac
+            igrac = Player(ime, ws, ls, achievements, i)
+            IGRACI.append(igrac)
 
     return IGRACI
 
-def update_achievements(igrac, broj_achievementa):
-    global IGRACI
-    if igrac in IGRACI:
-        IGRACI[igrac].achievement(broj_achievementa)
-        write_achievements_to_file()
+def update_achievement(igrac_number, broj_achievementa):
+    # Read the current achievements from the file
+    with open("Podzemne borbe\Achievements.txt", 'r', encoding="utf-8") as achievements_file:
+        lines = achievements_file.read().splitlines()
 
-def write_achievements_to_file():
-    global IGRACI
-    with open("Podzemne borbe\Achievements.txt", 'wt', encoding="utf-8") as achievements_file:
-        for player_key in sorted(IGRACI.keys(), key=lambda x: int(x[6:])):
-            player = IGRACI[player_key]
-            achievements_file.write(','.join(player.achievement) + '\n')
+    # Find the line corresponding to the selected player
+    line_index = igrac_number - 1  # Assuming profile numbers start from 1
+
+    if 0 <= line_index < len(lines):
+        # Update the achievements for the selected player
+        achievements_line = list(lines[line_index].split(','))
+        achievements_line[broj_achievementa - 1] = "da"
+        lines[line_index] = ",".join(achievements_line)
+
+        # Write the modified content back to the file
+        with open("Podzemne borbe\Achievements.txt", 'wt', encoding="utf-8") as achievements_file:
+            achievements_file.write("\n".join(lines))
 
 
 #Definira se klasa gumb sa svojim metodama
@@ -1043,7 +1054,6 @@ def biranje_profila():
     global PLAYERI_LISTA_GUMBOVA
     global KLASE_PLAYER
     biranje_profila_bool = True
-    global reader
     SCREEN.fill('Black')
 
     PLAYER_BUTTON1 = Button(PLAYERI_IMENA.get("player1"), 70, "White", (480, 120), "Grey", "Green", (350, 175))
@@ -1128,7 +1138,6 @@ def biranje_profila():
                                     selektirani_profili.append(PLAYERI_IMENA.get(f"player{i+1}"))
                                 if len(selektirani_profili) == 3:
                                     selektirani_profili.remove(selektirani_profili[2])
-                                read_data()
                     
                 
                             
@@ -1137,12 +1146,13 @@ def biranje_profila():
 
 BORCI = {"igrac1":0, "igrac2":0}
 def odabir_borca1():
+    global odabranAndrej, odabranBroz
     global IGRACI
     global BORCI
-    global reader
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render(f"{selektirani_profili[0]}, IZABERI BORCA", False, "White")
     naslov_rectangle = naslov_surface.get_rect(topleft = (50, 50))
+    read_data()
     print(IGRACI)
     run = True
     while run == True:
@@ -1174,6 +1184,9 @@ def odabir_borca1():
                     main()
                 if BORAC1_GUMB.checkForCollision(mouse_position):
                     BORCI["igrac1"] = Andrej("prvi")
+                    odabranAndrej = True
+                    if odabranAndrej == True:
+                        update_achievement(IGRACI[0].profil_broj, 2)
                     run = False
                 if BORAC2_GUMB.checkForCollision(mouse_position):
                     BORCI["igrac1"] = Andrej("prvi")
@@ -1184,6 +1197,7 @@ def odabir_borca1():
         clock.tick(FPS)
 
 def odabir_borca2():
+    global IGRACI
     global BORCI
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render(f"{selektirani_profili[1]}, IZABERI BORCA", False, "White")
@@ -1221,6 +1235,7 @@ def odabir_borca2():
                     run = False
                 if BORAC2_GUMB.checkForCollision(mouse_position):
                     BORCI["igrac2"] = Andrej("drugi")
+                    print(IGRACI[1].profil_broj)
                     run = False
 
        
