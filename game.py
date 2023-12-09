@@ -1,6 +1,7 @@
-import pygame, sys, os, warnings, time
+import pygame, sys, os, warnings, time, pygamepopup
 warnings.filterwarnings("ignore", category=UserWarning, message=".*iCCP.*")
 pygame.init() #instalira i učitava sve pygame module
+pygamepopup.init()
 
 #Definiranje displaya
 WIDTH, HEIGHT = 1600, 900
@@ -735,10 +736,6 @@ class Player:
     def ispisi(self):
         print(self.achievements)
 
-    def achievement(self, broj_achievementa):
-        if 1 <= broj_achievementa <= len(self.achievements):
-            self.achievements[broj_achievementa - 1] = "da"
-
 odabranAndrej = False
 odabranBroz = False
 
@@ -765,23 +762,21 @@ def read_data():
 
     return IGRACI
 
-def update_achievement(igrac_number, broj_achievementa):
-    # Read the current achievements from the file
+def update_achievementa(igrac_broj, broj_achievementa):
     with open("Podzemne borbe\Achievements.txt", 'r', encoding="utf-8") as achievements_file:
         lines = achievements_file.read().splitlines()
 
-    # Find the line corresponding to the selected player
-    line_index = igrac_number - 1  # Assuming profile numbers start from 1
+    line_index = igrac_broj - 1
 
     if 0 <= line_index < len(lines):
-        # Update the achievements for the selected player
         achievements_line = list(lines[line_index].split(','))
         achievements_line[broj_achievementa - 1] = "da"
         lines[line_index] = ",".join(achievements_line)
 
-        # Write the modified content back to the file
         with open("Podzemne borbe\Achievements.txt", 'wt', encoding="utf-8") as achievements_file:
             achievements_file.write("\n".join(lines))
+
+ACHIEVEMENTS = {"prvi":"Dobrodošli u klub", "drugi":"Nezz tbh", "treci":"Bing Qi Lin", "cetvrti":"You dare oppose me, mortal!", "peti":"niti blizu", "sesti":"Veni, vidi, vici"}
 
 
 #Definira se klasa gumb sa svojim metodama
@@ -1186,7 +1181,7 @@ def odabir_borca1():
                     BORCI["igrac1"] = Andrej("prvi")
                     odabranAndrej = True
                     if odabranAndrej == True:
-                        update_achievement(IGRACI[0].profil_broj, 2)
+                        update_achievementa(IGRACI[0].profil_broj, 2)
                     run = False
                 if BORAC2_GUMB.checkForCollision(mouse_position):
                     BORCI["igrac1"] = Andrej("prvi")
