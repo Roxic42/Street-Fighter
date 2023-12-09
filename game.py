@@ -1,7 +1,7 @@
-import pygame, sys, os, warnings, time, pygamepopup
+import pygame, sys, os, warnings, time #,pygamepopup
 warnings.filterwarnings("ignore", category=UserWarning, message=".*iCCP.*")
 pygame.init() #instalira i učitava sve pygame module
-pygamepopup.init()
+#pygamepopup.init()
 
 #Definiranje displaya
 WIDTH, HEIGHT = 1600, 900
