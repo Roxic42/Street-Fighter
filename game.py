@@ -1478,8 +1478,6 @@ def igranje():
         pygame.draw.rect(SCREEN, "Brown", pod_rectangle)
 
         if pocetak_runde == True:
-            obrnuto = False
-            promjena_obrnuto = False
             pocetak_kraja = False
             BORCI["igrac1"].resetBeforeGame()
             BORCI["igrac2"].resetBeforeGame()

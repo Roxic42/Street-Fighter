@@ -10,3 +10,4 @@ ogromna greška tri borca se pojave nakon što se izađe iz runde u kojoj je jed
 broj rundi još nije funkcionalan
 profili se ne saveaju ni kad se ugasi ni kada se izađe iz runde, iz nekog razloga treba 2 puta kliknuti profil da se odabere
 ludovanje likova u eksperimentalnom kodu video (dodan)
+jako je zbunjujuće tko je koji igrač kada se igra
