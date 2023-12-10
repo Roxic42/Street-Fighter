@@ -46,13 +46,19 @@ class Andrej(pygame.sprite.Sprite):
 
         self.health = 10
 
+        self.score = 0
+
         self.pocetak_skoka = False
+
+        self.pocinjen_damage = False
+        self.stunned_timer_start = "kreiran eto da postoji"
 
         self.punch_timer_start = "kreiran eto da postoji"
         self.superman_timer_start = "kreiran eto da postoji"
         self.aperkat_timer_start = "kreiran eto da postoji"
         self.kick_timer_start = "kreiran eto da postoji"
         self.windmill_timer_start = "kreiran eto da postoji"
+        self.opcenito_attack_timer_start = "kreiran eto da postoji"
 
         self.pocetak_skok_animacije = False
         self.hodanje_animacija = False
@@ -525,6 +531,17 @@ def crtanjeHealthaIImena(igrac, pozicija):
     ime_rectangle = ime_surface.get_rect(topleft = (x, 5))
     SCREEN.blit(ime_surface, ime_rectangle)
 
+def crtanjeRunde(igrac1, igrac2):
+    global broj_runde
+    runda_font = pygame.font.Font(None, 100)
+    runda_surface = runda_font.render(f"Runda {broj_runde}", True, "White")
+    runda_rectangle = runda_surface.get_rect(midtop = (WIDTH/2, 5))
+    SCREEN.blit(runda_surface, runda_rectangle)
+    score_font = pygame.font.Font(None, 40)
+    score_surface = score_font.render(f"{igrac1.score}  -  {igrac2.score}", True, "White")
+    score_rectangle = score_surface.get_rect(midtop = (WIDTH/2, 70))
+    SCREEN.blit(score_surface, score_rectangle)
+
 def provjeraPozicijeZaObrnuto(left, right):
     global obrnuto
     global promjena_obrnuto
@@ -679,16 +696,22 @@ def provjeraUdarcaIUdaranje(igrac, pritisnuta_tipka, trazena_tipka):
                 igrac.aperkat_timer_start = time.time()
                 igrac.pocetak_crouchpunch_animacija = True
                 igrac.crouchpunch_animacija = True
+                igrac.pocinjen_damage = False
+                igrac.opcenito_attack_timer_start = time.time()
             elif igrac.varijable["jumping"] == True:
                 igrac.varijable["jumpingpunch"] = True
                 igrac.superman_timer_start = time.time()
                 igrac.airpunch_animacija = True
                 igrac.pocetak_airpunch_animacija = True
+                igrac.pocinjen_damage = False
+                igrac.opcenito_attack_timer_start = time.time()
             else:
                 igrac.varijable["punching"] = True
                 igrac.punch_timer_start = time.time()
                 igrac.punch_animacija = True
                 igrac.pocetak_punch_animacija = True
+                igrac.pocinjen_damage = False
+                igrac.opcenito_attack_timer_start = time.time()
 
 def provjeraNogeINogatanje(igrac, pritisnuta_tipka, trazena_tipka):
     if pritisnuta_tipka == trazena_tipka:
@@ -714,13 +737,85 @@ def provjeraNogeINogatanje(igrac, pritisnuta_tipka, trazena_tipka):
                 igrac.windmill_timer_start = time.time()
                 igrac.airkick_animacija = True
                 igrac.pocetak_airkick_animacija = True
+                igrac.pocinjen_damage = False
+                igrac.opcenito_attack_timer_start = time.time()
             else:
                 igrac.varijable["kicking"] = True
                 igrac.kick_timer_start = time.time()
                 igrac.kick_animacija = True
                 igrac.pocetak_kick_animacija = True
+                igrac.pocinjen_damage = False
+                igrac.opcenito_attack_timer_start = time.time()
 
-                 
+def provjeraDamagea(igrac1, igrac2):
+    if findDamageRectangle(igrac1) == True:
+        if igrac1.pocinjen_damage == True:
+            pass
+        elif findDamageRectangle(igrac2) == True:
+            if pygame.sprite.spritecollide(igrac1.damageRect, igrac2.rectangles, False, pygame.sprite.collide_rect):
+                vrijeme = time.time()
+                if (vrijeme - igrac1.opcenito_attack_timer_start) >= (vrijeme - igrac2.opcenito_attack_timer_start):
+                    igrac2.varijable["stunned"] = True
+                    igrac2.stunned_timer_start = time.time()
+                    igrac2.health -= 1
+                    igrac1.pocinjen_damage = True
+            else:
+                pass
+        elif igrac2.varijable["blocking"] == True:
+            pass
+        elif igrac2.varijable["defeated"] == True:
+            pass
+        elif pygame.sprite.spritecollide(igrac1.damageRect, igrac2.rectangles, False, pygame.sprite.collide_rect):
+            igrac2.varijable["stunned"] = True
+            igrac2.stunned_timer_start = time.time()
+            igrac2.health -= 1
+            igrac1.pocinjen_damage = True
+        else:
+            pass
+    if findDamageRectangle(igrac2) == True:
+        if igrac2.pocinjen_damage == True:
+            pass
+        elif findDamageRectangle(igrac1) == True:
+            if pygame.sprite.spritecollide(igrac2.damageRect, igrac1.rectangles, False, pygame.sprite.collide_rect):
+                vrijeme = time.time()
+                if (vrijeme - igrac2.opcenito_attack_timer_start) >= (vrijeme - igrac1.opcenito_attack_timer_start):
+                    igrac1.varijable["stunned"] = True
+                    igrac1.stunned_timer_start = time.time()
+                    igrac1.health -= 1
+                    igrac2.pocinjen_damage = True
+            else:
+                pass
+        elif igrac1.varijable["blocking"] == True:
+            pass
+        elif igrac1.varijable["defeated"] == True:
+            pass
+        elif pygame.sprite.spritecollide(igrac2.damageRect, igrac1.rectangles, False, pygame.sprite.collide_rect):
+            igrac1.varijable["stunned"] = True
+            igrac1.stunned_timer_start = time.time()
+            igrac1.health -= 1
+            igrac2.pocinjen_damage = True
+        else:
+            pass
+
+def provjeraJeLiStunned(igrac):
+    if igrac.varijable["stunned"] == True:
+        if (time.time() - igrac.stunned_timer_start) >= 0.4:
+            igrac.varijable["stunned"] = False
+            igrac.airkick_animacija = False
+            igrac.airpunch_animacija = False
+            igrac.crouchpunch_animacija = False
+            igrac.kick_animacija = False
+            igrac.punch_animacija = False
+            igrac.varijable["punching"] = False
+            igrac.varijable["kicking"] = False
+            igrac.varijable["jumpingpunch"] = False
+            igrac.varijable["jumpingkick"] = False
+            igrac.varijable["crouchingpunch"] = False
+        else:
+            pass
+    else:
+        pass
+
 class Player:
     def __init__(self, ime, Ws, Ls, achievements, profil_broj):
         self.ime = ime                       
@@ -879,11 +974,19 @@ def main():
                     pass
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if IGRAJ_GUMB.checkForCollision(mouse_position):
-                    imenovanje_profila()
-                    biranje_profila()
-                    odabir_borca1()
-                    odabir_borca2()
-                    igranje()
+                    if imenovanje_profila():
+                        break
+                    if biranje_profila():
+                        break
+                    if odabir_borca1():
+                        break
+                    if odabir_borca2():
+                        break
+                    if odabir_rundi():
+                        break
+                    if igranje():
+                        break
+                    winscreen()
                 if IZADI_GUMB.checkForCollision(mouse_position):
                     pygame.quit()
                     sys.exit()
@@ -978,7 +1081,7 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
 
 
                 if NAZAD_GUMB.checkForCollision(mouse_position):
-                    main()
+                    return True
                     
                     
                 for i in range(8):
@@ -1016,7 +1119,7 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     if escape_screen('Želiš li se vratiti nazad?'):
-                        main()
+                        return True
                     imenovanje_profila_bool = False
 
                 for i in range(8):
@@ -1106,14 +1209,13 @@ def biranje_profila():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     if escape_screen('Želiš li izaći iz igre?'):
-                        main()
+                        return True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if DALJE_GUMB.checkForCollision(mouse_position):
                     if len(selektirani_profili) == 2:
                         biranje_profila_bool = False
                 if NAZAD_GUMB.checkForCollision(mouse_position):
-                    main()
-                    break
+                    return True
                 if len(selektirani_profili) <= 2:
                     for i in range(8):
                         if PLAYERI_LISTA_GUMBOVA[i].checkForCollision(mouse_position):
@@ -1171,12 +1273,12 @@ def odabir_borca1():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     if escape_screen("Želiš li se vratiti na početnu stranicu?"):
-                        main()
+                        return True
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if NAZAD_GUMB.checkForCollision(mouse_position):
                     run = False
-                    main()
+                    return True
                 if BORAC1_GUMB.checkForCollision(mouse_position):
                     BORCI["igrac1"] = Andrej("prvi")
                     odabranAndrej = True
@@ -1203,8 +1305,8 @@ def odabir_borca2():
         mouse_position = pygame.mouse.get_pos()
         NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
         DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Red", (1500, 850))
-        BORAC1_GUMB = Button("Borac1", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 400))
-        BORAC2_GUMB = Button("Borac2", 70, "White", (220, 120), "Grey", "Blue", (WIDTH/2, 600))
+        BORAC1_GUMB = Button("Andrej Tejtanović", 70, "White", (420, 120), "Grey", "Green", (WIDTH/2, 400))
+        BORAC2_GUMB = Button("Broz Li", 70, "White", (420, 120), "Grey", "Blue", (WIDTH/2, 600))
         for gumb in [NAZAD_GUMB, DALJE_GUMB, BORAC1_GUMB, BORAC2_GUMB]:
             if gumb.checkForCollision(mouse_position):
                 gumb.changeButtonColor()
@@ -1219,12 +1321,12 @@ def odabir_borca2():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     if escape_screen("Želiš li se vratiti na početnu stranicu?"):
-                        main()
+                        return True
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if NAZAD_GUMB.checkForCollision(mouse_position):
                     run = False
-                    main()
+                    return True
                 if BORAC1_GUMB.checkForCollision(mouse_position):
                     BORCI["igrac2"] = Andrej("drugi")
                     run = False
@@ -1238,6 +1340,7 @@ def odabir_borca2():
         clock.tick(FPS)
 
 def odabir_rundi():
+    global broj_rundi
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render("Na koliko rundi se igra?", False, "White")
     naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 100))
@@ -1263,35 +1366,110 @@ def odabir_rundi():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     if escape_screen("Želiš li se vratiti na početnu stranicu?"):
-                        main()
-
+                        return True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if JEDNA_GUMB.checkForCollision(mouse_position):
                     run = False
+                    broj_rundi = 1
                 if TRI_GUMB.checkForCollision(mouse_position):
-                    #igranje3()
-                    pass
+                    run = False
+                    broj_rundi = 3
                 if SEDAM_GUMB.checkForCollision(mouse_position):
-                    #igranje7()
-                    pass
+                    run = False
+                    broj_rundi = 7
                 if NAZAD_GUMB.checkForCollision(mouse_position):
                     run = False
+                    return True
                 
         pygame.display.update()
         clock.tick(FPS)
 
-runda = 0
+def findDamageRectangle(igrac):
+    if igrac.varijable["punching"] == True:
+        return True
+    elif igrac.varijable["kicking"] == True:
+        return True
+    elif igrac.varijable["crouchingpunch"] == True:
+        return True
+    elif igrac.varijable["jumpingpunch"] == True:
+        return True
+    elif igrac.varijable["jumpingkick"] == True:
+        return True
+    else:
+        return False
+    
+def provjeraJeLiTkoDefeated(igrac1, igrac2):
+    global pocetak_kraja, krajnji_counter
+    if igrac1.health == 0:
+        igrac1.varijable["defeated"] = True
+        if pocetak_kraja == False:
+            igrac2.score += 1
+            pocetak_kraja = True
+            krajnji_counter = time.time()
+        ime_font = pygame.font.Font(None, 100)
+        ime_surface = ime_font.render(f"{selektirani_profili[1]} je pobjedio/la rundu!", True, "White")
+        ime_rectangle = ime_surface.get_rect(center = (WIDTH/2, HEIGHT/2))
+        SCREEN.blit(ime_surface, ime_rectangle)
+        if (time.time() - krajnji_counter) >= 5:
+            reset_igre(igrac1, igrac2)
+    if igrac2.health == 0:
+        igrac2.varijable["defeated"] = True
+        if pocetak_kraja == False:
+            igrac1.score += 1
+            pocetak_kraja = True
+            krajnji_counter = time.time()
+        ime_font = pygame.font.Font(None, 100)
+        ime_surface = ime_font.render(f"{selektirani_profili[0]} je pobjedio/la rundu!", True, "White")
+        ime_rectangle = ime_surface.get_rect(center = (WIDTH/2, HEIGHT/2))
+        SCREEN.blit(ime_surface, ime_rectangle)
+        if (time.time() - krajnji_counter) >= 5:
+            reset_igre(igrac1, igrac2)
+
+def reset_igre(igrac1, igrac2):
+    global kraj_igre, pobjednik, pocetak_runde, broj_runde
+    if broj_rundi == 1:
+        if igrac1.score == 1:
+            kraj_igre = True
+            pobjednik = selektirani_profili[0]
+        elif igrac2.score == 1:
+            kraj_igre = True
+            pobjednik = selektirani_profili[1]
+    elif broj_rundi == 3:
+        if igrac1.score == 2:
+            kraj_igre = True
+            pobjednik = selektirani_profili[0]
+        elif igrac2.score == 2:
+            kraj_igre = True
+            pobjednik = selektirani_profili[1]
+        else:
+            broj_runde += 1
+            pocetak_runde = True
+    elif broj_rundi == 7:
+        if igrac1.score == 4:
+            kraj_igre = True
+            pobjednik = selektirani_profili[0]
+        elif igrac2.score == 4:
+            kraj_igre = True
+            pobjednik = selektirani_profili[1]
+        else:
+            broj_runde += 1
+            pocetak_runde = True
+    
 
 #Funkcija u kojoj se odvija sama igra
 def igranje():
     global BORCI
     global IGRACI
-    global runda
     global promjena_obrnuto, obrnuto
+    global pocetak_kraja, kraj_igre, pocetak_runde, broj_runde
     pocetak_runde = True
     igranje = True
     obrnuto = False
     promjena_obrnuto = False
+    kraj_igre = False
+    broj_runde = 1
+    BORCI["igrac1"].score = 0
+    BORCI["igrac2"].score = 0
     while igranje:
         SCREEN.fill("Light Blue")
         pygame.mouse.set_visible(False)
@@ -1300,9 +1478,16 @@ def igranje():
         pygame.draw.rect(SCREEN, "Brown", pod_rectangle)
 
         if pocetak_runde == True:
+            obrnuto = False
+            promjena_obrnuto = False
+            pocetak_kraja = False
             BORCI["igrac1"].resetBeforeGame()
             BORCI["igrac2"].resetBeforeGame()
             pocetak_runde = False
+
+        provjeraJeLiTkoDefeated(BORCI["igrac1"], BORCI["igrac2"])
+        if kraj_igre == True:
+            return
 
         BORCI["igrac1"].gravitacija()
         BORCI["igrac2"].gravitacija()
@@ -1313,6 +1498,9 @@ def igranje():
             promjena_obrnuto = False
             BORCI["igrac1"].flipanje_slika()
             BORCI["igrac2"].flipanje_slika()
+
+        provjeraJeLiStunned(BORCI["igrac1"])
+        provjeraJeLiStunned(BORCI["igrac2"])
 
         provjeraTrajanjaUdaraca(BORCI["igrac1"])
         provjeraTrajanjaUdaraca(BORCI["igrac2"])
@@ -1326,8 +1514,11 @@ def igranje():
         BORCI["igrac1"].animacije()
         BORCI["igrac2"].animacije()
 
+        provjeraDamagea(BORCI["igrac1"], BORCI["igrac2"])
+
         crtanjeHealthaIImena(BORCI["igrac1"], "lijevo")
         crtanjeHealthaIImena(BORCI["igrac2"], "desno")
+        crtanjeRunde(BORCI["igrac1"], BORCI["igrac2"])
 
         keys_pressed = pygame.key.get_pressed()
 
@@ -1352,7 +1543,7 @@ def igranje():
                     pygame.mouse.set_visible(True)
                     if escape_screen("Želiš li izaći u početni zaslon?"):
                         igranje = False
-                        main()
+                        return True
 
                 provjeraSkokaISkakanje(BORCI["igrac1"], pritisnuto, pygame.K_w)
                 provjeraSkokaISkakanje(BORCI["igrac2"], pritisnuto, pygame.K_UP)
@@ -1366,15 +1557,24 @@ def igranje():
         pygame.display.update()
         clock.tick(FPS)
 
-def winscreen():  #Nije upogonjeno
+def winscreen():
+    global pobjednik
     pygame.mouse.set_visible(True)
     transparent_background = pygame.Surface((WIDTH, HEIGHT))
-    transparent_background.fill("Light Blue")
-    transparent_background.set_alpha(100)
+    transparent_background.fill("Black")
+    transparent_background.set_alpha(500)
     SCREEN.blit(transparent_background, (0,0))
+    naslov_font = pygame.font.Font(None, 90)
+    naslov_surface = naslov_font.render(f"{pobjednik} je ultimativni pobjednik/ca!!!", False, "White")
+    naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 150))
     run = True
     while run == True:
-
+        mouse_position = pygame.mouse.get_pos()
+        SCREEN.blit(naslov_surface, naslov_rectangle)
+        IZADI_GUMB = Button("Izađi", 80, "White", (350, 120), "Grey", "Yellow", (WIDTH/2, 450))
+        if IZADI_GUMB.checkForCollision(mouse_position):
+                IZADI_GUMB.changeButtonColor()
+        IZADI_GUMB.update(SCREEN)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -1383,8 +1583,10 @@ def winscreen():  #Nije upogonjeno
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     if escape_screen("Želiš li izaći u početni zaslon?"):
-                        run = False
-                        main()
+                        return
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if IZADI_GUMB.checkForCollision(mouse_position):
+                    return
 
         pygame.display.update()
         clock.tick(FPS)
