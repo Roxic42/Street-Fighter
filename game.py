@@ -353,10 +353,12 @@ class Andrej(pygame.sprite.Sprite):
             self.stunnedRectangles()
         elif self.varijable["blocking"] == True:
             self.blockRectangles()
-        elif self.varijable["crouching"] == True:
-            self.crouchRectangles()
+        elif self.varijable["kicking"] == True:
+            self.kickRectangles()
         elif self.varijable["crouchingpunch"] == True:
             self.crouchPunchRectangles()
+        elif self.varijable["crouching"] == True:
+            self.crouchRectangles()
         elif self.varijable["jumpingpunch"] == True:
             self.jumpPunchRectangles()
         elif self.varijable["jumpingkick"] == True:
@@ -365,8 +367,6 @@ class Andrej(pygame.sprite.Sprite):
             self.jumpRectangles()
         elif self.varijable["punching"] == True:
             self.punchRectangles()
-        elif self.varijable["kicking"] == True:
-            self.kickRectangles()
         else:
             self.idleRectangles()
 
@@ -856,7 +856,7 @@ def provjeraJeLiStunned(igrac):
 def provjeraZaRegeneriranjeStamine(igrac):
     if igrac.stamina >= 5:
         igrac.stamina = 5
-    elif (time.time() - igrac.promjena_stamine) < 2:
+    elif (time.time() - igrac.promjena_stamine) < 1.25:
         pass
     else:
         igrac.stamina += 0.08
