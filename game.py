@@ -12,7 +12,26 @@ pygame.display.set_caption("Street-Fighter")
 clock = pygame.time.Clock()
 FPS = 60
 
-Achievements_BG = pygame.image.load(os.path.join("Assets", "Achievements", "achievement_bg.png")).convert_alpha()
+ACHV_BG = pygame.image.load(os.path.join("Assets", "Achievements", "achievement_bg.png")).convert_alpha()
+ACHV_NASLOV = pygame.image.load(os.path.join("Assets", "Achievements", "achievement_naslov.png")).convert_alpha()
+A_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "andrej_achvmnt.png")).convert_alpha()
+A_OPIS = pygame.image.load(os.path.join("Assets", "Achievements", "andrej_opis.png")).convert_alpha()
+BACK_GUMB_OKVIR = pygame.image.load(os.path.join("Assets", "Achievements", "back_gumb_hover_bijelo.png")).convert_alpha()
+BACK_GUMB_HOVER = pygame.image.load(os.path.join("Assets", "Achievements", "back_gumb_hover.png")).convert_alpha()
+BACK_GUMB = pygame.image.load(os.path.join("Assets", "Achievements", "back_gumb.png")).convert_alpha()
+B_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "broz_achvmnt.png")).convert_alpha()
+B_OPIS = pygame.image.load(os.path.join("Assets", "Achievements", "broz_opis.png")).convert_alpha()
+COLLEC_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "collector_achvmnt.png")).convert_alpha()
+COLLEC_OPIS = pygame.image.load(os.path.join("Assets", "Achievements", "collector_opis.png")).convert_alpha()
+ONEHP_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "onehp_achvmnt.png")).convert_alpha()
+ONEHP_OPIS = pygame.image.load(os.path.join("Assets", "Achievements", "onehp_opis.png")).convert_alpha()
+SEVKE_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "severina_achvmnt.png")).convert_alpha()
+SEVKE_OPIS = pygame.image.load(os.path.join("Assets", "Achievements", "severina_opis.png")).convert_alpha()
+SUPER_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "superhero_achvmnt.png")).convert_alpha()
+SUPER_OPIS = pygame.image.load(os.path.join("Assets", "Achievements", "superhero_opis.png")).convert_alpha()
+UNKNOWN_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "unkown_achvmnt.png")).convert_alpha()
+UNKNOWN_HOVER = pygame.image.load(os.path.join("Assets", "Achievements", "unkown_achvmnt_hover.png")).convert_alpha()
+ZAKLJUCANO = pygame.image.load(os.path.join("Assets", "Achievements", "zakljucano.png")).convert_alpha()
 
 class SpriteRectangle(pygame.sprite.Sprite):
     def __init__(self, color, x, y, width, height):
@@ -1065,13 +1084,11 @@ def main():
         clock.tick(FPS)
 
 def postignuca():
-    naslov_font = pygame.font.Font(None, 100)
-    naslov_surface = naslov_font.render("Postignuća", False, "Black")
-    naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 50))
     run = True
     while run == True:
-        SCREEN.fill("Grey")
-        SCREEN.blit(naslov_surface, naslov_rectangle)
+        SCREEN.fill("White")
+        SCREEN.blit(ACHV_BG, (0,0))
+        SCREEN.blit(ACHV_NASLOV, (WIDTH/4, 10))
 
 
 
