@@ -12,6 +12,8 @@ pygame.display.set_caption("Street-Fighter")
 clock = pygame.time.Clock()
 FPS = 60
 
+Achievements_BG = pygame.image.load(os.path.join("Assets", "Achievements", "achievement_bg.png")).convert_alpha()
+
 class SpriteRectangle(pygame.sprite.Sprite):
     def __init__(self, color, x, y, width, height):
         super().__init__()
@@ -878,9 +880,6 @@ class Player:
     def ispisi(self):
         print(self.achievements)
 
-odabranAndrej = False
-odabranBroz = False
-
 IGRACI = []
 def read_data():
     global selektirani_profili
@@ -917,9 +916,21 @@ def update_achievementa(igrac_broj, broj_achievementa):
 
         with open("Podzemne borbe\Achievements.txt", 'wt', encoding="utf-8") as achievements_file:
             achievements_file.write("\n".join(lines))
+    
+def update_score(igrac_broj, wins, losses):
+    with open("Podzemne borbe\score.txt", 'r') as score_file:
+        lines = score_file.read().splitlines()
 
-ACHIEVEMENTS = {"prvi":"Dobrodošli u klub", "drugi":"Nezz tbh", "treci":"Bing Qi Lin", "cetvrti":"You dare oppose me, mortal!", "peti":"niti blizu", "sesti":"Veni, vidi, vici"}
+    line_index = igrac_broj - 1 
 
+    if 0 <= line_index < len(lines):
+        score_line = list(map(int, lines[line_index].split(',')))
+        score_line[0] = wins
+        score_line[1] = losses
+        lines[line_index] = ",".join(map(str, score_line))
+
+        with open("Podzemne borbe\score.txt", 'wt') as score_file:
+            score_file.write("\n".join(lines))
 
 #Definira se klasa gumb sa svojim metodama
 class Button:
@@ -1006,7 +1017,7 @@ def main():
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
         IGRAJ_GUMB = Button("Igraj", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 300))
-        ACHIEVEMENTS_GUMB = Button("Achievements", 70, "White", (350, 120), "Grey", "Yellow", (WIDTH/2, 500))
+        ACHIEVEMENTS_GUMB = Button("Postignuća", 70, "White", (350, 120), "Grey", "Yellow", (WIDTH/2, 500))
         IZADI_GUMB = Button("Izađi", 70, "White", (220, 120), "Grey", "Red", (WIDTH/2, 700))
         for gumb in [IGRAJ_GUMB, IZADI_GUMB, ACHIEVEMENTS_GUMB]:
             if gumb.checkForCollision(mouse_position):
@@ -1044,9 +1055,35 @@ def main():
                     if igranje():
                         break
                     winscreen()
+                if ACHIEVEMENTS_GUMB.checkForCollision(mouse_position):
+                    if postignuca():
+                        break
                 if IZADI_GUMB.checkForCollision(mouse_position):
                     pygame.quit()
                     sys.exit()
+        pygame.display.update()
+        clock.tick(FPS)
+
+def postignuca():
+    naslov_font = pygame.font.Font(None, 100)
+    naslov_surface = naslov_font.render("Postignuća", False, "Black")
+    naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 50))
+    run = True
+    while run == True:
+        SCREEN.fill("Grey")
+        SCREEN.blit(naslov_surface, naslov_rectangle)
+
+
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if escape_screen("Želiš li se vratiti nazad na početnu stranicu?"):
+                        return True
+                    
         pygame.display.update()
         clock.tick(FPS)
 
@@ -1068,7 +1105,6 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
     global profili
     global PLAYERI_IMENA
     global PLAYERI_SELEKTIRANI
-    global KLASE_PLAYER
     global biranje_profila_bool
     global imenovanje_profila_bool
     global trenutno_ime_upis
@@ -1206,7 +1242,6 @@ def biranje_profila():
     global PLAYERI_IMENA
     global PLAYERI_SELEKTIRANI
     global PLAYERI_LISTA_GUMBOVA
-    global KLASE_PLAYER
     biranje_profila_bool = True
     SCREEN.fill('Black')
 
