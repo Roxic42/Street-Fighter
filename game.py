@@ -1402,6 +1402,7 @@ odabrano = False
 def keybind_screen1():
     global selektirani_profili, odabrano, preset1, preset2, preset3
     global BORCI
+    odabrano = False
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render(f"{selektirani_profili[0]}, odaberi svoje kontrole ", False, "White")
     naslov_rectangle = naslov_surface.get_rect(topleft = (10, 10))
