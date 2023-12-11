@@ -42,6 +42,8 @@ class Andrej(pygame.sprite.Sprite):
 
         self.varijable = {"jumping" : False, "crouching" : False, "blocking" : False, "stunned" : False, "defeated" : False, "kicking" : False, "punching" : False, "jumpingpunch" : False, "jumpingkick" : False, "crouchingpunch" : False}
 
+        self.dictionary = {"left":0, "right":0, "up":0, "down":0, "punch":0, "kick":0, "block":0}
+
         self.rectangles = pygame.sprite.Group()
 
         self.health = 10
@@ -926,6 +928,7 @@ class Button:
         self.rectangle = pygame.Rect((position[0]-(rectangle_width_and_height[0]/2), position[1]-(rectangle_width_and_height[1]/2)), rectangle_width_and_height)
         self.rectangle_color, self.rectangle_hovering_color = rectangle_color, rectangle_hovering_color
         #tekst u gumbu
+        self.text_input = text_input
         self.font = pygame.font.Font(None, text_size)
         self.text_surface = self.font.render(text_input, False, text_color)
         self.text_rectangle = self.text_surface.get_rect(center = self.rectangle.center)
@@ -989,12 +992,17 @@ def escape_screen(tekst):
 
 #Glavna funkcija koja se počinje vrtjeti čim se program starta i hijerarhijski je najviša
 def main():
-    global selektirani_profili
-    selektirani_profili = [] 
+    global selektirani_profili, IGRACI, PLAYERI_IMENA, PLAYERI_SELEKTIRANI
+    
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render("Podzemne borbe", False, "White")
     naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 100))
     while True:
+        selektirani_profili.clear()
+        PLAYERI_SELEKTIRANI.clear()
+        PLAYERI_IMENA.clear()
+        IGRACI.clear()
+
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
         IGRAJ_GUMB = Button("Igraj", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 300))
@@ -1027,6 +1035,10 @@ def main():
                         break
                     if odabir_borca2():
                         break
+                    if keybind_screen1():
+                        break
+                    if keybind_screen2():
+                        break
                     if odabir_rundi():
                         break
                     if igranje():
@@ -1041,7 +1053,6 @@ def main():
 PLAYERI_SELEKTIRANI = {}
 PLAYERI_IMENA = {}
 PLAYERI_LISTA_GUMBOVA = []
-KLASE_PLAYER = {}
 
 selektirani_profili = []
 with open("Podzemne borbe\profili.txt",encoding="utf-8") as datoteka:
@@ -1384,6 +1395,133 @@ def odabir_borca2():
         pygame.display.update()
         clock.tick(FPS)
 
+preset1 = False
+preset2 = False
+preset3 = False
+odabrano = False
+def keybind_screen1():
+    global selektirani_profili, odabrano, preset1, preset2, preset3
+    global BORCI
+    naslov_font = pygame.font.Font(None, 100)
+    naslov_surface = naslov_font.render(f"{selektirani_profili[0]}, odaberi svoje kontrole ", False, "White")
+    naslov_rectangle = naslov_surface.get_rect(topleft = (10, 10))
+    run = True
+    while run == True:
+        SCREEN.fill("Black")
+        mouse_position = pygame.mouse.get_pos()
+        SCREEN.blit(naslov_surface, naslov_rectangle)
+        PRESET1 = Button("Old school", 70, "White", (320, 120), "Grey", "Green", (WIDTH/5, 790))
+        PRESET2 = Button("Builder pro", 70, "White", (320, 120), "Grey", "Green", (WIDTH/2, 790))
+        PRESET3 = Button("Combat pro", 70, "White", (320, 120), "Grey", "Green", (4*WIDTH/5, 790))
+        DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Green", (WIDTH/2, 650))
+        for gumb in [PRESET1, PRESET2, PRESET3, DALJE_GUMB]:
+            if gumb.checkForCollision(mouse_position):
+                if not odabrano:
+                    if gumb.text_input == "Dalje":
+                        gumb = Button("Dalje", 35, "White", (120, 60), "Grey", "Red", (WIDTH/2, 650))
+                gumb.changeButtonColor()
+            gumb.update(SCREEN)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()   
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if escape_screen('Želiš li izaći iz igre?'):
+                        return True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if odabrano == False:
+                    pass
+                else:
+                    if DALJE_GUMB.checkForCollision(mouse_position):
+                        run = False
+
+                if PRESET1.checkForCollision(mouse_position):
+                    preset1 = True
+                    odabrano = True
+                    BORCI["igrac1"].dictionary = {key: keybind_preset1[key] for key in BORCI["igrac1"].dictionary}
+
+                if PRESET2.checkForCollision(mouse_position):
+                    preset2 = True
+                    odabrano = True
+                    BORCI["igrac1"].dictionary = {key: keybind_preset2[key] for key in BORCI["igrac1"].dictionary}
+
+                if PRESET3.checkForCollision(mouse_position):
+                    preset3 = True
+                    odabrano = True
+                    BORCI["igrac1"].dictionary = {key: keybind_preset3[key] for key in BORCI["igrac1"].dictionary}
+                    
+
+        pygame.display.update()
+        clock.tick(FPS)
+
+def keybind_screen2():
+    global selektirani_profili, odabrano, preset1, preset2, preset3
+    global BORCI
+    odabrano = False
+    naslov_font = pygame.font.Font(None, 100)
+    naslov_surface = naslov_font.render(f"{selektirani_profili[1]}, odaberi svoje kontrole ", False, "White")
+    naslov_rectangle = naslov_surface.get_rect(topleft = (10, 10))
+    run = True
+    while run == True:
+        SCREEN.fill("Black")
+        mouse_position = pygame.mouse.get_pos()
+        SCREEN.blit(naslov_surface, naslov_rectangle)
+        PRESET1 = Button("Old school", 70, "White", (320, 120), "Grey", "Green", (WIDTH/5, 790))
+        PRESET2 = Button("Builder pro", 70, "White", (320, 120), "Grey", "Green", (WIDTH/2, 790))
+        PRESET3 = Button("Combat pro", 70, "White", (320, 120), "Grey", "Green", (4*WIDTH/5, 790))
+        DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Green", (WIDTH/2, 650))
+        for gumb in [PRESET1, PRESET2, PRESET3, DALJE_GUMB]:
+            if gumb.checkForCollision(mouse_position):
+                if not odabrano:
+                    if gumb.text_input == "Dalje":
+                        gumb = Button("Dalje", 35, "White", (120, 60), "Grey", "Red", (WIDTH/2, 650))
+                gumb.changeButtonColor()
+            gumb.update(SCREEN)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()   
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if escape_screen('Želiš li izaći iz igre?'):
+                        return True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if odabrano == False:
+                    pass
+                else:
+                    if DALJE_GUMB.checkForCollision(mouse_position):
+                        run = False
+
+                if preset1 == True:
+                    if PRESET1.checkForCollision(mouse_position):
+                        pass
+                else:      
+                    if PRESET1.checkForCollision(mouse_position):
+                        odabrano = True
+                        BORCI["igrac2"].dictionary = {key: keybind_preset1[key] for key in BORCI["igrac2"].dictionary}
+                    
+                if preset2 == True:
+                    if PRESET2.checkForCollision(mouse_position):
+                        pass
+                else:      
+                    if PRESET2.checkForCollision(mouse_position):
+                        odabrano = True
+                        BORCI["igrac2"].dictionary = {key: keybind_preset2[key] for key in BORCI["igrac2"].dictionary}
+
+                if preset3 == True:
+                    if PRESET3.checkForCollision(mouse_position):
+                        pass
+                else:      
+                    if PRESET3.checkForCollision(mouse_position):
+                        odabrano = True
+                        BORCI["igrac2"].dictionary = {key: keybind_preset3[key] for key in BORCI["igrac2"].dictionary}                
+
+        pygame.display.update()
+        clock.tick(FPS)
+
 def odabir_rundi():
     global broj_rundi
     naslov_font = pygame.font.Font(None, 100)
@@ -1568,16 +1706,13 @@ def igranje():
 
         keys_pressed = pygame.key.get_pressed()
 
-        provjeraCrouchanja(BORCI["igrac1"], keys_pressed, pygame.K_s)
-        provjeraCrouchanja(BORCI["igrac2"], keys_pressed, pygame.K_DOWN)
+        provjeraCrouchanja(BORCI["igrac1"], keys_pressed, BORCI["igrac1"].dictionary["down"])
+        provjeraBlokiranja(BORCI["igrac1"], keys_pressed, BORCI["igrac1"].dictionary["block"])
+        provjeraKretanjaIKretanje(BORCI["igrac1"], keys_pressed, BORCI["igrac1"].dictionary["left"], BORCI["igrac1"].dictionary["right"])
 
-
-        provjeraBlokiranja(BORCI["igrac1"], keys_pressed, pygame.K_SPACE)
-        provjeraBlokiranja(BORCI["igrac2"], keys_pressed, pygame.K_b)
-
-        provjeraKretanjaIKretanje(BORCI["igrac1"], keys_pressed, pygame.K_a, pygame.K_d)
-        provjeraKretanjaIKretanje(BORCI["igrac2"], keys_pressed, pygame.K_LEFT, pygame.K_RIGHT)
-
+        provjeraCrouchanja(BORCI["igrac2"], keys_pressed, BORCI["igrac2"].dictionary["down"])
+        provjeraBlokiranja(BORCI["igrac2"], keys_pressed, BORCI["igrac2"].dictionary["block"])
+        provjeraKretanjaIKretanje(BORCI["igrac2"], keys_pressed, BORCI["igrac2"].dictionary["left"], BORCI["igrac2"].dictionary["right"])
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -1590,15 +1725,15 @@ def igranje():
                     if escape_screen("Želiš li izaći u početni zaslon?"):
                         igranje = False
                         return True
+                    
+                provjeraSkokaISkakanje(BORCI["igrac1"], pritisnuto, BORCI["igrac1"].dictionary["up"])
+                provjeraUdarcaIUdaranje(BORCI["igrac1"], pritisnuto, BORCI["igrac1"].dictionary["punch"])
+                provjeraNogeINogatanje(BORCI["igrac1"], pritisnuto, BORCI["igrac1"].dictionary["kick"])
 
-                provjeraSkokaISkakanje(BORCI["igrac1"], pritisnuto, pygame.K_w)
-                provjeraSkokaISkakanje(BORCI["igrac2"], pritisnuto, pygame.K_UP)
+                provjeraSkokaISkakanje(BORCI["igrac2"], pritisnuto, BORCI["igrac2"].dictionary["up"])
+                provjeraUdarcaIUdaranje(BORCI["igrac2"], pritisnuto, BORCI["igrac2"].dictionary["punch"])
+                provjeraNogeINogatanje(BORCI["igrac2"], pritisnuto, BORCI["igrac2"].dictionary["kick"])
 
-                provjeraUdarcaIUdaranje(BORCI["igrac1"], pritisnuto, pygame.K_LSHIFT)
-                provjeraUdarcaIUdaranje(BORCI["igrac2"], pritisnuto, pygame.K_m)
-
-                provjeraNogeINogatanje(BORCI["igrac1"], pritisnuto, pygame.K_LCTRL)
-                provjeraNogeINogatanje(BORCI["igrac2"], pritisnuto, pygame.K_n)
 
         pygame.display.update()
         clock.tick(FPS)
