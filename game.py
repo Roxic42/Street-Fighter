@@ -12,6 +12,43 @@ pygame.display.set_caption("Street-Fighter")
 clock = pygame.time.Clock()
 FPS = 60
 
+class SlikeGumbi:
+    def __init__(self, slika, hover_slika, x, y):
+        self.slika = slika
+        self.hover_slika = hover_slika
+        self.poz = (x, y)
+        self.slika_rect = self.slika.get_rect(topleft = self.poz)
+    def provjeraSudara(self, pozicija_misa):
+        if pozicija_misa[0] in range(self.slika_rect.left, self.slika_rect.right) and pozicija_misa[1] in range(self.slika_rect.top, self.slika_rect.bottom):
+            return True
+        return False
+    def crtanjeGumba(self, pozicija_misa):
+        if pozicija_misa[0] in range(self.slika_rect.left, self.slika_rect.right) and pozicija_misa[1] in range(self.slika_rect.top, self.slika_rect.bottom):
+            SCREEN.blit(self.hover_slika, self.poz)
+        else:
+            SCREEN.blit(self.slika, self.slika_rect)
+
+
+#Slike za main ekran
+main_background = []
+for image in range(3):
+    main_background.append(pygame.image.load(os.path.join("Assets", "MainScreen", f"main_bg{image +1 }.png")).convert_alpha())
+naslov = pygame.image.load(os.path.join("Assets", "MainScreen", "naslov.png")).convert_alpha()
+igraj_gumb = pygame.image.load(os.path.join("Assets", "MainScreen", "igraj_gumb.png")).convert_alpha()
+igraj_gumb_hover = pygame.image.load(os.path.join("Assets", "MainScreen", "igraj_gumb_hover.png")).convert_alpha()
+postignuca_gumb = pygame.image.load(os.path.join("Assets", "MainScreen", "postignuca_gumb.png")).convert_alpha()
+postignuca_gumb_hover = pygame.image.load(os.path.join("Assets", "MainScreen", "postignuca_gumb_hover.png")).convert_alpha()
+izadi_gumb = pygame.image.load(os.path.join("Assets", "MainScreen", "izadi_gumb.png")).convert_alpha()
+izadi_gumb_hover = pygame.image.load(os.path.join("Assets", "MainScreen", "izadi_gumb_hover.png")).convert_alpha()
+
+#Slike za escape ekran
+da_gumb = pygame.image.load(os.path.join("Assets", "EscapeScreen", "da.png")).convert_alpha()
+da_gumb_hover = pygame.image.load(os.path.join("Assets", "EscapeScreen", "da_hover.png")).convert_alpha()
+ne_gumb = pygame.image.load(os.path.join("Assets", "EscapeScreen", "ne.png")).convert_alpha()
+ne_gumb_hover = pygame.image.load(os.path.join("Assets", "EscapeScreen", "ne_hover.png")).convert_alpha()
+prozor = pygame.image.load(os.path.join("Assets", "EscapeScreen", "escape_okvir.png")).convert_alpha()
+
+
 Achievements_BG = pygame.image.load(os.path.join("Assets", "Achievements", "achievement_bg.png")).convert_alpha()
 
 class SpriteRectangle(pygame.sprite.Sprite):
@@ -957,43 +994,30 @@ class Button:
         self.rectangle_color = self.rectangle_hovering_color
         
 
-def escape_screen(tekst):
+def escape_screen():
     transparent_background = pygame.Surface((WIDTH, HEIGHT))
     transparent_background.fill("Black")
-    transparent_background.set_alpha(100)
+    transparent_background.set_alpha(120)
     SCREEN.blit(transparent_background, (0,0))
 
-    plava_pozadina = pygame.Surface((640,360))
-    plava_pozadina.fill("Navy")
-    plava_pozadina_rectangle = plava_pozadina.get_rect(center = (WIDTH/2, HEIGHT/2))
-
-    okvir_surface = pygame.Surface((600,320))
-    okvir_rectangle = okvir_surface.get_rect(center = (WIDTH/2, HEIGHT/2))
-
-    font = pygame.font.Font(None, 30)
-    tekst_surface = font.render(tekst, False, "White")
-    tekst_rectangle = tekst_surface.get_rect(midtop = (WIDTH/2, 380))
+    SCREEN.blit(prozor, (0, 0))
+    da = SlikeGumbi(da_gumb, da_gumb_hover, 620, 540)
+    ne = SlikeGumbi(ne_gumb, ne_gumb_hover, 815, 540)
     while True:
+        SCREEN.blit(prozor, (0, 0))
         mouse_position = pygame.mouse.get_pos()
-        SCREEN.blit(plava_pozadina, plava_pozadina_rectangle)
-        pygame.draw.rect(SCREEN,'Black', okvir_rectangle, 6)
-        SCREEN.blit(tekst_surface, tekst_rectangle)
 
-        CANCEL_GUMB = Button('Ne', 30, 'Black', (70, 40), '#475F77', '#D74B4B', (650, 500))
-        CONFIRM_GUMB = Button('Da', 30, 'Black', (70, 40), '#475F77', '#77dd77', (950, 500))
-        for gumb in [CANCEL_GUMB, CONFIRM_GUMB]:
-            if gumb.checkForCollision(mouse_position):
-                gumb.changeButtonColor()
-            gumb.update(SCREEN)
+        for gumb in [da, ne]:
+            gumb.crtanjeGumba(mouse_position)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if CONFIRM_GUMB.checkForCollision(mouse_position):
+                if da.provjeraSudara(mouse_position):
                     return True
-                if CANCEL_GUMB.checkForCollision(mouse_position):
+                if ne.provjeraSudara(mouse_position):
                     return False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -1004,10 +1028,10 @@ def escape_screen(tekst):
 #Glavna funkcija koja se počinje vrtjeti čim se program starta i hijerarhijski je najviša
 def main():
     global selektirani_profili, IGRACI, PLAYERI_IMENA, PLAYERI_SELEKTIRANI
-    
-    naslov_font = pygame.font.Font(None, 100)
-    naslov_surface = naslov_font.render("Podzemne borbe", False, "White")
-    naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 100))
+    IGRAJ_GUMB = SlikeGumbi(igraj_gumb, igraj_gumb_hover, 200, 293)
+    ACHIEVEMENTS_GUMB = SlikeGumbi(postignuca_gumb, postignuca_gumb_hover, 200, 483)
+    IZADI_GUMB = SlikeGumbi(izadi_gumb, izadi_gumb_hover, 200, 673)
+    promjena = 0
     while True:
         selektirani_profili.clear()
         PLAYERI_SELEKTIRANI.clear()
@@ -1016,15 +1040,14 @@ def main():
 
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
-        IGRAJ_GUMB = Button("Igraj", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 300))
-        ACHIEVEMENTS_GUMB = Button("Postignuća", 70, "White", (350, 120), "Grey", "Yellow", (WIDTH/2, 500))
-        IZADI_GUMB = Button("Izađi", 70, "White", (220, 120), "Grey", "Red", (WIDTH/2, 700))
-        for gumb in [IGRAJ_GUMB, IZADI_GUMB, ACHIEVEMENTS_GUMB]:
-            if gumb.checkForCollision(mouse_position):
-                gumb.changeButtonColor()
-            gumb.update(SCREEN)
-        
-        SCREEN.blit(naslov_surface, naslov_rectangle)
+        if promjena >= 2.9:
+            promjena = 0
+        else:
+            promjena += 0.012
+        SCREEN.blit(main_background[int(promjena)], (0, 0))
+        SCREEN.blit(naslov, (0, 0))
+        for gumb in [IGRAJ_GUMB, ACHIEVEMENTS_GUMB, IZADI_GUMB]:
+            gumb.crtanjeGumba(mouse_position)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -1032,12 +1055,12 @@ def main():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if escape_screen("Želiš li izaći iz igre?"):
+                    if escape_screen():
                         pygame.quit()
                         sys.exit()
                     pass
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if IGRAJ_GUMB.checkForCollision(mouse_position):
+                if IGRAJ_GUMB.provjeraSudara(mouse_position):
                     if imenovanje_profila():
                         break
                     if biranje_profila():
@@ -1055,10 +1078,10 @@ def main():
                     if igranje():
                         break
                     winscreen()
-                if ACHIEVEMENTS_GUMB.checkForCollision(mouse_position):
+                if ACHIEVEMENTS_GUMB.provjeraSudara(mouse_position):
                     if postignuca():
                         break
-                if IZADI_GUMB.checkForCollision(mouse_position):
+                if IZADI_GUMB.provjeraSudara(mouse_position):
                     pygame.quit()
                     sys.exit()
         pygame.display.update()
@@ -1210,7 +1233,7 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
                         
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if escape_screen('Želiš li se vratiti nazad?'):
+                    if escape_screen():
                         return True
                     imenovanje_profila_bool = False
 
@@ -1299,7 +1322,7 @@ def biranje_profila():
                 sys.exit()   
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if escape_screen('Želiš li izaći iz igre?'):
+                    if escape_screen():
                         return True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if DALJE_GUMB.checkForCollision(mouse_position):
@@ -1363,7 +1386,7 @@ def odabir_borca1():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if escape_screen("Želiš li se vratiti na početnu stranicu?"):
+                    if escape_screen():
                         return True
 
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -1411,7 +1434,7 @@ def odabir_borca2():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if escape_screen("Želiš li se vratiti na početnu stranicu?"):
+                    if escape_screen():
                         return True
 
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -1464,7 +1487,7 @@ def keybind_screen1():
                 sys.exit()   
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if escape_screen('Želiš li izaći iz igre?'):
+                    if escape_screen():
                         return True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if odabrano == False:
@@ -1522,7 +1545,7 @@ def keybind_screen2():
                 sys.exit()   
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if escape_screen('Želiš li izaći iz igre?'):
+                    if escape_screen():
                         return True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if odabrano == False:
@@ -1584,7 +1607,7 @@ def odabir_rundi():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if escape_screen("Želiš li se vratiti na početnu stranicu?"):
+                    if escape_screen():
                         return True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if JEDNA_GUMB.checkForCollision(mouse_position):
