@@ -28,7 +28,6 @@ class SlikeGumbi:
         else:
             SCREEN.blit(self.slika, self.slika_rect)
 
-
 #Slike za main ekran
 main_background = []
 for image in range(3):
@@ -49,7 +48,26 @@ ne_gumb_hover = pygame.image.load(os.path.join("Assets", "EscapeScreen", "ne_hov
 prozor = pygame.image.load(os.path.join("Assets", "EscapeScreen", "escape_okvir.png")).convert_alpha()
 
 
-Achievements_BG = pygame.image.load(os.path.join("Assets", "Achievements", "achievement_bg.png")).convert_alpha()
+ACHV_BG = pygame.image.load(os.path.join("Assets", "Achievements", "achievement_bg.png")).convert_alpha()
+ACHV_NASLOV = pygame.image.load(os.path.join("Assets", "Achievements", "achievement_naslov.png")).convert_alpha()
+A_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "andrej_achvmnt.png")).convert_alpha()
+A_OPIS = pygame.image.load(os.path.join("Assets", "Achievements", "andrej_opis.png")).convert_alpha()
+BACK_GUMB_OKVIR = pygame.image.load(os.path.join("Assets", "Achievements", "back_gumb_hover_bijelo.png")).convert_alpha()
+BACK_GUMB_HOVER = pygame.image.load(os.path.join("Assets", "Achievements", "back_gumb_hover.png")).convert_alpha()
+BACK_GUMB = pygame.image.load(os.path.join("Assets", "Achievements", "back_gumb.png")).convert_alpha()
+B_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "broz_achvmnt.png")).convert_alpha()
+B_OPIS = pygame.image.load(os.path.join("Assets", "Achievements", "broz_opis.png")).convert_alpha()
+COLLEC_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "collector_achvmnt.png")).convert_alpha()
+COLLEC_OPIS = pygame.image.load(os.path.join("Assets", "Achievements", "collector_opis.png")).convert_alpha()
+ONEHP_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "onehp_achvmnt.png")).convert_alpha()
+ONEHP_OPIS = pygame.image.load(os.path.join("Assets", "Achievements", "onehp_opis.png")).convert_alpha()
+SEVKE_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "severina_achvmnt.png")).convert_alpha()
+SEVKE_OPIS = pygame.image.load(os.path.join("Assets", "Achievements", "severina_opis.png")).convert_alpha()
+SUPER_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "superhero_achvmnt.png")).convert_alpha()
+SUPER_OPIS = pygame.image.load(os.path.join("Assets", "Achievements", "superhero_opis.png")).convert_alpha()
+UNKNOWN_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "unkown_achvmnt.png")).convert_alpha()
+UNKNOWN_HOVER = pygame.image.load(os.path.join("Assets", "Achievements", "unkown_achvmnt_hover.png")).convert_alpha()
+ZAKLJUCANO = pygame.image.load(os.path.join("Assets", "Achievements", "zakljucano.png")).convert_alpha()
 
 class SpriteRectangle(pygame.sprite.Sprite):
     def __init__(self, color, x, y, width, height):
@@ -1104,7 +1122,7 @@ def postignuca():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if escape_screen("Želiš li se vratiti nazad na početnu stranicu?"):
+                    if escape_screen():
                         return True
                     
         pygame.display.update()
@@ -1781,7 +1799,7 @@ def igranje():
                 pritisnuto = event.key
                 if event.key == pygame.K_ESCAPE:
                     pygame.mouse.set_visible(True)
-                    if escape_screen("Želiš li izaći u početni zaslon?"):
+                    if escape_screen():
                         igranje = False
                         return True
                     
@@ -1822,7 +1840,7 @@ def winscreen():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if escape_screen("Želiš li izaći u početni zaslon?"):
+                    if escape_screen():
                         return
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if IZADI_GUMB.checkForCollision(mouse_position):
