@@ -13,3 +13,5 @@ ludovanje likova u eksperimentalnom kodu video (dodan)
 jako je zbunjujuće tko je koji igrač kada se igra
 andrej se teleportira (video dodan)
 igra se crasha ako uppercut ili kick iz čučnja bude prvi udarac(video dodan)
+može se ići dalje a nije selektiran keybinds preset
+crash ako se selektira broz li
