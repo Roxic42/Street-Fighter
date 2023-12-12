@@ -83,10 +83,6 @@ class SpriteRectangle(pygame.sprite.Sprite):
 def flip_image_horizontally(image):
     return pygame.transform.flip(image, True, False)
 
-class Broz(pygame.sprite.Sprite):
-    def __init__(self, igrac):
-        super().__init__()
-        pass
 
 class Andrej(pygame.sprite.Sprite):
     def __init__(self, igrac):
@@ -569,6 +565,450 @@ class Andrej(pygame.sprite.Sprite):
                 self.crouch_hodanje_animacija = True
             self.baseRectX += self.pomak
 
+
+class Broz(Andrej):
+    def __init__(self, igrac):
+        super().__init__(igrac)
+
+        if igrac == "prvi":
+            self.pozicija_borca = "lijevo"
+        elif igrac == "drugi":
+            self.pozicija_borca = "desno"
+
+        self.varijable = {"jumping" : False, "crouching" : False, "blocking" : False, "stunned" : False, "defeated" : False, "kicking" : False, "punching" : False, "jumpingpunch" : False, "jumpingkick" : False, "crouchingpunch" : False}
+
+        self.dictionary = {"left":0, "right":0, "up":0, "down":0, "punch":0, "kick":0, "block":0}
+
+        self.rectangles = pygame.sprite.Group()
+
+        self.health = 10
+        self.stamina = 5
+        self.promjena_stamine = time.time()
+        self.udario_u_blok = False
+
+        self.score = 0
+
+        self.pocetak_skoka = False
+
+        self.pocinjen_damage = False
+        self.stunned_timer_start = "kreiran eto da postoji"
+
+        self.punch_timer_start = "kreiran eto da postoji"
+        self.superman_timer_start = "kreiran eto da postoji"
+        self.aperkat_timer_start = "kreiran eto da postoji"
+        self.kick_timer_start = "kreiran eto da postoji"
+        self.windmill_timer_start = "kreiran eto da postoji"
+        self.opcenito_attack_timer_start = "kreiran eto da postoji"
+
+        self.pocetak_skok_animacije = False
+        self.hodanje_animacija = False
+        self.crouch_hodanje_animacija = False
+        self.pocetak_airkick_animacija = False
+        self.airkick_animacija = False
+        self.pocetak_airpunch_animacija = False
+        self.airpunch_animacija = False
+        self.pocetak_punch_animacija = False
+        self.punch_animacija = False
+        self.pocetak_kick_animacija = False
+        self.kick_animacija = False
+        self.pocetak_crouchpunch_animacija = False
+        self.crouchpunch_animacija = False
+
+        self.airkick = []
+        self.promjena_airkick = 0
+        self.airpunch = []
+        self.promjena_airpunch = 0
+        self.crouchpunch = []
+        self.promjena_crouch_punch = 0
+        self.crouchwalk = []
+        self.promjena_crouchwalk = 0
+        self.idle = []
+        self.promjena_idle = 0
+        self.jump = []
+        self.promjena_jump = 0
+        self.kick = []
+        self.promjena_kick = 0
+        self.punch = []
+        self.promjena_punch = 0
+        self.walk = []
+        self.promjena_walk = 0
+
+        self.promjena_stamine = time.time()
+
+        if self.pozicija_borca == "lijevo":
+            for image in range(3):
+                self.airkick.append(pygame.image.load(os.path.join("Assets", "brozli_animacije", "airpunch", f"BROZLIskokUdaracKick{image + 1}.png")).convert_alpha())
+            for image in range(3):
+                self.airpunch.append(pygame.image.load(os.path.join("Assets", "brozli_animacije", "airpunch", f"BROZLIskokUdaracKick{image + 1}.png")).convert_alpha())
+            for image in range(2):
+                self.crouchwalk.append(pygame.image.load(os.path.join("Assets", "brozli_animacije", "crouchwalk", f"BROZLIcrouchwalk{image + 1}.png")).convert_alpha())
+            for image in range(2):
+                self.idle.append(pygame.image.load(os.path.join("Assets", "brozli_animacije", "idle", f"BROZLIstojeća{image + 1}.png")).convert_alpha())
+            for image in range(3):
+                self.kick.append(pygame.image.load(os.path.join("Assets", "brozli_animacije", "kick", f"BROZLIkick{image + 1}.png")).convert_alpha())
+            for image in range(3):
+                self.punch.append(pygame.image.load(os.path.join("Assets", "brozli_animacije", "punch", f"BROZLIpunch{image + 1}.png")).convert_alpha())
+            for image in range(2):
+                self.walk.append(pygame.image.load(os.path.join("Assets", "brozli_animacije", "walk", f"BROZLIkretanje{image + 1}.png")).convert_alpha())
+            self.stun = pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIstunned1.png")).convert_alpha()
+            self.jump = pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIskok.png")).convert_alpha()
+            self.block = pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIblock.png")).convert_alpha()
+            self.crouch = pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIcrouch.png")).convert_alpha()
+            self.fatality = pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIfatality.png")).convert_alpha()
+        elif self.pozicija_borca == "desno":
+            for image in range(3):
+                self.airkick.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "airpunch", f"BROZLIskokUdaracKick{image + 1}.png")).convert_alpha()))
+            for image in range(3):
+                self.airpunch.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "airpunch", f"BROZLIskokUdaracKick{image + 1}.png")).convert_alpha()))
+            for image in range(2):
+                self.crouchwalk.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "crouchwalk", f"BROZLIcrouchwalk{image + 1}.png")).convert_alpha()))
+            for image in range(2):
+                self.idle.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "idle", f"BROZLIstojeća{image + 1}.png")).convert_alpha()))
+            for image in range(3):
+                self.kick.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "kick", f"BROZLIkick{image + 1}.png")).convert_alpha()))
+            for image in range(3):
+                self.punch.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "punch", f"BROZLIpunch{image + 1}.png")).convert_alpha()))
+            for image in range(2):
+                self.walk.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "walk", f"BROZLIkretanje{image + 1}.png")).convert_alpha()))
+            self.stun = pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIstunned1.png")).convert_alpha())
+            self.jump = pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIskok.png")).convert_alpha())
+            self.block = pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIblock.png")).convert_alpha())
+            self.crouch = pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIcrouch.png")).convert_alpha())
+            self.fatality = pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIfatality.png")).convert_alpha())
+
+    def idleRectangles(self):
+        self.rectangles.empty()
+        if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 107, self.baseRect.topleft[1] + 21, 105, 119)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 65, self.baseRect.topleft[1] + 122, 159, 152)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 188, self.baseRect.topleft[1] + 138, 182, 90)
+            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 8, self.baseRect.topleft[1] + 162, 105, 105)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 16, self.baseRect.topleft[1] + 296, 357, 297)
+        else:
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] -212, self.baseRect.topleft[1] + 21, 105, 119)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 224, self.baseRect.topleft[1] + 122, 159, 152)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 370, self.baseRect.topleft[1] + 138, 182, 90)
+            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 113, self.baseRect.topleft[1] + 162, 105, 105)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 373, self.baseRect.topleft[1] + 296, 357, 297)
+        self.rectangles.add(self.headRect)
+        self.rectangles.add(self.torsoRect)
+        self.rectangles.add(self.hand1Rect)
+        self.rectangles.add(self.hand2Rect)
+        self.rectangles.add(self.legsRect)
+
+    def jumpRectangles(self):
+        self.rectangles.empty()
+        if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 164, self.baseRect.topleft[1] + 6, 96, 103)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 88, self.baseRect.topleft[1] + 25, 127, 130)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 25, self.baseRect.topleft[1] + 43, 82, 40)
+            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 8, self.baseRect.topleft[1] + 33, 103, 117)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 78, self.baseRect.topleft[1] + 128, 234, 333)
+        else:
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 260, self.baseRect.topleft[1] + 6, 96, 103)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 215, self.baseRect.topleft[1] + 25, 127, 130)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 107, self.baseRect.topleft[1] + 43, 82, 40)
+            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 111, self.baseRect.topleft[1] + 33, 103, 117)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 312, self.baseRect.topleft[1] + 128, 234, 333)
+        self.rectangles.add(self.headRect)
+        self.rectangles.add(self.torsoRect)
+        self.rectangles.add(self.hand1Rect)
+        self.rectangles.add(self.hand2Rect)
+        self.rectangles.add(self.legsRect)
+        
+
+    def crouchRectangles(self):
+        self.rectangles.empty()
+        if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 35, self.baseRect.topleft[1] + 347, 102, 89)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 74, self.baseRect.topleft[1] + 396, 140, 49)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 138, self.baseRect.topleft[1] + 334, 192, 108)
+            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 9, self.baseRect.topleft[1] + 406, 114, 179)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 38, self.baseRect.topleft[1] + 435, 195, 132)
+        else:
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 137, self.baseRect.topleft[1] + 347, 102, 89)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 214, self.baseRect.topleft[1] + 396, 140, 49)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 330, self.baseRect.topleft[1] + 334, 192, 108)
+            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 123, self.baseRect.topleft[1] + 406, 114, 179)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 233, self.baseRect.topleft[1] + 435, 195, 132)
+        self.rectangles.add(self.headRect)
+        self.rectangles.add(self.torsoRect)
+        self.rectangles.add(self.hand1Rect)
+        self.rectangles.add(self.hand2Rect)
+        self.rectangles.add(self.legsRect)
+
+
+    def blockRectangles(self):
+        self.rectangles.empty()
+        if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 91, self.baseRect.topleft[1] + 34, 91, 90)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 64, self.baseRect.topleft[1] + 116, 98, 89)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 88, self.baseRect.topleft[1] + 37, 165, 97)
+            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 42, self.baseRect.topleft[1] + 84, 164, 75)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 42, self.baseRect.topleft[1] + 196, 211, 196)
+            self.blockRect = SpriteRectangle("Light blue", self.baseRect.topleft[0] + 37, self.baseRect.topleft[1] + 26, 215, 189)
+        else:
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 173, self.baseRect.topleft[1] + 34, 91, 90)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 162, self.baseRect.topleft[1] + 116, 98, 89)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 253, self.baseRect.topleft[1] + 37, 165, 97)
+            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 206, self.baseRect.topleft[1] + 84, 164, 75)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 253, self.baseRect.topleft[1] + 196, 211, 196)
+            self.blockRect = SpriteRectangle("Light blue", self.baseRect.topleft[0] - 252, self.baseRect.topleft[1] + 26, 215, 189)
+        self.rectangles.add(self.headRect)
+        self.rectangles.add(self.torsoRect)
+        self.rectangles.add(self.hand1Rect)
+        self.rectangles.add(self.hand2Rect)
+        self.rectangles.add(self.legsRect)
+        self.rectangles.add(self.blockRect)
+
+    def stunnedRectangles(self):
+        self.rectangles.empty()
+        if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 140, self.baseRect.topleft[1] + 112, 76, 95)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 60, self.baseRect.topleft[1] + 152, 109, 107)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 167, self.baseRect.topleft[1] + 160, 131, 81)
+            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 12, self.baseRect.topleft[1] + 155, 96, 216)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 51, self.baseRect.topleft[1] + 251, 232, 335)
+        else:
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 216, self.baseRect.topleft[1] + 112, 76, 95)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 109, self.baseRect.topleft[1] + 152, 109, 107)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 298, self.baseRect.topleft[1] + 160, 131, 81)
+            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 108, self.baseRect.topleft[1] + 155, 96, 216)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 283, self.baseRect.topleft[1] + 251, 232, 335)
+        self.rectangles.add(self.headRect)
+        self.rectangles.add(self.torsoRect)
+        self.rectangles.add(self.hand1Rect)
+        self.rectangles.add(self.hand2Rect)
+        self.rectangles.add(self.legsRect)
+
+    def crouchPunchRectangles(self):
+        self.rectangles.empty()
+        if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 108, self.baseRect.topleft[1] + 56, 77, 80)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 60, self.baseRect.topleft[1] + 111, 132, 163)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 54, self.baseRect.topleft[1] + 274, 153, 297)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] + 167, self.baseRect.topleft[1] + 0, 73, 230)
+        else:
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topright[0] - 185, self.baseRect.topleft[1] + 56, 77, 80)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topright[0] - 192, self.baseRect.topleft[1] + 111, 132, 163)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topright[0] - 207, self.baseRect.topleft[1] + 274, 153, 297)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topright[0] - 240, self.baseRect.topleft[1] + 0, 73, 230)
+        self.rectangles.add(self.headRect)
+        self.rectangles.add(self.torsoRect)
+        self.rectangles.add(self.legsRect)
+        self.rectangles.add(self.damageRect)
+
+    def jumpPunchRectangles(self):
+        self.rectangles.empty()
+        if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 67, self.baseRect.topleft[1] + 14, 111, 119)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 22, self.baseRect.topleft[1] + 82, 105, 145)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 108, self.baseRect.topleft[1] + 115, 161, 152)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 8, self.baseRect.topleft[1] + 200, 343, 147)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] + 254, self.baseRect.topleft[1] + 75, 160, 271)
+        else:
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 178, self.baseRect.topleft[1] + 14, 111, 119)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 127, self.baseRect.topleft[1] + 82, 105, 145)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 269, self.baseRect.topleft[1] + 115, 161, 152)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 351, self.baseRect.topleft[1] + 200, 343, 147)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] - 414, self.baseRect.topleft[1] + 75, 160, 271)
+        self.rectangles.add(self.headRect)
+        self.rectangles.add(self.torsoRect)
+        self.rectangles.add(self.hand1Rect)
+        self.rectangles.add(self.legsRect)
+        self.rectangles.add(self.damageRect)
+
+    def jumpKickRectangles(self):
+        self.rectangles.empty()
+        if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 67, self.baseRect.topleft[1] + 14, 111, 119)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 22, self.baseRect.topleft[1] + 82, 105, 145)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 108, self.baseRect.topleft[1] + 115, 161, 152)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 8, self.baseRect.topleft[1] + 200, 343, 147)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] + 254, self.baseRect.topleft[1] + 75, 160, 271)
+        else:
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 178, self.baseRect.topleft[1] + 14, 111, 119)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 127, self.baseRect.topleft[1] + 82, 105, 145)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 269, self.baseRect.topleft[1] + 115, 161, 152)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 351, self.baseRect.topleft[1] + 200, 343, 147)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] - 414, self.baseRect.topleft[1] + 75, 160, 271)
+        self.rectangles.add(self.headRect)
+        self.rectangles.add(self.torsoRect)
+        self.rectangles.add(self.hand1Rect)
+        self.rectangles.add(self.legsRect)
+        self.rectangles.add(self.damageRect)
+
+    def punchRectangles(self):
+        self.rectangles.empty()
+        if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 167, self.baseRect.topleft[1] + 47, 75, 87)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 129, self.baseRect.topleft[1] + 119, 98, 111)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 204, self.baseRect.topleft[1] + 102, 104, 60)
+            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 109, self.baseRect.topleft[1] + 116, 41, 104)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 4, self.baseRect.topleft[1] + 268, 402, 316)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] + 347, self.baseRect.topleft[1] + 100, 38, 56)
+        else:
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 242, self.baseRect.topleft[1] + 47, 75, 87)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 227, self.baseRect.topleft[1] + 119, 98, 111)
+            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 308, self.baseRect.topleft[1] + 102, 104, 60)
+            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 150, self.baseRect.topleft[1] + 116, 41, 104)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 406, self.baseRect.topleft[1] + 268, 402, 316)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] - 385, self.baseRect.topleft[1] + 100, 38, 56)
+        self.rectangles.add(self.headRect)
+        self.rectangles.add(self.torsoRect)
+        self.rectangles.add(self.hand1Rect)
+        self.rectangles.add(self.hand2Rect)
+        self.rectangles.add(self.legsRect)
+        self.rectangles.add(self.damageRect)
+
+    def kickRectangles(self):
+        self.rectangles.empty()
+        if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 8, self.baseRect.topleft[1] + 122, 82, 82)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 23, self.baseRect.topleft[1] + 204, 132, 99)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 111, self.baseRect.topleft[1] + 246, 116, 346)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] + 163, self.baseRect.topleft[1] + 58, 215, 134)
+        else:
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 90, self.baseRect.topleft[1] + 122, 82, 82)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 146, self.baseRect.topleft[1] + 204, 132, 99)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 227, self.baseRect.topleft[1] + 246, 116, 346)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] - 378, self.baseRect.topleft[1] + 58, 215, 134)
+        self.rectangles.add(self.headRect)
+        self.rectangles.add(self.torsoRect)
+        self.rectangles.add(self.legsRect)
+        self.rectangles.add(self.damageRect)
+
+
+    def postavljanjeRectangleova(self):
+        self.baseRect = pygame.Rect(self.baseRectX, self.baseRectY, 416, 590)
+        if self.varijable["defeated"] == True:
+            pass
+        elif self.varijable["stunned"] == True:
+            self.stunnedRectangles()
+        elif self.varijable["blocking"] == True:
+            self.blockRectangles()
+        elif self.varijable["kicking"] == True:
+            self.kickRectangles()
+        elif self.varijable["crouchingpunch"] == True:
+            self.crouchPunchRectangles()
+        elif self.varijable["crouching"] == True:
+            self.crouchRectangles()
+        elif self.varijable["jumpingpunch"] == True:
+            self.jumpPunchRectangles()
+        elif self.varijable["jumpingkick"] == True:
+            self.jumpKickRectangles()
+        elif self.varijable["jumping"] == True:
+            self.jumpRectangles()
+        elif self.varijable["punching"] == True:
+            self.punchRectangles()
+        else:
+            self.idleRectangles()
+
+    def animacije(self):
+        if self.varijable["defeated"] == True:
+            SCREEN.blit(self.fatality, (self.baseRectX, self.baseRectY))
+        elif self.varijable["stunned"] == True:
+            SCREEN.blit(self.stun, (self.baseRectX, self.baseRectY))
+        elif self.varijable["blocking"] == True:
+            SCREEN.blit(self.block, (self.baseRectX, self.baseRectY))
+        elif self.crouchpunch_animacija == True:
+            if self.pocetak_crouchpunch_animacija == True:
+                self.pocetak_crouchpunch_animacija = False
+                self.promjena_crouch_punch = 0
+            if self.promjena_crouch_punch >= 2:
+                self.promjena_crouch_punch = 2
+            else:
+                self.promjena_crouch_punch += 0.15
+            SCREEN.blit(self.crouchpunch[int(self.promjena_crouch_punch)], (self.baseRectX, self.baseRectY))
+        elif self.crouch_hodanje_animacija == True:
+            self.promjena_crouchwalk += 0.1
+            if self.promjena_crouchwalk > 2:
+                self.promjena_crouchwalk = 0
+            SCREEN.blit(self.crouchwalk[int(self.promjena_crouchwalk)], (self.baseRectX, self.baseRectY))
+        elif self.varijable["crouching"] == True:
+            SCREEN.blit(self.crouch, (self.baseRectX, self.baseRectY))
+        elif self.airkick_animacija == True:
+            if self.pocetak_airkick_animacija == True:
+                self.pocetak_airkick_animacija = False
+                self.promjena_airkick = 0
+            if self.promjena_airkick >= 2:
+                self.promjena_airkick = 2
+            else:
+                self.promjena_airkick += 0.115
+            SCREEN.blit(self.airkick[int(self.promjena_airkick)], (self.baseRectX, self.baseRectY))
+        elif self.airpunch_animacija == True:
+            if self.pocetak_airpunch_animacija == True:
+                self.pocetak_airpunch_animacija = False
+                self.promjena_airpunch = 0
+            if self.promjena_airpunch >= 2:
+                self.promjena_airpunch = 2
+            else:
+                self.promjena_airpunch += 0.17
+            SCREEN.blit(self.airpunch[int(self.promjena_airpunch)], (self.baseRectX, self.baseRectY))
+        elif self.varijable["jumping"] == True:
+            if self.pocetak_skok_animacije == True:
+                self.pocetak_skok_animacije = False
+                self.promjena_jump = 0
+            if self.promjena_jump >= 1:
+                self.promjena_jump = 1
+            else:
+                self.promjena_jump += 0.15
+            SCREEN.blit(self.jump[int(self.promjena_jump)], (self.baseRectX, self.baseRectY))
+        elif self.kick_animacija == True:
+            if self.pocetak_kick_animacija == True:
+                self.pocetak_kick_animacija = False
+                self.promjena_kick = 0
+            if self.promjena_kick >= 3:
+                self.promjena_kick = 3
+            else:
+                self.promjena_kick += 0.1
+            SCREEN.blit(self.kick[int(self.promjena_kick)], (self.baseRectX, self.baseRectY))
+        elif self.punch_animacija == True:
+            if self.pocetak_punch_animacija == True:
+                self.pocetak_punch_animacija = False
+                self.promjena_punch = 0
+            if self.promjena_punch >= 2:
+                self.promjena_punch = 2
+            else:
+                self.promjena_punch += 0.17
+            SCREEN.blit(self.punch[int(self.promjena_punch)], (self.baseRectX, self.baseRectY))
+        elif self.hodanje_animacija == True:
+            self.promjena_walk += 0.1
+            if self.promjena_walk > 2:
+                self.promjena_walk = 0
+            SCREEN.blit(self.walk[int(self.promjena_walk)], (self.baseRectX, self.baseRectY))
+        else:
+            self.promjena_idle += 0.1
+            if self.promjena_idle > 2:
+                self.promjena_idle = 0
+            SCREEN.blit(self.idle[int(self.promjena_idle)], (self.baseRectX, self.baseRectY))
+
+
+    def flipanje_slika(self):
+        for i in range(len(self.airkick)):
+            self.airkick[i] = flip_image_horizontally(self.airkick[i])
+        for i in range(len(self.airpunch)):
+            self.airpunch[i] = flip_image_horizontally(self.airpunch[i])
+        for i in range(len(self.crouchpunch)):
+            self.crouchpunch[i] = flip_image_horizontally(self.crouchpunch[i])   
+        for i in range(len(self.crouchwalk)):
+            self.crouchwalk[i] = flip_image_horizontally(self.crouchwalk[i])
+        for i in range(len(self.idle)):
+            self.idle[i] = flip_image_horizontally(self.idle[i])
+        for i in range(len(self.jump)):
+            self.jump[i] = flip_image_horizontally(self.jump[i])
+        for i in range(len(self.kick)):
+            self.kick[i] = flip_image_horizontally(self.kick[i])
+        for i in range(len(self.punch)):
+            self.punch[i] = flip_image_horizontally(self.punch[i])
+        for i in range(len(self.walk)):
+            self.walk[i] = flip_image_horizontally(self.walk[i])
+        self.block = flip_image_horizontally(self.block)
+        self.crouch = flip_image_horizontally(self.crouch)
+        self.fatality = flip_image_horizontally(self.fatality)
+        self.stun = flip_image_horizontally(self.stun)
+
+
 def crtanjeHealthaIImena(igrac, pozicija):
     transparent_back = pygame.Surface((400, 30))
     transparent_back.fill("Black")
@@ -628,7 +1068,7 @@ def provjeraPozicijeZaObrnuto(left, right):
 
 keybind_preset1 = {"left": pygame.K_a, "right" : pygame.K_d, "up" : pygame.K_w, "down" : pygame.K_s, "punch" : pygame.K_LSHIFT, "kick" : pygame.K_LCTRL, "block" : pygame.K_SPACE}
 keybind_preset2 = {"left": pygame.K_LEFT, "right" : pygame.K_RIGHT, "up" : pygame.K_UP, "down" : pygame.K_DOWN, "punch" : pygame.K_m, "kick" : pygame.K_b, "block" : pygame.K_n}
-keybind_preset3 = {"left": pygame.K_4, "right" : pygame.K_6, "up" : pygame.K_8, "down" : pygame.K_5, "punch" : pygame.K_p, "kick" : pygame.K_i, "block" : pygame.K_o}
+keybind_preset3 = {"left": pygame.K_KP4, "right" : pygame.K_KP6, "up" : pygame.K_KP8, "down" : pygame.K_KP5, "punch" : pygame.K_p, "kick" : pygame.K_i, "block" : pygame.K_o}
 
 def provjeraTrajanjaUdaraca(igrac):
     if igrac.varijable["punching"] == True:
@@ -1063,7 +1503,7 @@ def main():
         else:
             promjena += 0.012
         SCREEN.blit(main_background[int(promjena)], (0, 0))
-        SCREEN.blit(naslov, (0, 0))
+        SCREEN.blit(naslov, (250, 0))
         for gumb in [IGRAJ_GUMB, ACHIEVEMENTS_GUMB, IZADI_GUMB]:
             gumb.crtanjeGumba(mouse_position)
 
@@ -1418,7 +1858,7 @@ def odabir_borca1():
                         update_achievementa(IGRACI[0].profil_broj, 2)
                     run = False
                 if BORAC2_GUMB.checkForCollision(mouse_position):
-                    BORCI["igrac1"] = Andrej("prvi")
+                    BORCI["igrac1"] = Broz("prvi")
                     run = False
 
                 
@@ -1463,7 +1903,7 @@ def odabir_borca2():
                     BORCI["igrac2"] = Andrej("drugi")
                     run = False
                 if BORAC2_GUMB.checkForCollision(mouse_position):
-                    BORCI["igrac2"] = Andrej("drugi")
+                    BORCI["igrac2"] = Broz("drugi")
                     print(IGRACI[1].profil_broj)
                     run = False
 
