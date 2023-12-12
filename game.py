@@ -47,7 +47,7 @@ ne_gumb = pygame.image.load(os.path.join("Assets", "EscapeScreen", "ne.png")).co
 ne_gumb_hover = pygame.image.load(os.path.join("Assets", "EscapeScreen", "ne_hover.png")).convert_alpha()
 prozor = pygame.image.load(os.path.join("Assets", "EscapeScreen", "escape_okvir.png")).convert_alpha()
 
-
+#Slike za achievemente
 ACHV_BG = pygame.image.load(os.path.join("Assets", "Achievements", "achievement_bg.png")).convert_alpha()
 ACHV_NASLOV = pygame.image.load(os.path.join("Assets", "Achievements", "achievement_naslov.png")).convert_alpha()
 A_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "andrej_achvmnt.png")).convert_alpha()
