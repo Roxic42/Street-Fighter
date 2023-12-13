@@ -1693,15 +1693,20 @@ def postignuca_nema_profila():
 def draw_buttons():
     global SVI_IGRACI
     buttons = []
-    button_height = 80
-    button_spacing = 10
-    start_position = (WIDTH/2, 200)
+    buttons = []
+    button_width = 360
+    button_height = 120
+    button_spacing = 50
+    x_offset_increase = 300
+    start_position = (900, 200)
 
-    for igrac in SVI_IGRACI:
-        button = Button(igrac.ime, 50, "#E1E193", (200, button_height), "#0A0A09", "#064719", start_position)
+    for i, igrac in enumerate(SVI_IGRACI):
+        x_offset = -button_width / 2 - button_spacing / 2 - x_offset_increase if i % 2 == 0 else button_spacing / 2 + x_offset_increase
+        x = start_position[0] + x_offset
+        y = start_position[1] + (i // 2) * (button_height + button_spacing)
+        button = Button(igrac.ime, 70, "#E1E193", (button_width, button_height), "#0A0A09", "#064719", (x, y))
         button.dodaj(igrac)
         buttons.append(button)
-        start_position = (start_position[0], start_position[1] + button_height + button_spacing)
 
     return buttons
 
@@ -2137,28 +2142,36 @@ def keybind_screen1():
         PRESET3_CLICK = SlikeGumbi(combat_selekt, combat_selekt, 1080, 750)
 
         DALJE_GUMB = SlikeGumbi(dalje, dalje_hover, 710, 650)
-        DALJE_GUMB_NEMOZE = SlikeGumbi(dalje_invalid, dalje_hover_invalid, 710, 650)
+        DALJE_GUMB_NEMOZE = SlikeGumbi(dalje_invalid, dalje_invalid, 710, 650)
 
         if odabrano == False:
             DALJE_GUMB_NEMOZE.crtanjeGumba(mouse_position)
         else:
             DALJE_GUMB.crtanjeGumba(mouse_position)
+
         if preset1 == True:
             PRESET1_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(old_school_info, (0,0))
         else:
             PRESET1.crtanjeGumba(mouse_position)
+            if PRESET1.provjeraSudara(mouse_position):
+                SCREEN.blit(old_school_info, (0,0))
+
         if preset2 == True:
             PRESET2_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(builder_info, (0,0))
         else:
             PRESET2.crtanjeGumba(mouse_position)
+            if PRESET2.provjeraSudara(mouse_position):
+                SCREEN.blit(builder_info, (0,0))
+
         if preset3 == True:
             PRESET3_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(combat_info, (0,0))
         else:
             PRESET3.crtanjeGumba(mouse_position)
-
+            if PRESET3.provjeraSudara(mouse_position):
+                SCREEN.blit(combat_info, (0,0))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -2239,7 +2252,7 @@ def keybind_screen2():
         PRESET3_ELIM = SlikeGumbi(combat_elim, combat_elim, 1080, 750)
 
         DALJE_GUMB = SlikeGumbi(dalje, dalje_hover, 710, 650)
-        DALJE_GUMB_NEMOZE = SlikeGumbi(dalje_invalid, dalje_hover_invalid, 710, 650)
+        DALJE_GUMB_NEMOZE = SlikeGumbi(dalje_invalid, dalje_invalid, 710, 650)
 
         if odabrano == False:
             DALJE_GUMB_NEMOZE.crtanjeGumba(mouse_position)
@@ -2249,32 +2262,32 @@ def keybind_screen2():
         if preset1 == True:
             PRESET1_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(old_school_info, (0,0))
-        else:
-            PRESET1.crtanjeGumba(mouse_position)
-        if otprije1 == True:
+        elif otprije1 == True:
             PRESET1_ELIM.crtanjeGumba(mouse_position)
         else:
             PRESET1.crtanjeGumba(mouse_position)
+            if PRESET1.provjeraSudara(mouse_position):
+                SCREEN.blit(old_school_info, (0,0))
 
         if preset2 == True:
             PRESET2_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(builder_info, (0,0))
-        else:
-            PRESET2.crtanjeGumba(mouse_position)
-        if otprije2 == True:
+        elif otprije2 == True:
             PRESET2_ELIM.crtanjeGumba(mouse_position)
         else:
             PRESET2.crtanjeGumba(mouse_position)
+            if PRESET2.provjeraSudara(mouse_position):
+                SCREEN.blit(builder_info, (0,0))
 
         if preset3 == True:
             PRESET3_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(combat_info, (0,0))
-        else:
-            PRESET3.crtanjeGumba(mouse_position)
-        if otprije3 == True:
+        elif otprije3 == True:
             PRESET3_ELIM.crtanjeGumba(mouse_position)
         else:
             PRESET3.crtanjeGumba(mouse_position)
+            if PRESET3.provjeraSudara(mouse_position):
+                SCREEN.blit(combat_info, (0,0))
 
 
         for event in pygame.event.get():
