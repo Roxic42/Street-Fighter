@@ -68,6 +68,34 @@ SUPER_OPIS = pygame.image.load(os.path.join("Assets", "Achievements", "superhero
 UNKNOWN_ACHV = pygame.image.load(os.path.join("Assets", "Achievements", "unkown_achvmnt.png")).convert_alpha()
 UNKNOWN_HOVER = pygame.image.load(os.path.join("Assets", "Achievements", "unkown_achvmnt_hover.png")).convert_alpha()
 ZAKLJUCANO = pygame.image.load(os.path.join("Assets", "Achievements", "zakljucano.png")).convert_alpha()
+NEPOSTOJI_PROFIL = pygame.image.load(os.path.join("Assets", "Achievements", "nepostoji_profil.png")).convert_alpha()
+NEP_IZADJI = pygame.image.load(os.path.join("Assets", "Achievements", "nepostojeci_izadi_gumb.png")).convert_alpha()
+NEP_IZADJI_HOVER = pygame.image.load(os.path.join("Assets", "Achievements", "nepostojeci_izadi_gumb_hover.png")).convert_alpha()
+
+#Slike za odabir preseta
+preset1_bg = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "background_preset1.png")).convert_alpha()
+preset2_bg = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "background_preset2.png")).convert_alpha()
+builder_elim = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "builder_pro_eliminiran.png")).convert_alpha()
+builder_hover = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "builder_pro_hover.png")).convert_alpha()
+builder_gumb = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "builder_pro.png")).convert_alpha()
+builder_selekt = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "builder_pro_selektiran.png")).convert_alpha()
+builder_info = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "builder_pro_info.png")).convert_alpha()
+combat_elim = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "combat_pro_eliminiran.png")).convert_alpha()
+combat_hover = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "combat_pro_hover.png")).convert_alpha()
+combat_gumb = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "combat_pro.png")).convert_alpha()
+combat_selekt = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "combat_pro_selektiran.png")).convert_alpha()
+combat_info = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "combat_pro_info.png")).convert_alpha()
+old_school_elim = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "old_school_eliminiran.png")).convert_alpha()
+old_school_hover = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "old_school_hover.png")).convert_alpha()
+old_school_gumb = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "old_school.png")).convert_alpha()
+old_school_selekt = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "old_school_selektiran.png")).convert_alpha()
+old_school_info = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "old_school_info.png")).convert_alpha()
+savjet = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "savjet.png")).convert_alpha()
+dalje_hover = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "gumb_dalje_hover.png")).convert_alpha()
+dalje_hover_invalid = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "gumb_dalje_hover_invalid.png")).convert_alpha()
+dalje_invalid = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "gumb_dalje_invalid.png")).convert_alpha()
+dalje = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "gumb_dalje.png")).convert_alpha()
+
 
 class SpriteRectangle(pygame.sprite.Sprite):
     def __init__(self, color, x, y, width, height):
@@ -1398,36 +1426,64 @@ def read_data():
 
     return IGRACI
 
+SVI_IGRACI = []
+def read_data_sve():
+    global SVI_IGRACI
+
+    with open("Podzemne borbe\profili.txt", 'r') as names_file:
+        imena = names_file.read().splitlines()
+
+    with open("Podzemne borbe\score.txt", 'r') as stats_file:
+        score_lines = stats_file.read().splitlines()
+
+    with open("Podzemne borbe\Achievements.txt", 'r', encoding="utf-8") as achievements_file:
+        achievements_line = achievements_file.readline().strip().split(',')
+
+    for i, (ime, score_line) in enumerate(zip(imena, score_lines), start=1):
+        if ime != "Napravi profil":
+            ws, ls = map(int, score_line.split(','))
+            achievements = achievements_line
+            igrac = Player(ime, ws, ls, achievements, i)
+            SVI_IGRACI.append(igrac)
+
+    return SVI_IGRACI
+
 def poredak():
     global IGRACI, selektirani_profili
     if selektirani_profili[0] == IGRACI[1].ime:
         IGRACI[0], IGRACI[1] = IGRACI[1], IGRACI[0]
     return IGRACI
 
-def update_achievementa(broj_achievementa):
+
+def update_achievementa(igrac_broj, broj_achievementa):
     with open("Podzemne borbe\Achievements.txt", 'r', encoding="utf-8") as achievements_file:
         lines = achievements_file.read().splitlines()
 
-    if lines:
-        achievements_line = list(lines[0].split(','))
+    line_index = igrac_broj - 1
+
+    if 0 <= line_index < len(lines):
+        achievements_line = list(lines[line_index].split(','))
         achievements_line[broj_achievementa - 1] = "da"
-        lines[0] = ",".join(achievements_line)
+        lines[line_index] = ",".join(achievements_line)
 
         with open("Podzemne borbe\Achievements.txt", 'wt', encoding="utf-8") as achievements_file:
             achievements_file.write("\n".join(lines))
 
 def zadnji_achievement():
-    with open("Podzemne borbe\Achievements.txt", 'r', encoding="utf-8") as achievements_file:
-        lines = achievements_file.read().splitlines()
+    for igrac_broj in range(1,9):
+        with open("Podzemne borbe\Achievements.txt", 'r', encoding="utf-8") as achievements_file:
+            lines = achievements_file.read().splitlines()
 
-    if lines:
-        achievements_line = list(lines[0].split(','))
-        if all(achievement == "da" for achievement in achievements_line[:5]):
-            achievements_line[-1] = "da"
-            lines[0] = ",".join(achievements_line)
-    
-    with open("Podzemne borbe\Achievements.txt", 'wt', encoding="utf-8") as achievements_file:
-            achievements_file.write("\n".join(lines))
+        line_index = igrac_broj - 1
+
+        if 0 <= line_index < len(lines):
+            achievements_line = list(lines[line_index].split(','))
+            if all(achievement == "da" for achievement in achievements_line[:5]):
+                achievements_line[-1] = "da"
+                lines[line_index] = ",".join(achievements_line)
+
+        with open("Podzemne borbe\Achievements.txt", 'wt', encoding="utf-8") as achievements_file:
+                achievements_file.write("\n".join(lines))
     
 def update_score(igrac_broj, wins, losses):
     with open("Podzemne borbe\score.txt", 'r') as score_file:
@@ -1455,6 +1511,10 @@ class Button:
         self.font = pygame.font.Font(None, text_size)
         self.text_surface = self.font.render(text_input, False, text_color)
         self.text_rectangle = self.text_surface.get_rect(center = self.rectangle.center)
+        self.player_number = 0
+    
+    def dodaj(self, IGRAC):
+        self.player_number = IGRAC.profil_broj
 
     def update(self, screen):
         pygame.draw.rect(screen, self.rectangle_color, self.rectangle)
@@ -1502,7 +1562,7 @@ def escape_screen():
 
 #Glavna funkcija koja se počinje vrtjeti čim se program starta i hijerarhijski je najviša
 def main():
-    global selektirani_profili, IGRACI, PLAYERI_IMENA, PLAYERI_SELEKTIRANI
+    global selektirani_profili, IGRACI, PLAYERI_IMENA, PLAYERI_SELEKTIRANI, SVI_IGRACI
     IGRAJ_GUMB = SlikeGumbi(igraj_gumb, igraj_gumb_hover, 200, 293)
     ACHIEVEMENTS_GUMB = SlikeGumbi(postignuca_gumb, postignuca_gumb_hover, 200, 483)
     IZADI_GUMB = SlikeGumbi(izadi_gumb, izadi_gumb_hover, 200, 673)
@@ -1513,6 +1573,7 @@ def main():
         PLAYERI_SELEKTIRANI.clear()
         PLAYERI_IMENA.clear()
         IGRACI.clear()
+        SVI_IGRACI.clear()
 
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
@@ -1555,6 +1616,10 @@ def main():
                         break
                     winscreen()
                 if ACHIEVEMENTS_GUMB.provjeraSudara(mouse_position):
+                    if postignuca_nema_profila():
+                        break
+                    if prije_postignuca():
+                        break
                     if postignuca():
                         break
                 if IZADI_GUMB.provjeraSudara(mouse_position):
@@ -1562,73 +1627,94 @@ def main():
                     sys.exit()
         pygame.display.update()
         clock.tick(FPS)
-    
-def crtajAchievemente(mouse_pos):
+
+def crtajAchievemente(mouse_pos, player_number):
     with open("Podzemne borbe\Achievements.txt", 'r', encoding="utf-8") as achievements_file:
         achievements_lines = achievements_file.read().splitlines()
 
-    if achievements_lines:
-        achievements = achievements_lines[0].split(',')
+    if achievements_lines and player_number - 1 < len(achievements_lines):
+        achievements = achievements_lines[player_number - 1].split(',')
 
-        if achievements[0] == "da":
-            SCREEN.blit(SEVKE_ACHV, (25, 170))
-            SCREEN.blit(SEVKE_OPIS, (250, 170))
-        else:
-            UNKNOWN_ACHV_GUMB = SlikeGumbi(UNKNOWN_ACHV, UNKNOWN_HOVER, 25, 170)
-            UNKNOWN_ACHV_GUMB.crtanjeGumba(mouse_pos)
-            SCREEN.blit(ZAKLJUCANO, (250, 170))
+        achievements_info = [{"ikona": SEVKE_ACHV, "opis": SEVKE_OPIS},{"ikona": A_ACHV, "opis": A_OPIS},{"ikona": B_ACHV, "opis": B_OPIS},{"ikona": ONEHP_ACHV, "opis": ONEHP_OPIS},{"ikona": SUPER_ACHV, "opis": SUPER_OPIS},{"ikona": COLLEC_ACHV, "opis": COLLEC_OPIS}]
 
-        if achievements[1] == "da":
-            SCREEN.blit(A_ACHV, (25, 170+230))
-            SCREEN.blit(A_OPIS, (250, 170+230))
-        else:
-            UNKNOWN_ACHV_GUMB = SlikeGumbi(UNKNOWN_ACHV, UNKNOWN_HOVER, 25, 170+230)
-            UNKNOWN_ACHV_GUMB.crtanjeGumba(mouse_pos)
-            SCREEN.blit(ZAKLJUCANO, (250, 170+230))
+        for i, achievement in enumerate(achievements_info):
+            x = 25 if i % 2 == 0 else 850
+            y = 170 + (i // 2) * 230
 
-        if achievements[2] == "da":
-            SCREEN.blit(B_ACHV, (850, 170+230))
-            SCREEN.blit(B_OPIS, (1075, 170+230))
-        else:
-            UNKNOWN_ACHV_GUMB = SlikeGumbi(UNKNOWN_ACHV, UNKNOWN_HOVER, 850, 170+230)
-            UNKNOWN_ACHV_GUMB.crtanjeGumba(mouse_pos)
-            SCREEN.blit(ZAKLJUCANO, (1075, 170+230))
+            if achievements[i] == "da":
+                SCREEN.blit(achievement["ikona"], (x, y))
+                SCREEN.blit(achievement["opis"], (x + 225, y))
+            else:
+                unknown_achv_gumb = SlikeGumbi(UNKNOWN_ACHV, UNKNOWN_HOVER, x, y)
+                unknown_achv_gumb.crtanjeGumba(mouse_pos)
+                SCREEN.blit(ZAKLJUCANO, (x + 225, y))
 
-        if achievements[3] == "da":
-            SCREEN.blit(ONEHP_ACHV, (25, 170+230*2))
-            SCREEN.blit(ONEHP_OPIS, (250, 170+230*2))
-        else:
-            UNKNOWN_ACHV_GUMB = SlikeGumbi(UNKNOWN_ACHV, UNKNOWN_HOVER, 25, 170+230*2)
-            UNKNOWN_ACHV_GUMB.crtanjeGumba(mouse_pos)
-            SCREEN.blit(ZAKLJUCANO, (250, 170+230*2))
+def imali():
+    global nema_profila, ima_profila, SVI_IGRACI
+    read_data_sve()
+    ima_profila = False
+    nema_profila = False
+    if len(SVI_IGRACI) == 0:
+        nema_profila = True
+    else:
+        ima_profila = True
+    return nema_profila, ima_profila
 
-        if achievements[4] == "da":
-            SCREEN.blit(SUPER_ACHV, (850, 170+230*2))
-            SCREEN.blit(SUPER_OPIS, (1075, 170+230*2))
-        else:
-            UNKNOWN_ACHV_GUMB = SlikeGumbi(UNKNOWN_ACHV, UNKNOWN_HOVER, 850, 170+230*2)
-            UNKNOWN_ACHV_GUMB.crtanjeGumba(mouse_pos)
-            SCREEN.blit(ZAKLJUCANO, (1075, 170+230*2))
-
-        if achievements[5] == "da":
-            SCREEN.blit(COLLEC_ACHV, (850, 170))
-            SCREEN.blit(COLLEC_OPIS, (1075, 170))
-        else:
-            UNKNOWN_ACHV_GUMB = SlikeGumbi(UNKNOWN_ACHV, UNKNOWN_HOVER, 850, 170)
-            UNKNOWN_ACHV_GUMB.crtanjeGumba(mouse_pos)
-            SCREEN.blit(ZAKLJUCANO, (1075, 170))
-
-
-def postignuca():
-    run = True
-    BACK_GUMBIC = SlikeGumbi(BACK_GUMB, BACK_GUMB_HOVER, 10, 10)
-    while run == True:
+def postignuca_nema_profila():
+    global nema_profila, SVI_IGRACI
+    SVI_IGRACI.clear()
+    imali()
+    NEPOSTOJECI_GUMB = SlikeGumbi(NEP_IZADJI, NEP_IZADJI_HOVER, 625, 550)
+    while nema_profila == True:
         mouse_position = pygame.mouse.get_pos()
         SCREEN.fill("White")
         SCREEN.blit(ACHV_BG, (0,0))
-        SCREEN.blit(ACHV_NASLOV, (WIDTH/4, 10))
+        SCREEN.blit(NEPOSTOJI_PROFIL, (0,0))
+        NEPOSTOJECI_GUMB.crtanjeGumba(mouse_position)
 
-        crtajAchievemente(mouse_position)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if escape_screen():
+                        return True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if NEPOSTOJECI_GUMB.provjeraSudara(mouse_position):
+                    nema_profila = False
+                    
+        pygame.display.update()
+        clock.tick(FPS)
+
+def draw_buttons():
+    global SVI_IGRACI
+    buttons = []
+    button_height = 120
+    button_spacing = 10
+    start_position = (WIDTH/2, 200)
+
+    for igrac in SVI_IGRACI:
+        button = Button(igrac.ime, 36, "White", (200, button_height), "Black", "Green", start_position)
+        button.dodaj(igrac)
+        buttons.append(button)
+        start_position = (start_position[0], start_position[1] + button_height + button_spacing)
+
+    return buttons
+
+def prije_postignuca():
+    global ima_profila, SVI_IGRACI
+    SVI_IGRACI.clear()
+    imali()
+    BACK_GUMBIC = SlikeGumbi(BACK_GUMB, BACK_GUMB_HOVER, 10, 10)
+    gumbici = draw_buttons()
+    while ima_profila == True:
+        mouse_position = pygame.mouse.get_pos()
+        SCREEN.fill("White")
+        SCREEN.blit(ACHV_BG, (0,0))
+
+        for gumb in gumbici:
+            gumb.update(SCREEN)
 
         BACK_GUMBIC.crtanjeGumba(mouse_position)
 
@@ -1640,10 +1726,31 @@ def postignuca():
                 if event.key == pygame.K_ESCAPE:
                     if escape_screen():
                         return True
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if BACK_GUMBIC.provjeraSudara(mouse_position):
-                    run = False
-                    
+
+        pygame.display.update()
+        clock.tick(FPS)
+
+def postignuca():
+    global ima_profila, SVI_IGRACI
+    BACK_GUMBIC = SlikeGumbi(BACK_GUMB, BACK_GUMB_HOVER, 10, 10)
+    while ima_profila == True:
+        mouse_position = pygame.mouse.get_pos()
+        SCREEN.fill("White")
+        SCREEN.blit(ACHV_BG, (0,0))
+        SCREEN.blit(ACHV_NASLOV, (WIDTH/4, 10))
+
+
+        BACK_GUMBIC.crtanjeGumba(mouse_position)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if escape_screen():
+                        return True
+
         pygame.display.update()
         clock.tick(FPS)
 
@@ -1763,7 +1870,6 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
                                     profili[z] = PLAYERI_IMENA.get(f"player{z+1}") + "\n"
                             with open("Podzemne borbe\profili.txt","wt",encoding="utf-8",) as datoteka:
                                 datoteka.writelines(profili)
-                                update_achievementa(1)
                             with open("Podzemne borbe\score.txt","wt",encoding="utf-8",) as datoteka:
                                 datoteka.writelines(score)  
                             imenovanje_profila_bool = False
@@ -1902,6 +2008,8 @@ def odabir_borca1():
     naslov_rectangle = naslov_surface.get_rect(topleft = (50, 50))
     read_data()
     poredak()
+    update_achievementa(IGRACI[0].profil_broj, 1)
+    update_achievementa(IGRACI[1].profil_broj, 1)
     print(IGRACI)
     print(f"{IGRACI[0].ime}, {IGRACI[0].profil_broj}")
     print(f"{IGRACI[1].ime}, {IGRACI[1].profil_broj}")
@@ -1935,11 +2043,11 @@ def odabir_borca1():
                     return True
                 if BORAC1_GUMB.checkForCollision(mouse_position):
                     BORCI["igrac1"] = Andrej("prvi")
-                    update_achievementa(2)
+                    update_achievementa(IGRACI[0].profil_broj, 2)
                     run = False
                 if BORAC2_GUMB.checkForCollision(mouse_position):
                     BORCI["igrac1"] = Broz("prvi")
-                    update_achievementa(3)
+                    update_achievementa(IGRACI[0].profil_broj, 3)
                     run = False
 
                 
@@ -1982,44 +2090,70 @@ def odabir_borca2():
                     return True
                 if BORAC1_GUMB.checkForCollision(mouse_position):
                     BORCI["igrac2"] = Andrej("drugi")
-                    update_achievementa(2)
+                    update_achievementa(IGRACI[1].profil_broj, 2)
                     run = False
                 if BORAC2_GUMB.checkForCollision(mouse_position):
                     BORCI["igrac2"] = Andrej("drugi")
-                    update_achievementa(3)
+                    update_achievementa(IGRACI[1].profil_broj, 3)
                     run = False
 
        
         pygame.display.update()
         clock.tick(FPS)
 
-preset1 = False
-preset2 = False
-preset3 = False
-odabrano = False
 def keybind_screen1():
-    global selektirani_profili, odabrano, preset1, preset2, preset3
+    global selektirani_profili, odabrano, preset1, preset2, preset3, otprije1, otprije2, otprije3
     global BORCI
     odabrano = False
+    preset1 = False
+    preset2 = False
+    preset3 = False
+    otprije1 = False
+    otprije2  = False
+    otprije3 = False
     naslov_font = pygame.font.Font(None, 100)
-    naslov_surface = naslov_font.render(f"{selektirani_profili[0]}, odaberi svoje kontrole ", False, "White")
+    naslov_surface = naslov_font.render(f"{selektirani_profili[0]}, odaberi svoje kontrole ", False, "Black")
     naslov_rectangle = naslov_surface.get_rect(topleft = (10, 10))
     run = True
     while run == True:
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
+        SCREEN.blit(preset1_bg, (0,0))
         SCREEN.blit(naslov_surface, naslov_rectangle)
-        PRESET1 = Button("Old school", 70, "White", (320, 120), "Grey", "Green", (WIDTH/5, 790))
-        PRESET2 = Button("Builder pro", 70, "White", (320, 120), "Grey", "Green", (WIDTH/2, 790))
-        PRESET3 = Button("Combat pro", 70, "White", (320, 120), "Grey", "Green", (4*WIDTH/5, 790))
-        DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Green", (WIDTH/2, 650))
-        for gumb in [PRESET1, PRESET2, PRESET3, DALJE_GUMB]:
-            if gumb.checkForCollision(mouse_position):
-                if not odabrano:
-                    if gumb.text_input == "Dalje":
-                        gumb = Button("Dalje", 35, "White", (120, 60), "Grey", "Red", (WIDTH/2, 650))
-                gumb.changeButtonColor()
-            gumb.update(SCREEN)
+        SCREEN.blit(savjet, (0,0))
+
+        PRESET1 = SlikeGumbi(old_school_gumb, old_school_hover, 80, 750)
+        PRESET1_CLICK = SlikeGumbi(old_school_selekt, old_school_selekt, 80, 750)
+
+        PRESET2 = SlikeGumbi(builder_gumb, builder_hover, 580, 750)
+        PRESET2_CLICK = SlikeGumbi(builder_selekt, builder_selekt, 580, 750)
+
+        PRESET3 = SlikeGumbi(combat_gumb, combat_hover, 1080, 750)
+        PRESET3_CLICK = SlikeGumbi(combat_selekt, combat_selekt, 1080, 750)
+
+        DALJE_GUMB = SlikeGumbi(dalje, dalje_hover, 710, 650)
+        DALJE_GUMB_NEMOZE = SlikeGumbi(dalje_invalid, dalje_hover_invalid, 710, 650)
+
+        if odabrano == False:
+            DALJE_GUMB_NEMOZE.crtanjeGumba(mouse_position)
+        else:
+            DALJE_GUMB.crtanjeGumba(mouse_position)
+        if preset1 == True:
+            PRESET1_CLICK.crtanjeGumba(mouse_position)
+            SCREEN.blit(old_school_info, (0,0))
+        else:
+            PRESET1.crtanjeGumba(mouse_position)
+        if preset2 == True:
+            PRESET2_CLICK.crtanjeGumba(mouse_position)
+            SCREEN.blit(builder_info, (0,0))
+        else:
+            PRESET2.crtanjeGumba(mouse_position)
+        if preset3 == True:
+            PRESET3_CLICK.crtanjeGumba(mouse_position)
+            SCREEN.blit(combat_info, (0,0))
+        else:
+            PRESET3.crtanjeGumba(mouse_position)
+
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -2033,57 +2167,103 @@ def keybind_screen1():
                 if odabrano == False:
                     pass
                 else:
-                    if DALJE_GUMB.checkForCollision(mouse_position):
+                    if DALJE_GUMB.provjeraSudara(mouse_position):
                         run = False
 
-                if PRESET1.checkForCollision(mouse_position):
+                if PRESET1.provjeraSudara(mouse_position):
                     preset1 = True
                     preset2 = False
                     preset3 = False
                     odabrano = True
+                    otprije1 = True
+                    otprije2 = False
+                    otprije3 = False
                     BORCI["igrac1"].dictionary = {key: keybind_preset1[key] for key in BORCI["igrac1"].dictionary}
 
-                if PRESET2.checkForCollision(mouse_position):
+                if PRESET2.provjeraSudara(mouse_position):
                     preset1 = False
                     preset3 = False
                     preset2 = True
                     odabrano = True
+                    otprije1 = False
+                    otprije2 = True
+                    otprije3 = False
                     BORCI["igrac1"].dictionary = {key: keybind_preset2[key] for key in BORCI["igrac1"].dictionary}
 
-                if PRESET3.checkForCollision(mouse_position):
+                if PRESET3.provjeraSudara(mouse_position):
                     preset3 = True
                     preset1 = False
                     preset2 = False
                     odabrano = True
+                    otprije1 = False
+                    otprije2 = False
+                    otprije3 = True
                     BORCI["igrac1"].dictionary = {key: keybind_preset3[key] for key in BORCI["igrac1"].dictionary}
-                    
 
         pygame.display.update()
         clock.tick(FPS)
 
 def keybind_screen2():
-    global selektirani_profili, odabrano, preset1, preset2, preset3
+    global selektirani_profili, odabrano, preset1, preset2, preset3, otprije1, otprije2, otprije3
     global BORCI
     odabrano = False
+    preset1 = False
+    preset2 = False
+    preset3 = False
     naslov_font = pygame.font.Font(None, 100)
-    naslov_surface = naslov_font.render(f"{selektirani_profili[1]}, odaberi svoje kontrole ", False, "White")
+    naslov_surface = naslov_font.render(f"{selektirani_profili[1]}, odaberi svoje kontrole ", False, "Black")
     naslov_rectangle = naslov_surface.get_rect(topleft = (10, 10))
     run = True
     while run == True:
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
+        SCREEN.blit(preset2_bg, (0,0))
         SCREEN.blit(naslov_surface, naslov_rectangle)
-        PRESET1 = Button("Old school", 70, "White", (320, 120), "Grey", "Green", (WIDTH/5, 790))
-        PRESET2 = Button("Builder pro", 70, "White", (320, 120), "Grey", "Green", (WIDTH/2, 790))
-        PRESET3 = Button("Combat pro", 70, "White", (320, 120), "Grey", "Green", (4*WIDTH/5, 790))
-        DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Green", (WIDTH/2, 650))
-        for gumb in [PRESET1, PRESET2, PRESET3, DALJE_GUMB]:
-            if gumb.checkForCollision(mouse_position):
-                if not odabrano:
-                    if gumb.text_input == "Dalje":
-                        gumb = Button("Dalje", 35, "White", (120, 60), "Grey", "Red", (WIDTH/2, 650))
-                gumb.changeButtonColor()
-            gumb.update(SCREEN)
+        SCREEN.blit(savjet, (0,0))
+
+        PRESET1 = SlikeGumbi(old_school_gumb, old_school_hover, 80, 750)
+        PRESET1_CLICK = SlikeGumbi(old_school_selekt, old_school_selekt, 80, 750)
+        PRESET1_ELIM = SlikeGumbi(old_school_elim, old_school_elim, 80, 750)
+
+        PRESET2 = SlikeGumbi(builder_gumb, builder_hover, 580, 750)
+        PRESET2_CLICK = SlikeGumbi(builder_selekt, builder_selekt, 580, 750)
+        PRESET2_ELIM = SlikeGumbi(builder_elim, builder_elim, 80, 750)
+        
+        PRESET3 = SlikeGumbi(combat_gumb, combat_hover, 1080, 750)
+        PRESET3_CLICK = SlikeGumbi(combat_selekt, combat_selekt, 1080, 750)
+        PRESET3_ELIM = SlikeGumbi(combat_elim, combat_elim, 80, 750)
+
+        DALJE_GUMB = SlikeGumbi(dalje, dalje_hover, 710, 650)
+        DALJE_GUMB_NEMOZE = SlikeGumbi(dalje_invalid, dalje_hover_invalid, 710, 650)
+
+        if odabrano == False:
+            DALJE_GUMB_NEMOZE.crtanjeGumba(mouse_position)
+        else:
+            DALJE_GUMB.crtanjeGumba(mouse_position)
+        if preset1 == True:
+            PRESET1_CLICK.crtanjeGumba(mouse_position)
+            SCREEN.blit(old_school_info, (0,0))
+        elif otprije1 == True:
+            PRESET1_ELIM.crtanjeGumba(mouse_position)
+        else:
+            PRESET1.crtanjeGumba(mouse_position)
+
+        if preset2 == True:
+            PRESET2_CLICK.crtanjeGumba(mouse_position)
+            SCREEN.blit(builder_info, (0,0))
+        elif otprije2 == True:
+            PRESET2_ELIM.crtanjeGumba(mouse_position)
+        else:
+            PRESET2.crtanjeGumba(mouse_position)
+
+        if preset3 == True:
+            PRESET3_CLICK.crtanjeGumba(mouse_position)
+            SCREEN.blit(combat_info, (0,0))
+        elif otprije3 == True:
+            PRESET3_ELIM.crtanjeGumba(mouse_position)
+        else:
+            PRESET3.crtanjeGumba(mouse_position)
+
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -2097,30 +2277,39 @@ def keybind_screen2():
                 if odabrano == False:
                     pass
                 else:
-                    if DALJE_GUMB.checkForCollision(mouse_position):
+                    if DALJE_GUMB.provjeraSudara(mouse_position):
                         run = False
 
-                if preset1 == True:
-                    if PRESET1.checkForCollision(mouse_position):
+                if otprije1 == True:
+                    if PRESET1.provjeraSudara(mouse_position):
                         pass
-                else:      
-                    if PRESET1.checkForCollision(mouse_position):
+                elif preset1 == False:      
+                    if PRESET1.provjeraSudara(mouse_position):
                         odabrano = True
+                        preset1 = True
+                        preset2 = False
+                        preset3 = False
                         BORCI["igrac2"].dictionary = {key: keybind_preset1[key] for key in BORCI["igrac2"].dictionary}
                     
-                if preset2 == True:
-                    if PRESET2.checkForCollision(mouse_position):
+                if otprije2 == True:
+                    if PRESET2.provjeraSudara(mouse_position):
                         pass
                 else:      
-                    if PRESET2.checkForCollision(mouse_position):
+                    if PRESET2.provjeraSudara(mouse_position):
                         odabrano = True
+                        preset1 = False
+                        preset2 = True
+                        preset3 = False
                         BORCI["igrac2"].dictionary = {key: keybind_preset2[key] for key in BORCI["igrac2"].dictionary}
 
-                if preset3 == True:
-                    if PRESET3.checkForCollision(mouse_position):
+                if otprije3 == True:
+                    if PRESET3.provjeraSudara(mouse_position):
                         pass
                 else:      
-                    if PRESET3.checkForCollision(mouse_position):
+                    if PRESET3.provjeraSudara(mouse_position):
+                        preset1 = False
+                        preset2 = False
+                        preset3 = True
                         odabrano = True
                         BORCI["igrac2"].dictionary = {key: keybind_preset3[key] for key in BORCI["igrac2"].dictionary}                
 
@@ -2190,14 +2379,14 @@ def provjeraJeLiTkoDefeated(igrac1, igrac2):
     global pocetak_kraja, krajnji_counter
     if (igrac1.health == 0) and (igrac2.health == 1):
         igrac1.varijable["defeated"] = True
-        update_achievementa(4)
+        update_achievementa(IGRACI[1].profil_broj, 4)
         if pocetak_kraja == False:
             igrac2.score += 1
             pocetak_kraja = True
             krajnji_counter = time.time()
     if (igrac1.health == 0) and (igrac2.health == 10):
         igrac1.varijable["defeated"] = True
-        update_achievementa(5)
+        update_achievementa(IGRACI[1].profil_broj, 5)
         if pocetak_kraja == False:
             igrac2.score += 1
             pocetak_kraja = True
@@ -2216,14 +2405,14 @@ def provjeraJeLiTkoDefeated(igrac1, igrac2):
             reset_igre(igrac1, igrac2)
     if (igrac2.health == 0) and (igrac1.health == 1):
         igrac2.varijable["defeated"] = True
-        update_achievementa(4)
+        update_achievementa(IGRACI[0].profil_broj, 4)
         if pocetak_kraja == False:
             igrac1.score += 1
             pocetak_kraja = True
             krajnji_counter = time.time()
     if (igrac2.health == 0) and (igrac1.health == 10):
         igrac2.varijable["defeated"] = True
-        update_achievementa(5)
+        update_achievementa(IGRACI[0].profil_broj, 5)
         if pocetak_kraja == False:
             igrac1.score += 1
             pocetak_kraja = True
