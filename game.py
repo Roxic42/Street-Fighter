@@ -1650,15 +1650,18 @@ def crtajAchievemente(mouse_pos, player_number):
                 SCREEN.blit(ZAKLJUCANO, (x + 225, y))
 
 def imali():
-    global nema_profila, ima_profila, SVI_IGRACI
+    global nema_profila, ima_profila2, ima_profila1, SVI_IGRACI
     read_data_sve()
-    ima_profila = False
+    ima_profila1 = False
+    ima_profila2 = False
     nema_profila = False
     if len(SVI_IGRACI) == 0:
         nema_profila = True
     else:
-        ima_profila = True
-    return nema_profila, ima_profila
+        ima_profila1 = True
+        ima_profila2 = True
+
+    return nema_profila, ima_profila2, ima_profila1
 
 def postignuca_nema_profila():
     global nema_profila, SVI_IGRACI
@@ -1690,12 +1693,12 @@ def postignuca_nema_profila():
 def draw_buttons():
     global SVI_IGRACI
     buttons = []
-    button_height = 120
+    button_height = 80
     button_spacing = 10
     start_position = (WIDTH/2, 200)
 
     for igrac in SVI_IGRACI:
-        button = Button(igrac.ime, 36, "White", (200, button_height), "Black", "Green", start_position)
+        button = Button(igrac.ime, 50, "#E1E193", (200, button_height), "#0A0A09", "#064719", start_position)
         button.dodaj(igrac)
         buttons.append(button)
         start_position = (start_position[0], start_position[1] + button_height + button_spacing)
@@ -1703,15 +1706,21 @@ def draw_buttons():
     return buttons
 
 def prije_postignuca():
-    global ima_profila, SVI_IGRACI
+    global ima_profila1, SVI_IGRACI, broj
+    broj = 0
     SVI_IGRACI.clear()
     imali()
     BACK_GUMBIC = SlikeGumbi(BACK_GUMB, BACK_GUMB_HOVER, 10, 10)
     gumbici = draw_buttons()
-    while ima_profila == True:
+
+    naslov_font = pygame.font.Font(None, 100)
+    naslov_surface = naslov_font.render("ODABERI PROFIL:", False, "#0A0A09")
+    naslov_rectangle = naslov_surface.get_rect(topleft = (150, 20))
+    while ima_profila1 == True:
         mouse_position = pygame.mouse.get_pos()
         SCREEN.fill("White")
         SCREEN.blit(ACHV_BG, (0,0))
+        SCREEN.blit(naslov_surface, naslov_rectangle)
 
         for gumb in gumbici:
             gumb.update(SCREEN)
@@ -1726,19 +1735,28 @@ def prije_postignuca():
                 if event.key == pygame.K_ESCAPE:
                     if escape_screen():
                         return True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for i in range(len(SVI_IGRACI)):
+                    if gumbici[i].checkForCollision(mouse_position):
+                        broj = gumbici[i].player_number
+                        ima_profila1 = False
+                if BACK_GUMBIC.provjeraSudara(mouse_position):
+                    ima_profila1 = False
+                    return True
 
         pygame.display.update()
         clock.tick(FPS)
 
 def postignuca():
-    global ima_profila, SVI_IGRACI
+    global ima_profila2, ima_profila1, SVI_IGRACI, broj
     BACK_GUMBIC = SlikeGumbi(BACK_GUMB, BACK_GUMB_HOVER, 10, 10)
-    while ima_profila == True:
+    while ima_profila2 == True:
         mouse_position = pygame.mouse.get_pos()
         SCREEN.fill("White")
         SCREEN.blit(ACHV_BG, (0,0))
         SCREEN.blit(ACHV_NASLOV, (WIDTH/4, 10))
 
+        crtajAchievemente(mouse_position, broj)
 
         BACK_GUMBIC.crtanjeGumba(mouse_position)
 
@@ -1750,6 +1768,11 @@ def postignuca():
                 if event.key == pygame.K_ESCAPE:
                     if escape_screen():
                         return True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if BACK_GUMBIC.provjeraSudara(mouse_position):
+                    ima_profila1 = True
+                    ima_profila2 = False
+                    
 
         pygame.display.update()
         clock.tick(FPS)
@@ -1777,46 +1800,41 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
     global trenutno_ime_upis
     imenovanje_profila_bool = True
     naslov_font = pygame.font.Font(None, 100)
-    naslov_surface = naslov_font.render("Odabir igraca", False, "White")
-    naslov_rectangle = naslov_surface.get_rect(center = (250, 50))
+    naslov_surface = naslov_font.render("NAPRAVI PROFIL", False, "#0A0A09")
+    naslov_rectangle = naslov_surface.get_rect(topleft = (50, 20))
     trenutno_ime_upis = ""
     for i in range(1,9):
         PLAYERI_SELEKTIRANI.update({f"player_{i}":False})
         PLAYERI_IMENA.update({f"player{i}": profili[i-1][:-1]})
     
     while imenovanje_profila_bool == True:
-        SCREEN.fill("Black")
+        SCREEN.fill("#d0d0d0")
         mouse_position = pygame.mouse.get_pos()
         SCREEN.blit(naslov_surface, naslov_rectangle)
 
 
-        PLAYER_BUTTON1 = Button(PLAYERI_IMENA.get("player1"), 70, "White", (480, 120), "Grey", "Green", (350, 175))
-        PLAYER_BUTTON2 = Button(PLAYERI_IMENA.get("player2"), 70, "White", (480, 120), "Grey", "Green", (350, 175 + 200))
-        PLAYER_BUTTON3 = Button(PLAYERI_IMENA.get("player3"), 70, "White", (480, 120), "Grey", "Green", (350, 175 + 200*2))
-        PLAYER_BUTTON4 = Button(PLAYERI_IMENA.get("player4"), 70, "White", (480, 120), "Grey", "Green", (350, 175 + 200*3))
+        PLAYER_BUTTON1 = Button(PLAYERI_IMENA.get("player1"), 70, "#E1E193", (480, 120), "#0A0A09", "#444443", (350, 175))
+        PLAYER_BUTTON2 = Button(PLAYERI_IMENA.get("player2"), 70, "#E1E193", (480, 120), "#0A0A09", "#444443", (350, 175 + 200))
+        PLAYER_BUTTON3 = Button(PLAYERI_IMENA.get("player3"), 70, "#E1E193", (480, 120), "#0A0A09", "#444443", (350, 175 + 200*2))
+        PLAYER_BUTTON4 = Button(PLAYERI_IMENA.get("player4"), 70, "#E1E193", (480, 120), "#0A0A09", "#444443", (350, 175 + 200*3))
         
-        PLAYER_BUTTON5 = Button(PLAYERI_IMENA.get("player5"), 70, "White", (480, 120), "Grey", "Green", (1000, 175)) 
-        PLAYER_BUTTON6 = Button(PLAYERI_IMENA.get("player6"), 70, "White", (480, 120), "Grey", "Green", (1000, 175 + 200))        
-        PLAYER_BUTTON7 = Button(PLAYERI_IMENA.get("player7"), 70, "White", (480, 120), "Grey", "Green", (1000, 175 + 200*2))
-        PLAYER_BUTTON8 = Button(PLAYERI_IMENA.get("player8"), 70, "White", (480, 120), "Grey", "Green", (1000, 175 + 200*3))
+        PLAYER_BUTTON5 = Button(PLAYERI_IMENA.get("player5"), 70, "#E1E193", (480, 120), "#0A0A09", "#444443", (1000, 175)) 
+        PLAYER_BUTTON6 = Button(PLAYERI_IMENA.get("player6"), 70, "#E1E193", (480, 120), "#0A0A09", "#444443", (1000, 175 + 200))        
+        PLAYER_BUTTON7 = Button(PLAYERI_IMENA.get("player7"), 70, "#E1E193", (480, 120), "#0A0A09", "#444443", (1000, 175 + 200*2))
+        PLAYER_BUTTON8 = Button(PLAYERI_IMENA.get("player8"), 70, "#E1E193", (480, 120), "#0A0A09", "#444443", (1000, 175 + 200*3))
 
 
         PLAYERI_LISTA_GUMBOVA = [PLAYER_BUTTON1,PLAYER_BUTTON2,PLAYER_BUTTON3,PLAYER_BUTTON4,PLAYER_BUTTON5,PLAYER_BUTTON6,PLAYER_BUTTON7,PLAYER_BUTTON8]
         
         
-        NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
-        NAZAD_GUMB.update(SCREEN)
-        if NAZAD_GUMB.checkForCollision(mouse_position):
-            NAZAD_GUMB.changeButtonColor()
-        NAZAD_GUMB.update(SCREEN)
         for gumb in PLAYERI_LISTA_GUMBOVA:
             if gumb.checkForCollision(mouse_position):
                 gumb.changeButtonColor()
             gumb.update(SCREEN)                    
         if list(PLAYERI_IMENA.values()).count("Napravi profil") <= 6:
-            DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Green", (1500, 850))
+            DALJE_GUMB = Button("Dalje", 70, "#E1E193", (240, 120), "#0A0A09", "#064719", (1425, 775))
         else:
-            DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Red", (1500, 850))
+            DALJE_GUMB = Button("Dalje", 70, "#E1E193", (240, 120), "#0A0A09", "#470606", (1425, 775))
         DALJE_GUMB.update(SCREEN)
         if DALJE_GUMB.checkForCollision(mouse_position):
             DALJE_GUMB.changeButtonColor()
@@ -1837,12 +1855,7 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
                         pass
                     else:
                         score[i] = "0,0\n"
-
-
-                if NAZAD_GUMB.checkForCollision(mouse_position):
-                    return True
-                    
-                    
+                      
                 for i in range(8):
                     
                     if PLAYERI_LISTA_GUMBOVA[i].checkForCollision(mouse_position):
@@ -1900,6 +1913,7 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
                                 trenutno_ime_upis += event.unicode
                                 if trenutno_ime_upis not in list(PLAYERI_IMENA.values()):
                                     PLAYERI_IMENA.update({f"player{i+1}": trenutno_ime_upis})
+                                
 
         pygame.display.update()
         clock.tick(FPS)
@@ -1910,52 +1924,45 @@ def biranje_profila():
     global PLAYERI_SELEKTIRANI
     global PLAYERI_LISTA_GUMBOVA
     biranje_profila_bool = True
-    SCREEN.fill('Black')
+    naslov_font = pygame.font.Font(None, 100)
+    naslov_surface = naslov_font.render("ODABIR IGRACA", False, "#0A0A09")
+    naslov_rectangle = naslov_surface.get_rect(topleft = (50, 20))
 
-    PLAYER_BUTTON1 = Button(PLAYERI_IMENA.get("player1"), 70, "White", (480, 120), "Grey", "Green", (350, 175))
-    PLAYER_BUTTON2 = Button(PLAYERI_IMENA.get("player2"), 70, "White", (480, 120), "Grey", "Green", (350, 175 + 200))
-    PLAYER_BUTTON3 = Button(PLAYERI_IMENA.get("player3"), 70, "White", (480, 120), "Grey", "Green", (350, 175 + 200*2))
-    PLAYER_BUTTON4 = Button(PLAYERI_IMENA.get("player4"), 70, "White", (480, 120), "Grey", "Green", (350, 175 + 200*3))
-         
-    PLAYER_BUTTON5 = Button(PLAYERI_IMENA.get("player5"), 70, "White", (480, 120), "Grey", "Green", (1000, 175)) 
-    PLAYER_BUTTON6 = Button(PLAYERI_IMENA.get("player6"), 70, "White", (480, 120), "Grey", "Green", (1000, 175 + 200))        
-    PLAYER_BUTTON7 = Button(PLAYERI_IMENA.get("player7"), 70, "White", (480, 120), "Grey", "Green", (1000, 175 + 200*2))
-    PLAYER_BUTTON8 = Button(PLAYERI_IMENA.get("player8"), 70, "White", (480, 120), "Grey", "Green", (1000, 175 + 200*3))
+    PLAYER_BUTTON1 = Button(PLAYERI_IMENA.get("player1"), 70, "#E1E193", (480, 120), "#0A0A09", "#064719", (350, 175))
+    PLAYER_BUTTON2 = Button(PLAYERI_IMENA.get("player2"), 70, "#E1E193", (480, 120), "#0A0A09", "#064719", (350, 175 + 200))
+    PLAYER_BUTTON3 = Button(PLAYERI_IMENA.get("player3"), 70, "#E1E193", (480, 120), "#0A0A09", "#064719", (350, 175 + 200*2))
+    PLAYER_BUTTON4 = Button(PLAYERI_IMENA.get("player4"), 70, "#E1E193", (480, 120), "#0A0A09", "#064719", (350, 175 + 200*3))
+        
+    PLAYER_BUTTON5 = Button(PLAYERI_IMENA.get("player5"), 70, "#E1E193", (480, 120), "#0A0A09", "#064719", (1000, 175)) 
+    PLAYER_BUTTON6 = Button(PLAYERI_IMENA.get("player6"), 70, "#E1E193", (480, 120), "#0A0A09", "#064719", (1000, 175 + 200))        
+    PLAYER_BUTTON7 = Button(PLAYERI_IMENA.get("player7"), 70, "#E1E193", (480, 120), "#0A0A09", "#064719", (1000, 175 + 200*2))
+    PLAYER_BUTTON8 = Button(PLAYERI_IMENA.get("player8"), 70, "#E1E193", (480, 120), "#0A0A09", "#064719", (1000, 175 + 200*3))
   
-    font = pygame.font.Font(None, 60)
     
     GUMBOVI_POZICIJE = [(350, 175),(350, 175+200),(350, 175+200*2),((350, 175+200*3)),((1000, 175)),(1000, 175+200),(1000, 175+200*2),(1000, 175+200*3)]
     PLAYERI_LISTA_GUMBOVA=[PLAYER_BUTTON1,PLAYER_BUTTON2,PLAYER_BUTTON3,PLAYER_BUTTON4,PLAYER_BUTTON5,PLAYER_BUTTON6,PLAYER_BUTTON7,PLAYER_BUTTON8]
     GUMBOVI_METAMORFOZA = {PLAYER_BUTTON1:0, PLAYER_BUTTON2:0, PLAYER_BUTTON3:0, PLAYER_BUTTON4:0 ,PLAYER_BUTTON5:0 ,PLAYER_BUTTON6:0 ,PLAYER_BUTTON7:0 ,PLAYER_BUTTON8:0}
-    SCREEN.fill('Black')
 
     while biranje_profila_bool == True:
-        SCREEN.fill('Black')
+        SCREEN.fill('#d0d0d0')
+        SCREEN.blit(naslov_surface, naslov_rectangle)
         mouse_position = pygame.mouse.get_pos()
-        Choose_profile = font.render("Izaberi profile",1,'White')
-        Choose_profile_rect = Choose_profile.get_rect(center=(630,45))
-        SCREEN.blit(Choose_profile,Choose_profile_rect)
         for gumb in PLAYERI_LISTA_GUMBOVA:
             if GUMBOVI_METAMORFOZA.get(gumb) == 0:
                 if PLAYERI_IMENA.get(f"player{PLAYERI_LISTA_GUMBOVA.index(gumb)+1}") == "Napravi profil":
-                    gumb = Button("N/A", 70, 'Black', (480, 120), '#475F77', '#77dd77', GUMBOVI_POZICIJE[PLAYERI_LISTA_GUMBOVA.index(gumb)])
+                    gumb = Button("N/A", 70, '#E1E193', (480, 120), '#300000', '#77dd77', GUMBOVI_POZICIJE[PLAYERI_LISTA_GUMBOVA.index(gumb)])
                     gumb.update(SCREEN)         
                 else:
-                    gumb = Button(PLAYERI_IMENA.get(f"player{PLAYERI_LISTA_GUMBOVA.index(gumb)+1}"), 70, 'Black', (480, 120), '#DADBDD', '#77dd77',GUMBOVI_POZICIJE[PLAYERI_LISTA_GUMBOVA.index(gumb)])
+                    gumb = Button(PLAYERI_IMENA.get(f"player{PLAYERI_LISTA_GUMBOVA.index(gumb)+1}"), 70, '#E1E193', (480, 120), '#0A0A09', '#444443',GUMBOVI_POZICIJE[PLAYERI_LISTA_GUMBOVA.index(gumb)])
                     gumb.update(SCREEN)
                     if gumb.checkForCollision(mouse_position):
                         gumb.changeButtonColor()
                     gumb.update(SCREEN)
             else:
-                gumb = Button(PLAYERI_IMENA.get(f"player{PLAYERI_LISTA_GUMBOVA.index(gumb)+1}"), 70, 'Black', (480, 120), '#D74B4B', '#D74B4B',GUMBOVI_POZICIJE[PLAYERI_LISTA_GUMBOVA.index(gumb)])
+                gumb = Button(PLAYERI_IMENA.get(f"player{PLAYERI_LISTA_GUMBOVA.index(gumb)+1}"), 70, '#E1E193', (480, 120), '#064719', '#064719',GUMBOVI_POZICIJE[PLAYERI_LISTA_GUMBOVA.index(gumb)])
                 gumb.update(SCREEN) 
 
-        NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
-        NAZAD_GUMB.update(SCREEN)
-        if NAZAD_GUMB.checkForCollision(mouse_position):
-            NAZAD_GUMB.changeButtonColor()
-        NAZAD_GUMB.update(SCREEN)
-        DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Green", (1500, 850))        
+        DALJE_GUMB = Button("Dalje", 70, "#E1E193", (240, 120), "#0A0A09", "#064719", (1425, 775))        
         DALJE_GUMB.update(SCREEN)
         if DALJE_GUMB.checkForCollision(mouse_position):
             DALJE_GUMB.changeButtonColor()
@@ -1972,8 +1979,6 @@ def biranje_profila():
                 if DALJE_GUMB.checkForCollision(mouse_position):
                     if len(selektirani_profili) == 2:
                         biranje_profila_bool = False
-                if NAZAD_GUMB.checkForCollision(mouse_position):
-                    return True
                 if len(selektirani_profili) <= 2:
                     for i in range(8):
                         if PLAYERI_LISTA_GUMBOVA[i].checkForCollision(mouse_position):
@@ -2004,7 +2009,7 @@ def odabir_borca1():
     global IGRACI
     global BORCI
     naslov_font = pygame.font.Font(None, 100)
-    naslov_surface = naslov_font.render(f"{selektirani_profili[0]}, IZABERI BORCA", False, "White")
+    naslov_surface = naslov_font.render(f"{selektirani_profili[0]}, izaberi borca!", False, "White")
     naslov_rectangle = naslov_surface.get_rect(topleft = (50, 50))
     read_data()
     poredak()
@@ -2058,7 +2063,7 @@ def odabir_borca2():
     global IGRACI
     global BORCI
     naslov_font = pygame.font.Font(None, 100)
-    naslov_surface = naslov_font.render(f"{selektirani_profili[1]}, IZABERI BORCA", False, "White")
+    naslov_surface = naslov_font.render(f"{selektirani_profili[1]}, izaberi borca!", False, "White")
     naslov_rectangle = naslov_surface.get_rect(topleft = (50, 50))
     run = True
     while run == True:
@@ -2227,11 +2232,11 @@ def keybind_screen2():
 
         PRESET2 = SlikeGumbi(builder_gumb, builder_hover, 580, 750)
         PRESET2_CLICK = SlikeGumbi(builder_selekt, builder_selekt, 580, 750)
-        PRESET2_ELIM = SlikeGumbi(builder_elim, builder_elim, 80, 750)
+        PRESET2_ELIM = SlikeGumbi(builder_elim, builder_elim, 580, 750)
         
         PRESET3 = SlikeGumbi(combat_gumb, combat_hover, 1080, 750)
         PRESET3_CLICK = SlikeGumbi(combat_selekt, combat_selekt, 1080, 750)
-        PRESET3_ELIM = SlikeGumbi(combat_elim, combat_elim, 80, 750)
+        PRESET3_ELIM = SlikeGumbi(combat_elim, combat_elim, 1080, 750)
 
         DALJE_GUMB = SlikeGumbi(dalje, dalje_hover, 710, 650)
         DALJE_GUMB_NEMOZE = SlikeGumbi(dalje_invalid, dalje_hover_invalid, 710, 650)
@@ -2240,10 +2245,13 @@ def keybind_screen2():
             DALJE_GUMB_NEMOZE.crtanjeGumba(mouse_position)
         else:
             DALJE_GUMB.crtanjeGumba(mouse_position)
+
         if preset1 == True:
             PRESET1_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(old_school_info, (0,0))
-        elif otprije1 == True:
+        else:
+            PRESET1.crtanjeGumba(mouse_position)
+        if otprije1 == True:
             PRESET1_ELIM.crtanjeGumba(mouse_position)
         else:
             PRESET1.crtanjeGumba(mouse_position)
@@ -2251,7 +2259,9 @@ def keybind_screen2():
         if preset2 == True:
             PRESET2_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(builder_info, (0,0))
-        elif otprije2 == True:
+        else:
+            PRESET2.crtanjeGumba(mouse_position)
+        if otprije2 == True:
             PRESET2_ELIM.crtanjeGumba(mouse_position)
         else:
             PRESET2.crtanjeGumba(mouse_position)
@@ -2259,7 +2269,9 @@ def keybind_screen2():
         if preset3 == True:
             PRESET3_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(combat_info, (0,0))
-        elif otprije3 == True:
+        else:
+            PRESET3.crtanjeGumba(mouse_position)
+        if otprije3 == True:
             PRESET3_ELIM.crtanjeGumba(mouse_position)
         else:
             PRESET3.crtanjeGumba(mouse_position)
@@ -2283,7 +2295,7 @@ def keybind_screen2():
                 if otprije1 == True:
                     if PRESET1.provjeraSudara(mouse_position):
                         pass
-                elif preset1 == False:      
+                else:      
                     if PRESET1.provjeraSudara(mouse_position):
                         odabrano = True
                         preset1 = True
