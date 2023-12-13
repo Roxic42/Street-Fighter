@@ -96,6 +96,21 @@ dalje_hover_invalid = pygame.image.load(os.path.join("Assets", "OdabirPreseta", 
 dalje_invalid = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "gumb_dalje_invalid.png")).convert_alpha()
 dalje = pygame.image.load(os.path.join("Assets", "OdabirPreseta", "gumb_dalje.png")).convert_alpha()
 
+#Slike za odabir heroja
+odabir_bg = pygame.image.load(os.path.join("Assets", "OdabirHeroja", "background.png")).convert_alpha()
+andrej_gumb_hover = pygame.image.load(os.path.join("Assets", "OdabirHeroja", "andrej_gumb_hover.png")).convert_alpha()
+andrej_gumb_selektiran = pygame.image.load(os.path.join("Assets", "OdabirHeroja", "andrej_gumb_selektiran.png")).convert_alpha()
+andrej_gumb = pygame.image.load(os.path.join("Assets", "OdabirHeroja", "andrej_gumb.png")).convert_alpha()
+andrej_selektiran = pygame.image.load(os.path.join("Assets", "OdabirHeroja", "andrej_selektiran.png")).convert_alpha()
+andrej = pygame.image.load(os.path.join("Assets", "OdabirHeroja", "andrej.png")).convert_alpha()
+broz_gumb_hover = pygame.image.load(os.path.join("Assets", "OdabirHeroja", "broz_gumb_hover.png")).convert_alpha()
+broz_gumb_selektiran = pygame.image.load(os.path.join("Assets", "OdabirHeroja", "broz_gumb_selektiran.png")).convert_alpha()
+broz_gumb = pygame.image.load(os.path.join("Assets", "OdabirHeroja", "broz_gumb.png")).convert_alpha()
+broz_selektiran = pygame.image.load(os.path.join("Assets", "OdabirHeroja", "broz_selektiran.png")).convert_alpha()
+broz = pygame.image.load(os.path.join("Assets", "OdabirHeroja", "broz.png")).convert_alpha()
+
+
+
 
 class SpriteRectangle(pygame.sprite.Sprite):
     def __init__(self, color, x, y, width, height):
@@ -1704,7 +1719,7 @@ def draw_buttons():
         x_offset = -button_width / 2 - button_spacing / 2 - x_offset_increase if i % 2 == 0 else button_spacing / 2 + x_offset_increase
         x = start_position[0] + x_offset
         y = start_position[1] + (i // 2) * (button_height + button_spacing)
-        button = Button(igrac.ime, 70, "#E1E193", (button_width, button_height), "#0A0A09", "#064719", (x, y))
+        button = Button(f"{igrac.ime} - W{igrac.Ws}/L{igrac.Ls}", 70, "#E1E193", (button_width, button_height), "#0A0A09", "#064719", (x, y))
         button.dodaj(igrac)
         buttons.append(button)
 
@@ -2011,32 +2026,57 @@ def biranje_profila():
 
 BORCI = {"igrac1":0, "igrac2":0}
 def odabir_borca1():
+    global odabran_borac, andrej_odabran, broz_odabran
     global IGRACI
     global BORCI
-    naslov_font = pygame.font.Font(None, 100)
-    naslov_surface = naslov_font.render(f"{selektirani_profili[0]}, izaberi borca!", False, "White")
-    naslov_rectangle = naslov_surface.get_rect(topleft = (50, 50))
     read_data()
     poredak()
     update_achievementa(IGRACI[0].profil_broj, 1)
     update_achievementa(IGRACI[1].profil_broj, 1)
-    print(IGRACI)
-    print(f"{IGRACI[0].ime}, {IGRACI[0].profil_broj}")
-    print(f"{IGRACI[1].ime}, {IGRACI[1].profil_broj}")
+    naslov_font = pygame.font.Font(None, 100)
+    naslov_surface = naslov_font.render(f"{selektirani_profili[0]}, izaberi borca!", False, "Black")
+    naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 50))
+    odabran_borac = False
+    andrej_odabran = False
+    broz_odabran = False
     run = True
     while run == True:
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
-        NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
-        DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Red", (1500, 850))
-        BORAC1_GUMB = Button("Andrej Tejtanović", 70, "White", (420, 120), "Grey", "Green", (WIDTH/2, 400))
-        BORAC2_GUMB = Button("Broz Li", 70, "White", (420, 120), "Grey", "Blue", (WIDTH/2, 600))
-        for gumb in [NAZAD_GUMB, DALJE_GUMB, BORAC1_GUMB, BORAC2_GUMB]:
-            if gumb.checkForCollision(mouse_position):
-                gumb.changeButtonColor()
-            gumb.update(SCREEN)
-
+        SCREEN.blit(odabir_bg, (0,0))
         SCREEN.blit(naslov_surface, naslov_rectangle)
+        SCREEN.blit(andrej, (0,0))
+        SCREEN.blit(broz, (0,0))
+
+        A_GUMB = SlikeGumbi(andrej_gumb, andrej_gumb_hover, 425, 300)
+        A_SELEKT_GUMB = SlikeGumbi(andrej_gumb_selektiran, andrej_gumb_selektiran, 425, 300)
+
+        B_GUMB = SlikeGumbi(broz_gumb, broz_gumb_hover, 600, 125)
+        B_SELEKT_GUMB = SlikeGumbi(broz_gumb_selektiran, broz_gumb_selektiran, 600, 125)
+
+        DALJE_GUMB = SlikeGumbi(dalje, dalje_hover, 710, 650)
+        DALJE_GUMB_NEMOZE = SlikeGumbi(dalje_invalid, dalje_invalid, 710, 650)
+
+        if andrej_odabran:
+            A_SELEKT_GUMB.crtanjeGumba(mouse_position)
+            SCREEN.blit(andrej_selektiran, (0,0))
+        else:
+            A_GUMB.crtanjeGumba(mouse_position)
+            if A_GUMB.provjeraSudara(mouse_position):
+                SCREEN.blit(andrej_selektiran, (0,0))
+
+        if broz_odabran:
+            B_SELEKT_GUMB.crtanjeGumba(mouse_position)
+            SCREEN.blit(broz_selektiran, (0,0))
+        else:
+            B_GUMB.crtanjeGumba(mouse_position)
+            if B_GUMB.provjeraSudara(mouse_position):
+                SCREEN.blit(broz_selektiran, (0,0))
+
+        if odabran_borac == False:
+            DALJE_GUMB_NEMOZE.crtanjeGumba(mouse_position)
+        else:
+            DALJE_GUMB.crtanjeGumba(mouse_position)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -2046,44 +2086,78 @@ def odabir_borca1():
                 if event.key == pygame.K_ESCAPE:
                     if escape_screen():
                         return True
-
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if NAZAD_GUMB.checkForCollision(mouse_position):
-                    run = False
-                    return True
-                if BORAC1_GUMB.checkForCollision(mouse_position):
+                if odabran_borac == False:
+                    pass
+                else:
+                    if DALJE_GUMB.provjeraSudara(mouse_position):
+                        run = False
+                if A_GUMB.provjeraSudara(mouse_position):
+                    odabran_borac = True
+                    andrej_odabran = True
+                    broz_odabran = False
                     BORCI["igrac1"] = Andrej("prvi")
                     update_achievementa(IGRACI[0].profil_broj, 2)
-                    run = False
-                if BORAC2_GUMB.checkForCollision(mouse_position):
+                if B_GUMB.provjeraSudara(mouse_position):
+                    odabran_borac = True
+                    andrej_odabran = False
+                    broz_odabran = True
                     BORCI["igrac1"] = Broz("prvi")
                     update_achievementa(IGRACI[0].profil_broj, 3)
-                    run = False
-
                 
         pygame.display.update()
         clock.tick(FPS)
 
 def odabir_borca2():
+    global odabran_borac, andrej_odabran, broz_odabran
     global IGRACI
     global BORCI
     naslov_font = pygame.font.Font(None, 100)
-    naslov_surface = naslov_font.render(f"{selektirani_profili[1]}, izaberi borca!", False, "White")
-    naslov_rectangle = naslov_surface.get_rect(topleft = (50, 50))
+    naslov_surface = naslov_font.render(f"{selektirani_profili[1]}, izaberi borca!", False, "Black")
+    naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 50))
+    odabran_borac = False
+    andrej_odabran = False
+    broz_odabran = False
+    read_data()
+    poredak()
     run = True
     while run == True:
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
-        NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
-        DALJE_GUMB = Button("Dalje", 35, "White", (120, 60), "Grey", "Red", (1500, 850))
-        BORAC1_GUMB = Button("Andrej Tejtanović", 70, "White", (420, 120), "Grey", "Green", (WIDTH/2, 400))
-        BORAC2_GUMB = Button("Broz Li", 70, "White", (420, 120), "Grey", "Blue", (WIDTH/2, 600))
-        for gumb in [NAZAD_GUMB, DALJE_GUMB, BORAC1_GUMB, BORAC2_GUMB]:
-            if gumb.checkForCollision(mouse_position):
-                gumb.changeButtonColor()
-            gumb.update(SCREEN)
-
+        SCREEN.blit(odabir_bg, (0,0))
         SCREEN.blit(naslov_surface, naslov_rectangle)
+        SCREEN.blit(andrej, (0,0))
+        SCREEN.blit(broz, (0,0))
+
+        A_GUMB = SlikeGumbi(andrej_gumb, andrej_gumb_hover, 425, 300)
+        A_SELEKT_GUMB = SlikeGumbi(andrej_gumb_selektiran, andrej_gumb_selektiran, 425, 300)
+
+        B_GUMB = SlikeGumbi(broz_gumb, broz_gumb_hover, 600, 125)
+        B_SELEKT_GUMB = SlikeGumbi(broz_gumb_selektiran, broz_gumb_selektiran, 600, 125)
+
+        DALJE_GUMB = SlikeGumbi(dalje, dalje_hover, 710, 650)
+        DALJE_GUMB_NEMOZE = SlikeGumbi(dalje_invalid, dalje_invalid, 710, 650)
+
+        if andrej_odabran:
+            A_SELEKT_GUMB.crtanjeGumba(mouse_position)
+            SCREEN.blit(andrej_selektiran, (0,0))
+        else:
+            A_GUMB.crtanjeGumba(mouse_position)
+            if A_GUMB.provjeraSudara(mouse_position):
+                SCREEN.blit(andrej_selektiran, (0,0))
+
+        if broz_odabran:
+            B_SELEKT_GUMB.crtanjeGumba(mouse_position)
+            SCREEN.blit(broz_selektiran, (0,0))
+        else:
+            B_GUMB.crtanjeGumba(mouse_position)
+            if B_GUMB.provjeraSudara(mouse_position):
+                SCREEN.blit(broz_selektiran, (0,0))
+
+        if odabran_borac == False:
+            DALJE_GUMB_NEMOZE.crtanjeGumba(mouse_position)
+        else:
+            DALJE_GUMB.crtanjeGumba(mouse_position)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -2093,19 +2167,27 @@ def odabir_borca2():
                 if event.key == pygame.K_ESCAPE:
                     if escape_screen():
                         return True
-
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if NAZAD_GUMB.checkForCollision(mouse_position):
-                    run = False
-                    return True
-                if BORAC1_GUMB.checkForCollision(mouse_position):
+                if odabran_borac == False:
+                    pass
+                else:
+                    if DALJE_GUMB.provjeraSudara(mouse_position):
+                        run = False
+                if A_GUMB.provjeraSudara(mouse_position):
+                    odabran_borac = True
+                    andrej_odabran = True
+                    broz_odabran = False
                     BORCI["igrac2"] = Andrej("drugi")
                     update_achievementa(IGRACI[1].profil_broj, 2)
-                    run = False
-                if BORAC2_GUMB.checkForCollision(mouse_position):
-                    BORCI["igrac2"] = Andrej("drugi")
+                if B_GUMB.provjeraSudara(mouse_position):
+                    odabran_borac = True
+                    andrej_odabran = False
+                    broz_odabran = True
+                    BORCI["igrac2"] = Broz("drugi")
                     update_achievementa(IGRACI[1].profil_broj, 3)
-                    run = False
+                
+        pygame.display.update()
+        clock.tick(FPS)
 
        
         pygame.display.update()
@@ -2121,6 +2203,7 @@ def keybind_screen1():
     otprije1 = False
     otprije2  = False
     otprije3 = False
+    hover = False
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render(f"{selektirani_profili[0]}, odaberi svoje kontrole ", False, "Black")
     naslov_rectangle = naslov_surface.get_rect(topleft = (10, 10))
