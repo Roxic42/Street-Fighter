@@ -2299,7 +2299,7 @@ def odabir_borca2():
         clock.tick(FPS)
 
 def keybind_screen1():
-    global selektirani_profili, odabrano, preset1, preset2, preset3, otprije1, otprije2, otprije3
+    global selektirani_profili, odabrano, preset1, preset2, preset3, otprije1, otprije2, otprije3, hover
     global BORCI, IGRACI
     odabrano = False
     preset1 = False
@@ -2308,6 +2308,7 @@ def keybind_screen1():
     otprije1 = False
     otprije2  = False
     otprije3 = False
+    hover = False
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render(f"{selektirani_profili[0]}, odaberi svoje kontrole ", False, "Black")
     naslov_rectangle = naslov_surface.get_rect(topleft = (10, 10))
@@ -2346,29 +2347,42 @@ def keybind_screen1():
         else:
             DALJE_GUMB.crtanjeGumba(mouse_position)
 
-        if preset1 == True:
+        if preset1 == True and hover == True:
+            PRESET1_CLICK.crtanjeGumba(mouse_position)
+            hover = False
+        elif preset1 == True:
             PRESET1_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(old_school_info, (0,0))
         else:
             PRESET1.crtanjeGumba(mouse_position)
             if PRESET1.provjeraSudara(mouse_position):
                 SCREEN.blit(old_school_info, (0,0))
+                hover = True
 
-        if preset2 == True:
+
+        if preset2 == True and hover == True:
+            PRESET2_CLICK.crtanjeGumba(mouse_position)
+            hover = False
+        elif preset2 == True:
             PRESET2_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(builder_info, (0,0))
         else:
             PRESET2.crtanjeGumba(mouse_position)
             if PRESET2.provjeraSudara(mouse_position):
                 SCREEN.blit(builder_info, (0,0))
+                hover = True
 
-        if preset3 == True:
+        if preset3 == True and hover == True:
+            PRESET3_CLICK.crtanjeGumba(mouse_position)
+            hover = False
+        elif preset3 == True:
             PRESET3_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(combat_info, (0,0))
         else:
             PRESET3.crtanjeGumba(mouse_position)
             if PRESET3.provjeraSudara(mouse_position):
                 SCREEN.blit(combat_info, (0,0))
+                hover = True
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -2425,7 +2439,7 @@ def keybind_screen1():
         clock.tick(FPS)
 
 def keybind_screen2():
-    global selektirani_profili, odabrano, preset1, preset2, preset3, otprije1, otprije2, otprije3
+    global selektirani_profili, odabrano, preset1, preset2, preset3, otprije1, otprije2, otprije3, hover
     global BORCI
     odabrano = False
     preset1 = False
@@ -2435,6 +2449,7 @@ def keybind_screen2():
     naslov_surface = naslov_font.render(f"{selektirani_profili[1]}, odaberi svoje kontrole ", False, "Black")
     naslov_rectangle = naslov_surface.get_rect(topleft = (10, 10))
     run = True
+    hover = False
     while run == True:
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
@@ -2462,7 +2477,10 @@ def keybind_screen2():
         else:
             DALJE_GUMB.crtanjeGumba(mouse_position)
 
-        if preset1 == True:
+        if preset1 == True and hover == True:
+            PRESET1_CLICK.crtanjeGumba(mouse_position)
+            hover = False
+        elif preset1 == True:
             PRESET1_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(old_school_info, (0,0))
         elif otprije1 == True:
@@ -2471,8 +2489,12 @@ def keybind_screen2():
             PRESET1.crtanjeGumba(mouse_position)
             if PRESET1.provjeraSudara(mouse_position):
                 SCREEN.blit(old_school_info, (0,0))
+                hover = True
 
-        if preset2 == True:
+        if preset2 == True and hover == True:
+            PRESET2_CLICK.crtanjeGumba(mouse_position)
+            hover = False
+        elif preset2 == True:
             PRESET2_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(builder_info, (0,0))
         elif otprije2 == True:
@@ -2481,8 +2503,12 @@ def keybind_screen2():
             PRESET2.crtanjeGumba(mouse_position)
             if PRESET2.provjeraSudara(mouse_position):
                 SCREEN.blit(builder_info, (0,0))
+                hover = True
 
-        if preset3 == True:
+        if preset3 == True and hover == True:
+            PRESET3_CLICK.crtanjeGumba(mouse_position)
+            hover = False
+        elif preset3 == True:
             PRESET3_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(combat_info, (0,0))
         elif otprije3 == True:
@@ -2491,6 +2517,7 @@ def keybind_screen2():
             PRESET3.crtanjeGumba(mouse_position)
             if PRESET3.provjeraSudara(mouse_position):
                 SCREEN.blit(combat_info, (0,0))
+                hover = True
 
 
         for event in pygame.event.get():
@@ -2646,7 +2673,7 @@ def provjeraJeLiTkoDefeated(igrac1, igrac2):
             krajnji_counter = time.time()
         ime_font = pygame.font.Font(None, 100)
         ime_surface = ime_font.render(f"{selektirani_profili[1]} je pobjedio/la rundu!", True, "White")
-        ime_rectangle = ime_surface.get_rect(center = (WIDTH/2, HEIGHT/2))
+        ime_rectangle = ime_surface.get_rect(center = (WIDTH/2, 400))
         SCREEN.blit(ime_surface, ime_rectangle)
         if (time.time() - krajnji_counter) >= 5:
             reset_igre(igrac1, igrac2)
@@ -2684,7 +2711,7 @@ def provjeraJeLiTkoDefeated(igrac1, igrac2):
             reset_igre(igrac1, igrac2)
 
 def reset_igre(igrac1, igrac2):
-    global kraj_igre, pobjednik, shef, luzer, pocetak_runde, broj_runde, IGRACI
+    global kraj_igre, pobjednik, shef, luzer, pocetak_runde, broj_runde, IGRACI, pob_score, luz_score
     if broj_rundi == 1:
         if igrac1.score == 1:
             kraj_igre = True
@@ -2695,6 +2722,8 @@ def reset_igre(igrac1, igrac2):
             update_score(IGRACI[0].profil_broj, IGRACI[0].Ws, IGRACI[0].Ls)
             IGRACI[1].Ls += 1
             update_score(IGRACI[1].profil_broj, IGRACI[1].Ws, IGRACI[1].Ls)
+            pob_score = IGRACI[0]
+            luz_score = IGRACI[1]
         elif igrac2.score == 1:
             kraj_igre = True
             pobjednik = selektirani_profili[1]
@@ -2704,6 +2733,8 @@ def reset_igre(igrac1, igrac2):
             update_score(IGRACI[1].profil_broj, IGRACI[1].Ws, IGRACI[1].Ls)
             IGRACI[0].Ls += 1
             update_score(IGRACI[0].profil_broj, IGRACI[0].Ws, IGRACI[0].Ls)
+            pob_score = IGRACI[1]
+            luz_score = IGRACI[0]
 
     elif broj_rundi == 3:
         if igrac1.score == 2:
@@ -2715,6 +2746,8 @@ def reset_igre(igrac1, igrac2):
             update_score(IGRACI[0].profil_broj, IGRACI[0].Ws, IGRACI[0].Ls)
             IGRACI[1].Ls += 1
             update_score(IGRACI[1].profil_broj, IGRACI[1].Ws, IGRACI[1].Ls)
+            pob_score = IGRACI[0]
+            luz_score = IGRACI[1]
         elif igrac2.score == 2:
             kraj_igre = True
             pobjednik = selektirani_profili[1]
@@ -2724,6 +2757,8 @@ def reset_igre(igrac1, igrac2):
             update_score(IGRACI[1].profil_broj, IGRACI[1].Ws, IGRACI[1].Ls)
             IGRACI[0].Ls += 1
             update_score(IGRACI[0].profil_broj, IGRACI[0].Ws, IGRACI[0].Ls)
+            pob_score = IGRACI[1]
+            luz_score = IGRACI[0]
         else:
             broj_runde += 1
             pocetak_runde = True
@@ -2737,6 +2772,8 @@ def reset_igre(igrac1, igrac2):
             update_score(IGRACI[0].profil_broj, IGRACI[0].Ws, IGRACI[0].Ls)
             IGRACI[1].Ls += 1
             update_score(IGRACI[1].profil_broj, IGRACI[1].Ws, IGRACI[1].Ls)
+            pob_score = IGRACI[0]
+            luz_score = IGRACI[1]
         elif igrac2.score == 4:
             kraj_igre = True
             pobjednik = selektirani_profili[1]
@@ -2746,6 +2783,8 @@ def reset_igre(igrac1, igrac2):
             update_score(IGRACI[1].profil_broj, IGRACI[1].Ws, IGRACI[1].Ls)
             IGRACI[0].Ls += 1
             update_score(IGRACI[0].profil_broj, IGRACI[0].Ws, IGRACI[0].Ls)
+            pob_score = IGRACI[1]
+            luz_score = IGRACI[0]
         else:
             broj_runde += 1
             pocetak_runde = True
@@ -2852,32 +2891,36 @@ def igranje():
         clock.tick(FPS)
 
 def winscreen():
-    global pobjednik, shef, luzer
+    global pobjednik, shef, luzer, pob_score, luz_score
     pygame.mouse.set_visible(True)
     naslov_font = pygame.font.Font(None, 110)
     naslov_surface = naslov_font.render(f"{pobjednik} je ultimativni pobjednik/ca!!!", False, "Black")
     naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 50))
     stats_font = pygame.font.Font(None, 70)
     wrunde = stats_font.render(f"{shef.score}", False, "Black")
-    wrunde_rect = wrunde.get_rect(center = (830, 340))
+    wrunde_rect = wrunde.get_rect(center = (830, 330))
     wudarci = stats_font.render(f"{shef.udarci}", False, "Black")
-    wudarci_rect = wudarci.get_rect(center = (830, 410))
+    wudarci_rect = wudarci.get_rect(center = (815, 410))
     wpostotak = stats_font.render(f"{int(shef.hit / shef.udarci * 100)}%", False, "Black")
-    wpostotak_rect = wpostotak.get_rect(center = (830, 510))
+    wpostotak_rect = wpostotak.get_rect(center = (830, 497))
     wblokirano = stats_font.render(f"{shef.blokirano}", False, "Black")
-    wblokirano_rect = wblokirano.get_rect(center = (830, 600))
+    wblokirano_rect = wblokirano.get_rect(center = (830, 582))
+    wvinluz = stats_font.render(f"{pob_score.Ws}W - {pob_score.Ls}L", "False", "Black")
+    wvinluz_rect = wvinluz.get_rect(center = (797, 670))
     lrunde = stats_font.render(f"{luzer.score}", False, "Black")
-    lrunde_rect = lrunde.get_rect(center = (1330, 335))
+    lrunde_rect = lrunde.get_rect(center = (1330, 325))
     ludarci = stats_font.render(f"{luzer.udarci}", False, "Black")
-    ludarci_rect = ludarci.get_rect(center = (1330, 410))
+    ludarci_rect = ludarci.get_rect(center = (1345, 402))
     try:
         postotak_value = int(luzer.hit / luzer.udarci * 100)
     except ZeroDivisionError:
         postotak_value = 0 
     lpostotak = stats_font.render(f"{postotak_value}%", False, "Black")
-    lpostotak_rect = lpostotak.get_rect(center = (1345, 500))
+    lpostotak_rect = lpostotak.get_rect(center = (1353, 485))
     lblokirano = stats_font.render(f"{luzer.blokirano}", False, "Black")
-    lblokirano_rect = lblokirano.get_rect(center = (1330, 590))
+    lblokirano_rect = lblokirano.get_rect(center = (1335, 582))
+    lvinluz = stats_font.render(f"{luz_score.Ws}W - {luz_score.Ls}L", False, "Black")
+    lvinluz_rect = lvinluz.get_rect(center = (1390, 657))
     dalje_botun = SlikeGumbi(dalje, dalje_hover, 1420, 750)
     run = True
     while run == True:
@@ -2892,10 +2935,12 @@ def winscreen():
         SCREEN.blit(wudarci, wudarci_rect)
         SCREEN.blit(wpostotak, wpostotak_rect)
         SCREEN.blit(wblokirano, wblokirano_rect)
+        SCREEN.blit(wvinluz, wvinluz_rect)
         SCREEN.blit(lrunde, lrunde_rect)
         SCREEN.blit(ludarci, ludarci_rect)
         SCREEN.blit(lpostotak, lpostotak_rect)
         SCREEN.blit(lblokirano, lblokirano_rect)
+        SCREEN.blit(lvinluz, lvinluz_rect)
         dalje_botun.crtanjeGumba(mouse_position)
 
         for event in pygame.event.get():
