@@ -31,7 +31,7 @@ def LOADING_SCREEN():
     pygame.display.update()
     time.sleep(5.7)                
     SCREEN.fill('White')
-#LOADING_SCREEN()
+LOADING_SCREEN()
 class SlikeGumbi:
     def __init__(self, slika, hover_slika, x, y):
         self.slika = slika
