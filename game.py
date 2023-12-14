@@ -1650,13 +1650,13 @@ def main():
     ACHIEVEMENTS_GUMB = SlikeGumbi(postignuca_gumb, postignuca_gumb_hover, 200, 483)
     IZADI_GUMB = SlikeGumbi(izadi_gumb, izadi_gumb_hover, 200, 673)
     promjena = 0
-    zadnji_achievement()
     while True:
         selektirani_profili.clear()
         PLAYERI_SELEKTIRANI.clear()
         PLAYERI_IMENA.clear()
         IGRACI.clear()
         SVI_IGRACI.clear()
+        zadnji_achievement()
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
         if promjena >= 2.9:
@@ -1886,12 +1886,7 @@ PLAYERI_IMENA = {}
 PLAYERI_LISTA_GUMBOVA = []
 
 selektirani_profili = []
-with open("Podzemne borbe\profili.txt",encoding="utf-8") as datoteka:
-    profili = datoteka.readlines()
-with open("Podzemne borbe\score.txt",encoding="utf-8") as datoteka:
-    score = datoteka.readlines()
-with open("Podzemne borbe\Achievements.txt",encoding="utf-8") as datoteka:
-    postignucici = datoteka.readlines()
+
 
 imenovanje_profila_bool = True
 biranje_profila_bool = True
@@ -1910,10 +1905,15 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
     naslov_surface = naslov_font.render("NAPRAVI PROFIL", False, "#0A0A09")
     naslov_rectangle = naslov_surface.get_rect(topleft = (50, 20))
     trenutno_ime_upis = ""
+    with open("Podzemne borbe\profili.txt",encoding="utf-8") as datoteka:
+        profili = datoteka.readlines()
+    with open("Podzemne borbe\score.txt",encoding="utf-8") as datoteka:
+        score = datoteka.readlines()
+    with open("Podzemne borbe\Achievements.txt",encoding="utf-8") as datoteka:
+        postignucici = datoteka.readlines()
     for i in range(1,9):
         PLAYERI_SELEKTIRANI.update({f"player_{i}":False})
         PLAYERI_IMENA.update({f"player{i}": profili[i-1][:-1]})
-    
     while imenovanje_profila_bool == True:
         SCREEN.fill("#d0d0d0")
         mouse_position = pygame.mouse.get_pos()
@@ -1986,6 +1986,7 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
                                 pass
                             else:
                                 score[i] = "0,0\n"
+                                postignucici[i] = "ne,ne,ne,ne,ne,ne\n"
                             
                             with open("Podzemne borbe\profili.txt", encoding="utf-8") as datoteka:
                                 profili = []
@@ -1996,8 +1997,6 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
                                 datoteka.writelines(profili)
                             with open("Podzemne borbe\score.txt","wt",encoding="utf-8",) as datoteka:
                                 datoteka.writelines(score)
-                            with open("Podzemne borbe\Achievements.txt","wt",encoding="utf-8",) as datoteka:
-                                datoteka.writelines(postignucici)
                             imenovanje_profila_bool = False
                         
                         
