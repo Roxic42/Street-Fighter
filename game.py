@@ -109,7 +109,15 @@ broz_gumb = pygame.image.load(os.path.join("Assets", "OdabirHeroja", "broz_gumb.
 broz_selektiran = pygame.image.load(os.path.join("Assets", "OdabirHeroja", "broz_selektiran.png")).convert_alpha()
 broz = pygame.image.load(os.path.join("Assets", "OdabirHeroja", "broz.png")).convert_alpha()
 
+#Slike za igranje
+publika = pygame.image.load(os.path.join("Assets", "Igranje", "background.png")).convert_alpha()
+arena = pygame.image.load(os.path.join("Assets", "Igranje", "arena.png")).convert_alpha()
+health = pygame.image.load(os.path.join("Assets", "Igranje", "health.png")).convert_alpha()
 
+#Slike za winscreen
+bekigrunt = pygame.image.load(os.path.join("Assets", "WinScreen", "background.png")).convert_alpha()
+andrew = pygame.image.load(os.path.join("Assets", "WinScreen", "andrejtejt.png")).convert_alpha()
+bruce = pygame.image.load(os.path.join("Assets", "WinScreen", "brozli.png")).convert_alpha()
 
 
 class SpriteRectangle(pygame.sprite.Sprite):
@@ -148,6 +156,10 @@ class Andrej(pygame.sprite.Sprite):
         self.udario_u_blok = False
 
         self.score = 0
+
+        self.udarci = 0
+        self.hit = 0
+        self.blokirano = 0
 
         self.pocetak_skoka = False
 
@@ -631,6 +643,10 @@ class Broz(Andrej):
 
         self.score = 0
 
+        self.udarci = 0
+        self.hit = 0
+        self.blokirano = 0
+
         self.pocetak_skoka = False
 
         self.pocinjen_damage = False
@@ -667,8 +683,6 @@ class Broz(Andrej):
         self.promjena_crouchwalk = 0
         self.idle = []
         self.promjena_idle = 0
-        self.jump = []
-        self.promjena_jump = 0
         self.kick = []
         self.promjena_kick = 0
         self.punch = []
@@ -680,246 +694,252 @@ class Broz(Andrej):
 
         if self.pozicija_borca == "lijevo":
             for image in range(3):
-                self.airkick.append(pygame.image.load(os.path.join("Assets", "brozli_animacije", "airpunch", f"BROZLIskokUdaracKick{image + 1}.png")).convert_alpha())
+                self.airkick.append(pygame.image.load(os.path.join("Assets", "brozli", f"jumpkickpunch{image + 1}.png")).convert_alpha())
             for image in range(3):
-                self.airpunch.append(pygame.image.load(os.path.join("Assets", "brozli_animacije", "airpunch", f"BROZLIskokUdaracKick{image + 1}.png")).convert_alpha())
+                self.airpunch.append(pygame.image.load(os.path.join("Assets", "brozli", f"jumpkickpunch{image + 1}.png")).convert_alpha())
             for image in range(2):
-                self.crouchwalk.append(pygame.image.load(os.path.join("Assets", "brozli_animacije", "crouchwalk", f"BROZLIcrouchwalk{image + 1}.png")).convert_alpha())
+                self.crouchwalk.append(pygame.image.load(os.path.join("Assets", "brozli", f"crouchmove{image + 1}.png")).convert_alpha())
             for image in range(2):
-                self.idle.append(pygame.image.load(os.path.join("Assets", "brozli_animacije", "idle", f"BROZLIstojeća{image + 1}.png")).convert_alpha())
+                self.idle.append(pygame.image.load(os.path.join("Assets", "brozli", f"idle{image + 1}.png")).convert_alpha())
             for image in range(3):
-                self.kick.append(pygame.image.load(os.path.join("Assets", "brozli_animacije", "kick", f"BROZLIkick{image + 1}.png")).convert_alpha())
+                self.kick.append(pygame.image.load(os.path.join("Assets", "brozli", f"kick{image + 1}.png")).convert_alpha())
             for image in range(3):
-                self.punch.append(pygame.image.load(os.path.join("Assets", "brozli_animacije", "punch", f"BROZLIpunch{image + 1}.png")).convert_alpha())
+                self.punch.append(pygame.image.load(os.path.join("Assets", "brozli", f"punch{image + 1}.png")).convert_alpha())
             for image in range(2):
-                self.walk.append(pygame.image.load(os.path.join("Assets", "brozli_animacije", "walk", f"BROZLIkretanje{image + 1}.png")).convert_alpha())
-            self.stun = pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIstunned1.png")).convert_alpha()
-            self.jump = pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIskok.png")).convert_alpha()
-            self.block = pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIblock.png")).convert_alpha()
-            self.crouch = pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIcrouch.png")).convert_alpha()
-            self.fatality = pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIfatality.png")).convert_alpha()
+                self.walk.append(pygame.image.load(os.path.join("Assets", "brozli", f"move{image + 1}.png")).convert_alpha())
+            for image in range(3):
+                self.crouchpunch.append(pygame.image.load(os.path.join("Assets", "brozli", f"crouchpunch{image + 1}.png")).convert_alpha())
+            self.stun = pygame.image.load(os.path.join("Assets", "brozli", "stunned.png")).convert_alpha()
+            self.jump = pygame.image.load(os.path.join("Assets", "brozli", "jump.png")).convert_alpha()
+            self.block = pygame.image.load(os.path.join("Assets", "brozli", "blok.png")).convert_alpha()
+            self.crouch = pygame.image.load(os.path.join("Assets", "brozli", "crouchmove1.png")).convert_alpha()
+            self.fatality = pygame.image.load(os.path.join("Assets", "brozli", "fatality.png")).convert_alpha()
         elif self.pozicija_borca == "desno":
             for image in range(3):
-                self.airkick.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "airpunch", f"BROZLIskokUdaracKick{image + 1}.png")).convert_alpha()))
+                self.airkick.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli", f"jumpkickpunch{image + 1}.png")).convert_alpha(), True, False))
             for image in range(3):
-                self.airpunch.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "airpunch", f"BROZLIskokUdaracKick{image + 1}.png")).convert_alpha()))
+                self.airpunch.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli", f"jumpkickpunch{image + 1}.png")).convert_alpha(), True, False))
             for image in range(2):
-                self.crouchwalk.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "crouchwalk", f"BROZLIcrouchwalk{image + 1}.png")).convert_alpha()))
+                self.crouchwalk.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli", f"crouchmove{image + 1}.png")).convert_alpha(), True, False))
             for image in range(2):
-                self.idle.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "idle", f"BROZLIstojeća{image + 1}.png")).convert_alpha()))
+                self.idle.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli", f"idle{image + 1}.png")).convert_alpha(), True, False))
             for image in range(3):
-                self.kick.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "kick", f"BROZLIkick{image + 1}.png")).convert_alpha()))
+                self.kick.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli", f"kick{image + 1}.png")).convert_alpha(), True, False))
             for image in range(3):
-                self.punch.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "punch", f"BROZLIpunch{image + 1}.png")).convert_alpha()))
+                self.punch.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli", f"punch{image + 1}.png")).convert_alpha(), True, False))
             for image in range(2):
-                self.walk.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "walk", f"BROZLIkretanje{image + 1}.png")).convert_alpha()))
-            self.stun = pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIstunned1.png")).convert_alpha())
-            self.jump = pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIskok.png")).convert_alpha())
-            self.block = pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIblock.png")).convert_alpha())
-            self.crouch = pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIcrouch.png")).convert_alpha())
-            self.fatality = pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli_animacije", "BROZLIfatality.png")).convert_alpha())
+                self.walk.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli", f"move{image + 1}.png")).convert_alpha(), True, False))
+            for image in range(3):
+                self.crouchpunch.append(pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli", f"crouchpunch{image + 1}.png")).convert_alpha(), True, False))
+            self.stun = pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli", "stunned.png")).convert_alpha(), True, False)
+            self.jump = pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli", "jump.png")).convert_alpha(), True, False)
+            self.block = pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli", "blok.png")).convert_alpha(), True, False)
+            self.crouch = pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli", "crouchmove1.png")).convert_alpha(), True, False)
+            self.fatality = pygame.transform.flip(pygame.image.load(os.path.join("Assets", "brozli", "fatality.png")).convert_alpha(), True, False)
 
     def idleRectangles(self):
         self.rectangles.empty()
         if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 107, self.baseRect.topleft[1] + 21, 105, 119)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 65, self.baseRect.topleft[1] + 122, 159, 152)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 188, self.baseRect.topleft[1] + 138, 182, 90)
-            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 8, self.baseRect.topleft[1] + 162, 105, 105)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 16, self.baseRect.topleft[1] + 296, 357, 297)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 110, self.baseRect.topleft[1] + 46, 75, 103)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 76, self.baseRect.topleft[1] + 143, 117, 136)
+            self.handsRect = SpriteRectangle("Green", self.baseRect.topleft[0] + 158, self.baseRect.topleft[1] + 152, 178, 88)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 52, self.baseRect.topleft[1] + 279, 247, 300)
         else:
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] -212, self.baseRect.topleft[1] + 21, 105, 119)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 224, self.baseRect.topleft[1] + 122, 159, 152)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 370, self.baseRect.topleft[1] + 138, 182, 90)
-            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 113, self.baseRect.topleft[1] + 162, 105, 105)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 373, self.baseRect.topleft[1] + 296, 357, 297)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topright[0] - 185, self.baseRect.topleft[1] + 46, 75, 103)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topright[0] - 193, self.baseRect.topleft[1] + 143, 117, 136)
+            self.handsRect = SpriteRectangle("Green", self.baseRect.topright[0] - 336, self.baseRect.topleft[1] + 152, 178, 88)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topright[0] - 299, self.baseRect.topleft[1] + 279, 247, 300)
         self.rectangles.add(self.headRect)
         self.rectangles.add(self.torsoRect)
-        self.rectangles.add(self.hand1Rect)
-        self.rectangles.add(self.hand2Rect)
+        self.rectangles.add(self.handsRect)
         self.rectangles.add(self.legsRect)
 
     def jumpRectangles(self):
         self.rectangles.empty()
         if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 164, self.baseRect.topleft[1] + 6, 96, 103)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 88, self.baseRect.topleft[1] + 25, 127, 130)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 25, self.baseRect.topleft[1] + 43, 82, 40)
-            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 8, self.baseRect.topleft[1] + 33, 103, 117)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 78, self.baseRect.topleft[1] + 128, 234, 333)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 184, self.baseRect.topleft[1] + 103, 73, 99)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 75, self.baseRect.topleft[1] + 112, 143, 144)
+            self.handsRect = SpriteRectangle("Green", self.baseRect.topleft[0] + 0, self.baseRect.topleft[1] + 129, 75, 108)
+            self.leg1Rect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 107, self.baseRect.topleft[1] + 254, 104, 316)
+            self.leg2Rect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 211, self.baseRect.topleft[1] + 267, 103, 118)
         else:
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 260, self.baseRect.topleft[1] + 6, 96, 103)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 215, self.baseRect.topleft[1] + 25, 127, 130)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 107, self.baseRect.topleft[1] + 43, 82, 40)
-            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 111, self.baseRect.topleft[1] + 33, 103, 117)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 312, self.baseRect.topleft[1] + 128, 234, 333)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topright[0] - 257, self.baseRect.topleft[1] + 103, 73, 99)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topright[0] - 218, self.baseRect.topleft[1] + 112, 143, 144)
+            self.handsRect = SpriteRectangle("Green", self.baseRect.topright[0] - 75, self.baseRect.topleft[1] + 129, 75, 108)
+            self.leg1Rect = SpriteRectangle("Pink", self.baseRect.topright[0] - 211, self.baseRect.topleft[1] + 254, 104, 316)
+            self.leg2Rect = SpriteRectangle("Pink", self.baseRect.topright[0] - 314, self.baseRect.topleft[1] + 267, 103, 118)
         self.rectangles.add(self.headRect)
         self.rectangles.add(self.torsoRect)
-        self.rectangles.add(self.hand1Rect)
-        self.rectangles.add(self.hand2Rect)
-        self.rectangles.add(self.legsRect)
+        self.rectangles.add(self.handsRect)
+        self.rectangles.add(self.leg1Rect)
+        self.rectangles.add(self.leg2Rect)
         
 
     def crouchRectangles(self):
         self.rectangles.empty()
         if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 35, self.baseRect.topleft[1] + 347, 102, 89)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 74, self.baseRect.topleft[1] + 396, 140, 49)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 138, self.baseRect.topleft[1] + 334, 192, 108)
-            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 9, self.baseRect.topleft[1] + 406, 114, 179)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 38, self.baseRect.topleft[1] + 435, 195, 132)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 141, self.baseRect.topleft[1] + 234, 65, 78)
+            self.handsRect = SpriteRectangle("Green", self.baseRect.topleft[0] + 52, self.baseRect.topleft[1] + 296, 135, 106)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 32, self.baseRect.topleft[1] + 402, 211, 178)
         else:
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 137, self.baseRect.topleft[1] + 347, 102, 89)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 214, self.baseRect.topleft[1] + 396, 140, 49)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 330, self.baseRect.topleft[1] + 334, 192, 108)
-            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 123, self.baseRect.topleft[1] + 406, 114, 179)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 233, self.baseRect.topleft[1] + 435, 195, 132)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topright[0] - 206, self.baseRect.topleft[1] + 234, 65, 78)
+            self.handsRect = SpriteRectangle("Green", self.baseRect.topright[0] - 187, self.baseRect.topleft[1] + 296, 135, 106)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topright[0] - 243, self.baseRect.topleft[1] + 402, 211, 178)
         self.rectangles.add(self.headRect)
-        self.rectangles.add(self.torsoRect)
-        self.rectangles.add(self.hand1Rect)
-        self.rectangles.add(self.hand2Rect)
+        self.rectangles.add(self.handsRect)
         self.rectangles.add(self.legsRect)
 
 
     def blockRectangles(self):
         self.rectangles.empty()
         if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 91, self.baseRect.topleft[1] + 34, 91, 90)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 64, self.baseRect.topleft[1] + 116, 98, 89)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 88, self.baseRect.topleft[1] + 37, 165, 97)
-            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 42, self.baseRect.topleft[1] + 84, 164, 75)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 42, self.baseRect.topleft[1] + 196, 211, 196)
-            self.blockRect = SpriteRectangle("Light blue", self.baseRect.topleft[0] + 37, self.baseRect.topleft[1] + 26, 215, 189)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 120, self.baseRect.topleft[1] + 27, 61, 107)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 54, self.baseRect.topleft[1] + 94, 130, 127)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 46, self.baseRect.topleft[1] + 221, 200, 356)
+            self.blockRect = SpriteRectangle("Light blue", self.baseRect.topleft[0] + 155, self.baseRect.topleft[1] + 84, 127, 261)
         else:
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 173, self.baseRect.topleft[1] + 34, 91, 90)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 162, self.baseRect.topleft[1] + 116, 98, 89)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 253, self.baseRect.topleft[1] + 37, 165, 97)
-            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 206, self.baseRect.topleft[1] + 84, 164, 75)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 253, self.baseRect.topleft[1] + 196, 211, 196)
-            self.blockRect = SpriteRectangle("Light blue", self.baseRect.topleft[0] - 252, self.baseRect.topleft[1] + 26, 215, 189)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topright[0] - 181, self.baseRect.topleft[1] + 27, 61, 107)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topright[0] - 184, self.baseRect.topleft[1] + 94, 130, 127)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topright[0] - 246, self.baseRect.topleft[1] + 221, 200, 356)
+            self.blockRect = SpriteRectangle("Light blue", self.baseRect.topright[0] - 282, self.baseRect.topleft[1] + 84, 127, 261)
         self.rectangles.add(self.headRect)
         self.rectangles.add(self.torsoRect)
-        self.rectangles.add(self.hand1Rect)
-        self.rectangles.add(self.hand2Rect)
         self.rectangles.add(self.legsRect)
         self.rectangles.add(self.blockRect)
 
     def stunnedRectangles(self):
         self.rectangles.empty()
         if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 140, self.baseRect.topleft[1] + 112, 76, 95)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 60, self.baseRect.topleft[1] + 152, 109, 107)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 167, self.baseRect.topleft[1] + 160, 131, 81)
-            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 12, self.baseRect.topleft[1] + 155, 96, 216)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 51, self.baseRect.topleft[1] + 251, 232, 335)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 151, self.baseRect.topleft[1] + 71, 65, 88)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 70, self.baseRect.topleft[1] + 106, 156, 121)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 61, self.baseRect.topleft[1] + 227, 165, 341)
         else:
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 216, self.baseRect.topleft[1] + 112, 76, 95)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 109, self.baseRect.topleft[1] + 152, 109, 107)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 298, self.baseRect.topleft[1] + 160, 131, 81)
-            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 108, self.baseRect.topleft[1] + 155, 96, 216)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 283, self.baseRect.topleft[1] + 251, 232, 335)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topright[0] - 216, self.baseRect.topleft[1] + 71, 65, 88)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topright[0] - 226, self.baseRect.topleft[1] + 106, 156, 121)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topright[0] - 226, self.baseRect.topleft[1] + 227, 165, 341)
         self.rectangles.add(self.headRect)
         self.rectangles.add(self.torsoRect)
-        self.rectangles.add(self.hand1Rect)
-        self.rectangles.add(self.hand2Rect)
         self.rectangles.add(self.legsRect)
 
     def crouchPunchRectangles(self):
         self.rectangles.empty()
         if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 108, self.baseRect.topleft[1] + 56, 77, 80)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 60, self.baseRect.topleft[1] + 111, 132, 163)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 54, self.baseRect.topleft[1] + 274, 153, 297)
-            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] + 167, self.baseRect.topleft[1] + 0, 73, 230)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 46, self.baseRect.topleft[1] + 378, 78, 67)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 95, self.baseRect.topleft[1] + 303, 133, 163)
+            self.handsRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 93, self.baseRect.topleft[1] + 206, 78, 380)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 177, self.baseRect.topleft[1] + 178, 123, 171)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] + 258, self.baseRect.topleft[1] + 98, 99, 144)
         else:
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topright[0] - 185, self.baseRect.topleft[1] + 56, 77, 80)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topright[0] - 192, self.baseRect.topleft[1] + 111, 132, 163)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topright[0] - 207, self.baseRect.topleft[1] + 274, 153, 297)
-            self.damageRect = SpriteRectangle("Red", self.baseRect.topright[0] - 240, self.baseRect.topleft[1] + 0, 73, 230)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topright[0] - 124, self.baseRect.topleft[1] + 378, 78, 67)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topright[0] - 228, self.baseRect.topleft[1] + 303, 133, 163)
+            self.handsRect = SpriteRectangle("Yellow", self.baseRect.topright[0] - 171, self.baseRect.topleft[1] + 206, 78, 380)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topright[0] - 300, self.baseRect.topleft[1] + 178, 123, 171)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topright[0] - 357, self.baseRect.topleft[1] + 98, 99, 144)
         self.rectangles.add(self.headRect)
         self.rectangles.add(self.torsoRect)
+        self.rectangles.add(self.handsRect)
         self.rectangles.add(self.legsRect)
         self.rectangles.add(self.damageRect)
 
     def jumpPunchRectangles(self):
         self.rectangles.empty()
         if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 67, self.baseRect.topleft[1] + 14, 111, 119)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 22, self.baseRect.topleft[1] + 82, 105, 145)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 108, self.baseRect.topleft[1] + 115, 161, 152)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 8, self.baseRect.topleft[1] + 200, 343, 147)
-            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] + 254, self.baseRect.topleft[1] + 75, 160, 271)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 81, self.baseRect.topleft[1] + 52, 73, 97)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 8, self.baseRect.topleft[1] + 99, 99, 141)
+            self.handsRect = SpriteRectangle("Green", self.baseRect.topleft[0] + 104, self.baseRect.topleft[1] + 126, 176, 46)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 17, self.baseRect.topleft[1] + 240, 197, 103)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] + 214, self.baseRect.topleft[1] + 242, 160, 110)
         else:
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 178, self.baseRect.topleft[1] + 14, 111, 119)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 127, self.baseRect.topleft[1] + 82, 105, 145)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 269, self.baseRect.topleft[1] + 115, 161, 152)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 351, self.baseRect.topleft[1] + 200, 343, 147)
-            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] - 414, self.baseRect.topleft[1] + 75, 160, 271)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topright[0] - 154, self.baseRect.topleft[1] + 52, 73, 97)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topright[0] - 107, self.baseRect.topleft[1] + 99, 99, 141)
+            self.handsRect = SpriteRectangle("Green", self.baseRect.topright[0] - 280, self.baseRect.topleft[1] + 126, 176, 46)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topright[0] - 214, self.baseRect.topleft[1] + 240, 197, 103)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topright[0] - 374, self.baseRect.topleft[1] + 242, 160, 110)
         self.rectangles.add(self.headRect)
         self.rectangles.add(self.torsoRect)
-        self.rectangles.add(self.hand1Rect)
+        self.rectangles.add(self.handsRect)
         self.rectangles.add(self.legsRect)
         self.rectangles.add(self.damageRect)
 
     def jumpKickRectangles(self):
         self.rectangles.empty()
         if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 67, self.baseRect.topleft[1] + 14, 111, 119)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 22, self.baseRect.topleft[1] + 82, 105, 145)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 108, self.baseRect.topleft[1] + 115, 161, 152)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 8, self.baseRect.topleft[1] + 200, 343, 147)
-            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] + 254, self.baseRect.topleft[1] + 75, 160, 271)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 81, self.baseRect.topleft[1] + 52, 73, 97)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 8, self.baseRect.topleft[1] + 99, 99, 141)
+            self.handsRect = SpriteRectangle("Green", self.baseRect.topleft[0] + 104, self.baseRect.topleft[1] + 126, 176, 46)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 17, self.baseRect.topleft[1] + 240, 197, 103)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] + 214, self.baseRect.topleft[1] + 242, 160, 110)
         else:
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 178, self.baseRect.topleft[1] + 14, 111, 119)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 127, self.baseRect.topleft[1] + 82, 105, 145)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 269, self.baseRect.topleft[1] + 115, 161, 152)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 351, self.baseRect.topleft[1] + 200, 343, 147)
-            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] - 414, self.baseRect.topleft[1] + 75, 160, 271)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topright[0] - 154, self.baseRect.topleft[1] + 52, 73, 97)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topright[0] - 107, self.baseRect.topleft[1] + 99, 99, 141)
+            self.handsRect = SpriteRectangle("Green", self.baseRect.topright[0] - 280, self.baseRect.topleft[1] + 126, 176, 46)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topright[0] - 214, self.baseRect.topleft[1] + 240, 197, 103)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topright[0] - 374, self.baseRect.topleft[1] + 242, 160, 110)
         self.rectangles.add(self.headRect)
         self.rectangles.add(self.torsoRect)
-        self.rectangles.add(self.hand1Rect)
+        self.rectangles.add(self.handsRect)
         self.rectangles.add(self.legsRect)
         self.rectangles.add(self.damageRect)
 
     def punchRectangles(self):
         self.rectangles.empty()
         if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 167, self.baseRect.topleft[1] + 47, 75, 87)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 129, self.baseRect.topleft[1] + 119, 98, 111)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 204, self.baseRect.topleft[1] + 102, 104, 60)
-            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 109, self.baseRect.topleft[1] + 116, 41, 104)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 4, self.baseRect.topleft[1] + 268, 402, 316)
-            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] + 347, self.baseRect.topleft[1] + 100, 38, 56)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 167, self.baseRect.topleft[1] + 62, 67, 67)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 132, self.baseRect.topleft[1] + 125, 86, 173)
+            self.handsRect = SpriteRectangle("Green", self.baseRect.topleft[0] + 203, self.baseRect.topleft[1] + 109, 113, 49)
+            self.leg1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] + 182, self.baseRect.topleft[1] + 298, 116, 86)
+            self.leg2Rect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 294, self.baseRect.topleft[1] + 360, 49, 191)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] + 316, self.baseRect.topleft[1] + 102, 62, 53)
         else:
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 242, self.baseRect.topleft[1] + 47, 75, 87)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 227, self.baseRect.topleft[1] + 119, 98, 111)
-            self.hand1Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 308, self.baseRect.topleft[1] + 102, 104, 60)
-            self.hand2Rect = SpriteRectangle("Green", self.baseRect.topleft[0] - 150, self.baseRect.topleft[1] + 116, 41, 104)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 406, self.baseRect.topleft[1] + 268, 402, 316)
-            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] - 385, self.baseRect.topleft[1] + 100, 38, 56)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topright[0] - 234, self.baseRect.topleft[1] + 62, 67, 67)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topright[0] - 218, self.baseRect.topleft[1] + 125, 86, 173)
+            self.handsRect = SpriteRectangle("Green", self.baseRect.topright[0] - 316, self.baseRect.topleft[1] + 109, 113, 49)
+            self.leg1Rect = SpriteRectangle("Green", self.baseRect.topright[0] - 298, self.baseRect.topleft[1] + 298, 116, 86)
+            self.leg2Rect = SpriteRectangle("Pink", self.baseRect.topright[0] - 343, self.baseRect.topleft[1] + 360, 49, 191)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topright[0] - 378, self.baseRect.topleft[1] + 102, 62, 53)
         self.rectangles.add(self.headRect)
         self.rectangles.add(self.torsoRect)
-        self.rectangles.add(self.hand1Rect)
-        self.rectangles.add(self.hand2Rect)
-        self.rectangles.add(self.legsRect)
+        self.rectangles.add(self.handsRect)
+        self.rectangles.add(self.leg1Rect)
+        self.rectangles.add(self.leg2Rect)
         self.rectangles.add(self.damageRect)
 
     def kickRectangles(self):
         self.rectangles.empty()
         if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 8, self.baseRect.topleft[1] + 122, 82, 82)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 23, self.baseRect.topleft[1] + 204, 132, 99)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 111, self.baseRect.topleft[1] + 246, 116, 346)
-            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] + 163, self.baseRect.topleft[1] + 58, 215, 134)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 5, self.baseRect.topleft[1] + 102, 72, 80)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 11, self.baseRect.topleft[1] + 136, 134, 132)
+            self.leg1Rect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 109, self.baseRect.topleft[1] + 268, 104, 318)
+            self.leg2Rect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 147, self.baseRect.topleft[1] + 147, 136, 120)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] + 283, self.baseRect.topleft[1] + 81, 100, 116)
         else:
-            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] - 90, self.baseRect.topleft[1] + 122, 82, 82)
-            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] - 146, self.baseRect.topleft[1] + 204, 132, 99)
-            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] - 227, self.baseRect.topleft[1] + 246, 116, 346)
-            self.damageRect = SpriteRectangle("Red", self.baseRect.topleft[0] - 378, self.baseRect.topleft[1] + 58, 215, 134)
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topright[0] - 78, self.baseRect.topleft[1] + 102, 72, 80)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topright[0] - 145, self.baseRect.topleft[1] + 136, 134, 132)
+            self.leg1Rect = SpriteRectangle("Pink", self.baseRect.topright[0] - 213, self.baseRect.topleft[1] + 268, 104, 318)
+            self.leg2Rect = SpriteRectangle("Pink", self.baseRect.topright[0] - 283, self.baseRect.topleft[1] + 147, 136, 120)
+            self.damageRect = SpriteRectangle("Red", self.baseRect.topright[0] - 383, self.baseRect.topleft[1] + 81, 100, 116)
         self.rectangles.add(self.headRect)
         self.rectangles.add(self.torsoRect)
-        self.rectangles.add(self.legsRect)
+        self.rectangles.add(self.leg1Rect)
+        self.rectangles.add(self.leg2Rect)
         self.rectangles.add(self.damageRect)
+
+    def moveRectangles(self):
+        self.rectangles.empty()
+        if (self.pozicija_borca == "lijevo" and obrnuto == False) or (self.pozicija_borca == "desno" and obrnuto == True):
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topleft[0] + 180, self.baseRect.topleft[1] + 35, 65, 85)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 145, self.baseRect.topleft[1] + 109, 86, 180)
+            self.handsRect = SpriteRectangle("Yellow", self.baseRect.topleft[0] + 87, self.baseRect.topleft[1] + 128, 174, 125)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topleft[0] + 17, self.baseRect.topleft[1] + 289, 240, 283)
+        else:
+            self.headRect = SpriteRectangle("Blue", self.baseRect.topright[0] - 245, self.baseRect.topleft[1] + 35, 65, 85)
+            self.torsoRect = SpriteRectangle("Yellow", self.baseRect.topright[0] - 231, self.baseRect.topleft[1] + 109, 86, 180)
+            self.handsRect = SpriteRectangle("Yellow", self.baseRect.topright[0] - 261, self.baseRect.topleft[1] + 128, 174, 125)
+            self.legsRect = SpriteRectangle("Pink", self.baseRect.topright[0] - 257, self.baseRect.topleft[1] + 289, 240, 283)
+        self.rectangles.add(self.headRect)
+        self.rectangles.add(self.torsoRect)
+        self.rectangles.add(self.handsRect)
+        self.rectangles.add(self.legsRect)
 
 
     def postavljanjeRectangleova(self):
@@ -986,23 +1006,16 @@ class Broz(Andrej):
             if self.promjena_airpunch >= 2:
                 self.promjena_airpunch = 2
             else:
-                self.promjena_airpunch += 0.17
+                self.promjena_airpunch += 0.115
             SCREEN.blit(self.airpunch[int(self.promjena_airpunch)], (self.baseRectX, self.baseRectY))
         elif self.varijable["jumping"] == True:
-            if self.pocetak_skok_animacije == True:
-                self.pocetak_skok_animacije = False
-                self.promjena_jump = 0
-            if self.promjena_jump >= 1:
-                self.promjena_jump = 1
-            else:
-                self.promjena_jump += 0.15
-            SCREEN.blit(self.jump[int(self.promjena_jump)], (self.baseRectX, self.baseRectY))
+            SCREEN.blit(self.jump, (self.baseRectX, self.baseRectY))
         elif self.kick_animacija == True:
             if self.pocetak_kick_animacija == True:
                 self.pocetak_kick_animacija = False
                 self.promjena_kick = 0
-            if self.promjena_kick >= 3:
-                self.promjena_kick = 3
+            if self.promjena_kick >= 2:
+                self.promjena_kick = 2
             else:
                 self.promjena_kick += 0.1
             SCREEN.blit(self.kick[int(self.promjena_kick)], (self.baseRectX, self.baseRectY))
@@ -1019,6 +1032,7 @@ class Broz(Andrej):
             self.promjena_walk += 0.1
             if self.promjena_walk > 2:
                 self.promjena_walk = 0
+            self.moveRectangles()
             SCREEN.blit(self.walk[int(self.promjena_walk)], (self.baseRectX, self.baseRectY))
         else:
             self.promjena_idle += 0.1
@@ -1038,8 +1052,6 @@ class Broz(Andrej):
             self.crouchwalk[i] = flip_image_horizontally(self.crouchwalk[i])
         for i in range(len(self.idle)):
             self.idle[i] = flip_image_horizontally(self.idle[i])
-        for i in range(len(self.jump)):
-            self.jump[i] = flip_image_horizontally(self.jump[i])
         for i in range(len(self.kick)):
             self.kick[i] = flip_image_horizontally(self.kick[i])
         for i in range(len(self.punch)):
@@ -1050,41 +1062,42 @@ class Broz(Andrej):
         self.crouch = flip_image_horizontally(self.crouch)
         self.fatality = flip_image_horizontally(self.fatality)
         self.stun = flip_image_horizontally(self.stun)
+        self.jump = flip_image_horizontally(self.jump)
 
 
 def crtanjeHealthaIImena(igrac, pozicija):
-    transparent_back = pygame.Surface((400, 30))
+    transparent_back = pygame.Surface((406, 46))
     transparent_back.fill("Black")
     transparent_back.set_alpha(100)
     if pozicija == "lijevo":
         x = 30
         ime = selektirani_profili[0]
     elif pozicija == "desno":
-        x = 1170
+        x = 1167
         ime = selektirani_profili[1]
-    SCREEN.blit(transparent_back, (x, 35))
+    SCREEN.blit(transparent_back, (x, 52))
     if igrac.health < 4:
         boja = "Red"
     elif igrac.health < 8:
         boja = "Yellow"
     else:
         boja = "Green"
-    health_bar = pygame.Surface(((0.1 * igrac.health * 400), 30))
+    health_bar = pygame.Surface(((0.1 * igrac.health * 406), 46))
     health_bar.fill(boja)
-    SCREEN.blit(health_bar, (x, 35))
+    SCREEN.blit(health_bar, (x, 52))
     ime_font = pygame.font.Font(None, 40)
     ime_surface = ime_font.render(ime, True, "White")
-    ime_rectangle = ime_surface.get_rect(topleft = (x, 5))
+    ime_rectangle = ime_surface.get_rect(midtop = (x + 203, 5))
     SCREEN.blit(ime_surface, ime_rectangle)
     if igrac.stamina < 0:
         igrac.stamina = 0
-    transparent_back = pygame.Surface((300, 15))
+    transparent_back = pygame.Surface((406, 22))
     transparent_back.fill("Black")
     transparent_back.set_alpha(100)
-    SCREEN.blit(transparent_back, (x, 70))
-    stamina_bar = pygame.Surface((((igrac.stamina / 5) * 300), 15))
+    SCREEN.blit(transparent_back, (x, 114))
+    stamina_bar = pygame.Surface((((igrac.stamina / 5) * 406), 22))
     stamina_bar.fill("Blue")
-    SCREEN.blit(stamina_bar, (x, 70))
+    SCREEN.blit(stamina_bar, (x, 114))
 
 def crtanjeRunde(igrac1, igrac2):
     global broj_runde
@@ -1110,7 +1123,7 @@ def provjeraPozicijeZaObrnuto(left, right):
             promjena_obrnuto = True
 
 keybind_preset1 = {"left": pygame.K_a, "right" : pygame.K_d, "up" : pygame.K_w, "down" : pygame.K_s, "punch" : pygame.K_LSHIFT, "kick" : pygame.K_LCTRL, "block" : pygame.K_SPACE}
-keybind_preset2 = {"left": pygame.K_LEFT, "right" : pygame.K_RIGHT, "up" : pygame.K_UP, "down" : pygame.K_DOWN, "punch" : pygame.K_m, "kick" : pygame.K_b, "block" : pygame.K_n}
+keybind_preset2 = {"left": pygame.K_LEFT, "right" : pygame.K_RIGHT, "up" : pygame.K_UP, "down" : pygame.K_DOWN, "punch" : pygame.K_m, "kick" : pygame.K_n, "block" : pygame.K_b}
 keybind_preset3 = {"left": pygame.K_KP4, "right" : pygame.K_KP6, "up" : pygame.K_KP8, "down" : pygame.K_KP5, "punch" : pygame.K_p, "kick" : pygame.K_i, "block" : pygame.K_o}
 
 def provjeraTrajanjaUdaraca(igrac):
@@ -1274,6 +1287,7 @@ def provjeraUdarcaIUdaranje(igrac, pritisnuta_tipka, trazena_tipka):
                 igrac.pocinjen_damage = False
                 igrac.opcenito_attack_timer_start = time.time()
             igrac.stamina -= 1
+            igrac.udarci += 1
             igrac.promjena_stamine = time.time()
             igrac.udario_u_blok = False
 
@@ -1315,6 +1329,7 @@ def provjeraNogeINogatanje(igrac, pritisnuta_tipka, trazena_tipka):
             igrac.stamina -= 1
             igrac.promjena_stamine = time.time()
             igrac.udario_u_blok = False
+            igrac.udarci += 1
 
 def provjeraDamagea(igrac1, igrac2):
     if findDamageRectangle(igrac1) == True:
@@ -1335,6 +1350,7 @@ def provjeraDamagea(igrac1, igrac2):
                 pass
             else:
                 igrac1.udario_u_blok = True
+                igrac2.blokirano += 1
                 igrac2.stamina -= 0.5
                 igrac2.promjena_stamine = time.time()
         elif igrac2.varijable["defeated"] == True:
@@ -1344,6 +1360,7 @@ def provjeraDamagea(igrac1, igrac2):
             igrac2.stunned_timer_start = time.time()
             igrac2.health -= 1
             igrac1.pocinjen_damage = True
+            igrac1.hit += 1
         else:
             pass
     if findDamageRectangle(igrac2) == True:
@@ -1364,6 +1381,7 @@ def provjeraDamagea(igrac1, igrac2):
                 pass
             else:
                 igrac2.udario_u_blok = True
+                igrac1.blokirano += 1
                 igrac1.stamina -= 0.5
                 igrac1.promjena_stamine = time.time()
         elif igrac1.varijable["defeated"] == True:
@@ -1373,6 +1391,7 @@ def provjeraDamagea(igrac1, igrac2):
             igrac1.stunned_timer_start = time.time()
             igrac1.health -= 1
             igrac2.pocinjen_damage = True
+            igrac2.hit += 1
         else:
             pass
 
@@ -2048,11 +2067,11 @@ def odabir_borca1():
         SCREEN.blit(andrej, (0,0))
         SCREEN.blit(broz, (0,0))
 
-        A_GUMB = SlikeGumbi(andrej_gumb, andrej_gumb_hover, 425, 300)
-        A_SELEKT_GUMB = SlikeGumbi(andrej_gumb_selektiran, andrej_gumb_selektiran, 425, 300)
+        A_GUMB = SlikeGumbi(andrej_gumb, andrej_gumb_hover, 425, 400)
+        A_SELEKT_GUMB = SlikeGumbi(andrej_gumb_selektiran, andrej_gumb_selektiran, 425, 400)
 
-        B_GUMB = SlikeGumbi(broz_gumb, broz_gumb_hover, 600, 125)
-        B_SELEKT_GUMB = SlikeGumbi(broz_gumb_selektiran, broz_gumb_selektiran, 600, 125)
+        B_GUMB = SlikeGumbi(broz_gumb, broz_gumb_hover, 600, 175)
+        B_SELEKT_GUMB = SlikeGumbi(broz_gumb_selektiran, broz_gumb_selektiran, 600, 175)
 
         DALJE_GUMB = SlikeGumbi(dalje, dalje_hover, 710, 650)
         DALJE_GUMB_NEMOZE = SlikeGumbi(dalje_invalid, dalje_invalid, 710, 650)
@@ -2129,11 +2148,11 @@ def odabir_borca2():
         SCREEN.blit(andrej, (0,0))
         SCREEN.blit(broz, (0,0))
 
-        A_GUMB = SlikeGumbi(andrej_gumb, andrej_gumb_hover, 425, 300)
-        A_SELEKT_GUMB = SlikeGumbi(andrej_gumb_selektiran, andrej_gumb_selektiran, 425, 300)
+        A_GUMB = SlikeGumbi(andrej_gumb, andrej_gumb_hover, 425, 400)
+        A_SELEKT_GUMB = SlikeGumbi(andrej_gumb_selektiran, andrej_gumb_selektiran, 425, 400)
 
-        B_GUMB = SlikeGumbi(broz_gumb, broz_gumb_hover, 600, 125)
-        B_SELEKT_GUMB = SlikeGumbi(broz_gumb_selektiran, broz_gumb_selektiran, 600, 125)
+        B_GUMB = SlikeGumbi(broz_gumb, broz_gumb_hover, 600, 175)
+        B_SELEKT_GUMB = SlikeGumbi(broz_gumb_selektiran, broz_gumb_selektiran, 600, 175)
 
         DALJE_GUMB = SlikeGumbi(dalje, dalje_hover, 710, 650)
         DALJE_GUMB_NEMOZE = SlikeGumbi(dalje_invalid, dalje_invalid, 710, 650)
@@ -2539,11 +2558,13 @@ def provjeraJeLiTkoDefeated(igrac1, igrac2):
             reset_igre(igrac1, igrac2)
 
 def reset_igre(igrac1, igrac2):
-    global kraj_igre, pobjednik, pocetak_runde, broj_runde, IGRACI
+    global kraj_igre, pobjednik, shef, luzer, pocetak_runde, broj_runde, IGRACI
     if broj_rundi == 1:
         if igrac1.score == 1:
             kraj_igre = True
             pobjednik = selektirani_profili[0]
+            shef = BORCI["igrac1"]
+            luzer = BORCI["igrac2"]
             IGRACI[0].Ws += 1
             update_score(IGRACI[0].profil_broj, IGRACI[0].Ws, IGRACI[0].Ls)
             IGRACI[1].Ls += 1
@@ -2551,6 +2572,8 @@ def reset_igre(igrac1, igrac2):
         elif igrac2.score == 1:
             kraj_igre = True
             pobjednik = selektirani_profili[1]
+            shef = BORCI["igrac2"]
+            luzer = BORCI["igrac1"]
             IGRACI[1].Ws += 1
             update_score(IGRACI[1].profil_broj, IGRACI[1].Ws, IGRACI[1].Ls)
             IGRACI[0].Ls += 1
@@ -2560,6 +2583,8 @@ def reset_igre(igrac1, igrac2):
         if igrac1.score == 2:
             kraj_igre = True
             pobjednik = selektirani_profili[0]
+            shef = BORCI["igrac1"]
+            luzer = BORCI["igrac2"]
             IGRACI[0].Ws += 1
             update_score(IGRACI[0].profil_broj, IGRACI[0].Ws, IGRACI[0].Ls)
             IGRACI[1].Ls += 1
@@ -2567,6 +2592,8 @@ def reset_igre(igrac1, igrac2):
         elif igrac2.score == 2:
             kraj_igre = True
             pobjednik = selektirani_profili[1]
+            shef = BORCI["igrac2"]
+            luzer = BORCI["igrac1"]
             IGRACI[1].Ws += 1
             update_score(IGRACI[1].profil_broj, IGRACI[1].Ws, IGRACI[1].Ls)
             IGRACI[0].Ls += 1
@@ -2578,6 +2605,8 @@ def reset_igre(igrac1, igrac2):
         if igrac1.score == 4:
             kraj_igre = True
             pobjednik = selektirani_profili[0]
+            shef = BORCI["igrac1"]
+            luzer = BORCI["igrac2"]
             IGRACI[0].Ws += 1
             update_score(IGRACI[0].profil_broj, IGRACI[0].Ws, IGRACI[0].Ls)
             IGRACI[1].Ls += 1
@@ -2585,6 +2614,8 @@ def reset_igre(igrac1, igrac2):
         elif igrac2.score == 4:
             kraj_igre = True
             pobjednik = selektirani_profili[1]
+            shef = BORCI["igrac2"]
+            luzer = BORCI["igrac1"]
             IGRACI[1].Ws += 1
             update_score(IGRACI[1].profil_broj, IGRACI[1].Ws, IGRACI[1].Ls)
             IGRACI[0].Ls += 1
@@ -2609,12 +2640,10 @@ def igranje():
     BORCI["igrac1"].score = 0
     BORCI["igrac2"].score = 0
     while igranje:
-        SCREEN.fill("Light Blue")
+        SCREEN.fill("Black")
         pygame.mouse.set_visible(False)
-        pod_surface = pygame.Surface((1600, 80))
-        pod_rectangle = pod_surface.get_rect(topleft = (0,820))
-        pygame.draw.rect(SCREEN, "Brown", pod_rectangle)
-
+        SCREEN.blit(publika, (0, 0))
+        SCREEN.blit(arena, (0, 0))
         if pocetak_runde == True:
             pocetak_kraja = False
             BORCI["igrac1"].resetBeforeGame()
@@ -2657,6 +2686,7 @@ def igranje():
 
         crtanjeHealthaIImena(BORCI["igrac1"], "lijevo")
         crtanjeHealthaIImena(BORCI["igrac2"], "desno")
+        SCREEN.blit(health, (0, 0))
         crtanjeRunde(BORCI["igrac1"], BORCI["igrac2"])
 
         keys_pressed = pygame.key.get_pressed()
@@ -2694,23 +2724,47 @@ def igranje():
         clock.tick(FPS)
 
 def winscreen():
-    global pobjednik
+    global pobjednik, shef, luzer
     pygame.mouse.set_visible(True)
-    transparent_background = pygame.Surface((WIDTH, HEIGHT))
-    transparent_background.fill("Black")
-    transparent_background.set_alpha(500)
-    SCREEN.blit(transparent_background, (0,0))
-    naslov_font = pygame.font.Font(None, 90)
-    naslov_surface = naslov_font.render(f"{pobjednik} je ultimativni pobjednik/ca!!!", False, "White")
-    naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 150))
+    naslov_font = pygame.font.Font(None, 110)
+    naslov_surface = naslov_font.render(f"{pobjednik} je ultimativni pobjednik/ca!!!", False, "Black")
+    naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 50))
+    stats_font = pygame.font.Font(None, 70)
+    wrunde = stats_font.render(f"{shef.score}", False, "Black")
+    wrunde_rect = wrunde.get_rect(center = (830, 340))
+    wudarci = stats_font.render(f"{shef.udarci}", False, "Black")
+    wudarci_rect = wudarci.get_rect(center = (830, 440))
+    wpostotak = stats_font.render(f"{int(shef.hit / shef.udarci * 100)}%", False, "Black")
+    wpostotak_rect = wpostotak.get_rect(center = (830, 540))
+    wblokirano = stats_font.render(f"{shef.blokirano}", False, "Black")
+    wblokirano_rect = wblokirano.get_rect(center = (830, 640))
+    lrunde = stats_font.render(f"{luzer.score}", False, "Black")
+    lrunde_rect = lrunde.get_rect(center = (1300, 340))
+    ludarci = stats_font.render(f"{luzer.udarci}", False, "Black")
+    ludarci_rect = ludarci.get_rect(center = (1300, 440))
+    lpostotak = stats_font.render(f"{int(luzer.hit / luzer.udarci * 100)}%", False, "Black")
+    lpostotak_rect = lpostotak.get_rect(center = (1300, 540))
+    lblokirano = stats_font.render(f"{luzer.blokirano}", False, "Black")
+    lblokirano_rect = lblokirano.get_rect(center = (1300, 640))
+    dalje_botun = SlikeGumbi(dalje, dalje_hover, 1420, 750)
     run = True
     while run == True:
         mouse_position = pygame.mouse.get_pos()
+        SCREEN.blit(bekigrunt, (0, 0))
+        if isinstance(shef, Andrej):
+            SCREEN.blit(andrew, (0, 0))
+        else:
+            SCREEN.blit(bruce, (0, 0))
         SCREEN.blit(naslov_surface, naslov_rectangle)
-        IZADI_GUMB = Button("Izađi", 80, "White", (350, 120), "Grey", "Yellow", (WIDTH/2, 450))
-        if IZADI_GUMB.checkForCollision(mouse_position):
-                IZADI_GUMB.changeButtonColor()
-        IZADI_GUMB.update(SCREEN)
+        SCREEN.blit(wrunde, wrunde_rect)
+        SCREEN.blit(wudarci, wudarci_rect)
+        SCREEN.blit(wpostotak, wpostotak_rect)
+        SCREEN.blit(wblokirano, wblokirano_rect)
+        SCREEN.blit(lrunde, lrunde_rect)
+        SCREEN.blit(ludarci, ludarci_rect)
+        SCREEN.blit(lpostotak, lpostotak_rect)
+        SCREEN.blit(lblokirano, lblokirano_rect)
+        dalje_botun.crtanjeGumba(mouse_position)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -2721,7 +2775,7 @@ def winscreen():
                     if escape_screen():
                         return
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if IZADI_GUMB.checkForCollision(mouse_position):
+                if dalje_botun.provjeraSudara(mouse_position):
                     return
 
         pygame.display.update()
