@@ -16,7 +16,7 @@ FPS = 60
 pogodeniudaraczvuk=pygame.mixer.Sound(os.path.join("audio","punch zvuk.wav"))
 chooseyourcharacterzvuk=pygame.mixer.Sound(os.path.join("audio","choose your character.wav"))
 VRATI_NAZAD_ZVUK = pygame.mixer.Sound(os.path.join("audio", "vrati_nazad_zvuk.ogg"))
-EXIT_GUMB_ZVUK = pygame.mixer.Sound(os.path.join("audio", "exit_gumb_zvuk.ogg"))
+EXIT_GUMB_ZVUK = pygame.mixer.Sound(os.path.join("audio", "exit_gumb_zvuk.wav"))
 TUPI_GUMB_ZVUK = pygame.mixer.Sound(os.path.join("audio", "tupi_gumb_zvuk.ogg"))
 KLIK_GUMB_ZVUK = pygame.mixer.Sound(os.path.join("audio", "klik_gumb_zvuk.ogg"))
 
@@ -1635,6 +1635,7 @@ def escape_screen():
                     pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     return True
                 if ne.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     return False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -1669,16 +1670,21 @@ def main():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.Sound.play(EXIT_GUMB_ZVUK)
+                time.sleep(2)
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     if escape_screen():
+                        pygame.mixer.Sound.play(EXIT_GUMB_ZVUK)
+                        time.sleep(2)
                         pygame.quit()
                         sys.exit()
                     pass
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if IGRAJ_GUMB.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     if imenovanje_profila():
                         break
                     if biranje_profila():
@@ -1697,6 +1703,7 @@ def main():
                         break
                     winscreen()
                 if ACHIEVEMENTS_GUMB.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     if postignuca_nema_profila():
                         break
                     if prije_postignuca():
@@ -1704,6 +1711,8 @@ def main():
                     if postignuca():
                         break
                 if IZADI_GUMB.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(EXIT_GUMB_ZVUK)
+                    time.sleep(2)
                     pygame.quit()
                     sys.exit()
         pygame.display.update()
@@ -1758,6 +1767,8 @@ def postignuca_nema_profila():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.Sound.play(EXIT_GUMB_ZVUK)
+                time.sleep(2)
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
@@ -1766,6 +1777,7 @@ def postignuca_nema_profila():
                         return True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if NEPOSTOJECI_GUMB.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     nema_profila = False
                     
         pygame.display.update()
@@ -1814,6 +1826,8 @@ def prije_postignuca():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.Sound.play(EXIT_GUMB_ZVUK)
+                time.sleep(2)
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
@@ -1823,9 +1837,11 @@ def prije_postignuca():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for i in range(len(SVI_IGRACI)):
                     if gumbici[i].checkForCollision(mouse_position):
+                        pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                         broj = gumbici[i].player_number
                         ima_profila1 = False
                 if BACK_GUMBIC.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     ima_profila1 = False
                     return True
 
@@ -1847,6 +1863,8 @@ def postignuca():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.Sound.play(EXIT_GUMB_ZVUK)
+                time.sleep(2)
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
@@ -1855,6 +1873,7 @@ def postignuca():
                         return True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if BACK_GUMBIC.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     ima_profila1 = True
                     ima_profila2 = False
                     
@@ -1931,6 +1950,8 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.Sound.play(EXIT_GUMB_ZVUK)
+                time.sleep(2)
                 pygame.quit()
                 sys.exit()
 
@@ -1948,7 +1969,7 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
                 for i in range(8):
                     
                     if PLAYERI_LISTA_GUMBOVA[i].checkForCollision(mouse_position):
-                        
+                        pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                         for k in range (8):
                             if PLAYERI_IMENA.get(f"player{k+1}") == "" and PLAYERI_SELEKTIRANI.get(f"player{k+1}") == False:
                                 PLAYERI_IMENA.update({f"player{k+1}":"Napravi profil"})
@@ -1959,6 +1980,7 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
                         trenutno_ime_upis = ""                    
                         PLAYERI_IMENA.update({f"player{i+1}":""})
                     if DALJE_GUMB.checkForCollision(mouse_position):
+                        pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                         if list(PLAYERI_IMENA.values()).count("Napravi profil") <= 6:
                             if PLAYERI_IMENA.get(f"player{i+1}")+"\n"== profili[i]:
                                 pass
@@ -2059,6 +2081,8 @@ def biranje_profila():
         DALJE_GUMB.update(SCREEN)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.Sound.play(EXIT_GUMB_ZVUK)
+                time.sleep(2)
                 pygame.quit()
                 sys.exit()   
             if event.type == pygame.KEYDOWN:
@@ -2067,11 +2091,13 @@ def biranje_profila():
                         return True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if DALJE_GUMB.checkForCollision(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     if len(selektirani_profili) == 2:
                         biranje_profila_bool = False
                 if len(selektirani_profili) <= 2:
                     for i in range(8):
                         if PLAYERI_LISTA_GUMBOVA[i].checkForCollision(mouse_position):
+                            pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                             if PLAYERI_IMENA.get(f"player{i+1}") == "Napravi profil":
                                 pass
                             else:
@@ -2151,6 +2177,8 @@ def odabir_borca1():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.Sound.play(EXIT_GUMB_ZVUK)
+                time.sleep(2)
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
@@ -2162,14 +2190,17 @@ def odabir_borca1():
                     pass
                 else:
                     if DALJE_GUMB.provjeraSudara(mouse_position):
+                        pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                         run = False
                 if A_GUMB.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     BORCI["igrac1"] = 0
                     odabran_borac = True
                     andrej_odabran = True
                     broz_odabran = False
                     BORCI["igrac1"] = Andrej("prvi")
                 if B_GUMB.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     BORCI["igrac1"] = 0
                     odabran_borac = True
                     andrej_odabran = False
@@ -2230,6 +2261,8 @@ def odabir_borca2():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.Sound.play(EXIT_GUMB_ZVUK)
+                time.sleep(2)
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
@@ -2241,14 +2274,17 @@ def odabir_borca2():
                     pass
                 else:
                     if DALJE_GUMB.provjeraSudara(mouse_position):
+                        pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                         run = False
                 if A_GUMB.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     BORCI["igrac2"] = 0
                     odabran_borac = True
                     andrej_odabran = True
                     broz_odabran = False
                     BORCI["igrac2"] = Andrej("drugi")
                 if B_GUMB.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     BORCI["igrac2"] = 0
                     odabran_borac = True
                     andrej_odabran = False
@@ -2336,6 +2372,8 @@ def keybind_screen1():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.Sound.play(EXIT_GUMB_ZVUK)
+                time.sleep(2)
                 pygame.quit()
                 sys.exit()   
             if event.type == pygame.KEYDOWN:
@@ -2347,9 +2385,11 @@ def keybind_screen1():
                     pass
                 else:
                     if DALJE_GUMB.provjeraSudara(mouse_position):
+                        pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                         run = False
 
                 if PRESET1.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     preset1 = True
                     preset2 = False
                     preset3 = False
@@ -2360,6 +2400,7 @@ def keybind_screen1():
                     BORCI["igrac1"].dictionary = {key: keybind_preset1[key] for key in BORCI["igrac1"].dictionary}
 
                 if PRESET2.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     preset1 = False
                     preset3 = False
                     preset2 = True
@@ -2370,6 +2411,7 @@ def keybind_screen1():
                     BORCI["igrac1"].dictionary = {key: keybind_preset2[key] for key in BORCI["igrac1"].dictionary}
 
                 if PRESET3.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     preset3 = True
                     preset1 = False
                     preset2 = False
@@ -2453,6 +2495,8 @@ def keybind_screen2():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.Sound.play(EXIT_GUMB_ZVUK)
+                time.sleep(2)
                 pygame.quit()
                 sys.exit()   
             if event.type == pygame.KEYDOWN:
@@ -2464,10 +2508,12 @@ def keybind_screen2():
                     pass
                 else:
                     if DALJE_GUMB.provjeraSudara(mouse_position):
+                        pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                         run = False
 
                 if otprije1 == True:
                     if PRESET1.provjeraSudara(mouse_position):
+                        pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                         pass
                 else:      
                     if PRESET1.provjeraSudara(mouse_position):
@@ -2482,6 +2528,7 @@ def keybind_screen2():
                         pass
                 else:      
                     if PRESET2.provjeraSudara(mouse_position):
+                        pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                         odabrano = True
                         preset1 = False
                         preset2 = True
@@ -2490,9 +2537,11 @@ def keybind_screen2():
 
                 if otprije3 == True:
                     if PRESET3.provjeraSudara(mouse_position):
+                        pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                         pass
                 else:      
                     if PRESET3.provjeraSudara(mouse_position):
+                        pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                         preset1 = False
                         preset2 = False
                         preset3 = True
@@ -2524,6 +2573,8 @@ def odabir_rundi():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.Sound.play(EXIT_GUMB_ZVUK)
+                time.sleep(2)
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
@@ -2532,15 +2583,19 @@ def odabir_rundi():
                         return True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if JEDNA_GUMB.checkForCollision(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     run = False
                     broj_rundi = 1
                 if TRI_GUMB.checkForCollision(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     run = False
                     broj_rundi = 3
                 if SEDAM_GUMB.checkForCollision(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     run = False
                     broj_rundi = 7
                 if NAZAD_GUMB.checkForCollision(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     run = False
                     return True
                 
@@ -2772,6 +2827,8 @@ def igranje():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.Sound.play(EXIT_GUMB_ZVUK)
+                time.sleep(2)
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
@@ -2843,6 +2900,8 @@ def winscreen():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.Sound.play(EXIT_GUMB_ZVUK)
+                time.sleep(2)
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
@@ -2851,6 +2910,7 @@ def winscreen():
                         return
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if dalje_botun.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     return
 
         pygame.display.update()
