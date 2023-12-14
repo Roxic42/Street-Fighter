@@ -1983,7 +1983,6 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
                 if event.key == pygame.K_ESCAPE:
                     if escape_screen():
                         return True
-                    imenovanje_profila_bool = False
 
                 for i in range(8):
                     if PLAYERI_SELEKTIRANI.get(f"player_{i+1}") == True:
