@@ -12,6 +12,26 @@ pygame.display.set_caption("Street-Fighter")
 clock = pygame.time.Clock()
 FPS = 60
 
+#Zvukovi opći
+pogodeniudaraczvuk=pygame.mixer.Sound(os.path.join("audio","punch zvuk.wav"))
+chooseyourcharacterzvuk=pygame.mixer.Sound(os.path.join("audio","choose your character.wav"))
+VRATI_NAZAD_ZVUK = pygame.mixer.Sound(os.path.join("audio", "vrati_nazad_zvuk.ogg"))
+EXIT_GUMB_ZVUK = pygame.mixer.Sound(os.path.join("audio", "exit_gumb_zvuk.ogg"))
+TUPI_GUMB_ZVUK = pygame.mixer.Sound(os.path.join("audio", "tupi_gumb_zvuk.ogg"))
+KLIK_GUMB_ZVUK = pygame.mixer.Sound(os.path.join("audio", "klik_gumb_zvuk.ogg"))
+
+#Loading screen
+LOGO = pygame.image.load(os.path.join("Assets", "MLKJR_LOGO.png")).convert_alpha()
+INTRO = pygame.mixer.Sound(os.path.join("audio", "INTRO.ogg"))
+
+def LOADING_SCREEN():
+    SCREEN.fill('White')
+    SCREEN.blit(LOGO,(300,50))
+    pygame.mixer.Sound.play(INTRO).set_volume(0.75)
+    pygame.display.update()
+    time.sleep(5.7)                
+    SCREEN.fill('White')
+#LOADING_SCREEN()
 class SlikeGumbi:
     def __init__(self, slika, hover_slika, x, y):
         self.slika = slika
@@ -205,6 +225,14 @@ class Andrej(pygame.sprite.Sprite):
         self.promjena_punch = 0
         self.walk = []
         self.promjena_walk = 0
+
+        self.skokzvuk=pygame.mixer.Sound(os.path.join("audio","andrej_jump.wav"))
+        self.punchzvuk=pygame.mixer.Sound(os.path.join("audio", "andrej_punch.wav"))
+        self.kickzvuk=pygame.mixer.Sound(os.path.join("audio", "andrej_kick.wav"))
+        self.primakickzvuk=pygame.mixer.Sound(os.path.join("audio", "andrej_prima_punch.wav"))
+        self.primaudaracblokzvuk=pygame.mixer.Sound(os.path.join("audio", "andrej blok prima punch.wav"))
+        self.mrtavzvuk=pygame.mixer.Sound(os.path.join("audio","andrej mrtav.wav"))
+        self.kadapobijedizvuk=pygame.mixer.Sound(os.path.join("audio", "andrej kada pobijedi.wav"))
 
         if self.pozicija_borca == "lijevo":
             for image in range(3):
@@ -689,6 +717,13 @@ class Broz(Andrej):
         self.promjena_punch = 0
         self.walk = []
         self.promjena_walk = 0
+        self.skokzvuk=pygame.mixer.Sound(os.path.join("audio","broz li jump.wav"))
+        self.punchzvuk=pygame.mixer.Sound(os.path.join("audio", "broz li punch.wav"))
+        self.kickzvuk=pygame.mixer.Sound(os.path.join("audio", "broz li kick.wav"))
+        self.primakickzvuk=pygame.mixer.Sound(os.path.join("audio", "broz li prima punch.wav"))
+        self.primaudaracblokzvuk=pygame.mixer.Sound(os.path.join("audio", "broz li blok prima punch.wav"))
+        self.mrtavzvuk=pygame.mixer.Sound(os.path.join("audio","broz li mrtav.wav"))
+        self.kadapobijedizvuk=pygame.mixer.Sound(os.path.join("audio", "broz li kada pobijedi.wav"))
 
         self.promjena_stamine = time.time()
 
@@ -1243,6 +1278,7 @@ def provjeraSkokaISkakanje(igrac, pritisnuta_tipka, trazena_tipka):
             igrac.varijable["jumping"] = True
             igrac.pocetak_skoka = True
             igrac.pocetak_skok_animacije = True
+            pygame.mixer.Sound.play(igrac.skokzvuk)
 
 def provjeraUdarcaIUdaranje(igrac, pritisnuta_tipka, trazena_tipka):
     if pritisnuta_tipka == trazena_tipka:
@@ -1265,6 +1301,7 @@ def provjeraUdarcaIUdaranje(igrac, pritisnuta_tipka, trazena_tipka):
         elif igrac.stamina < 1:
             pass
         else:
+            pygame.mixer.Sound.play(igrac.punchzvuk)
             if igrac.varijable["crouching"] == True:
                 igrac.varijable["crouchingpunch"] = True
                 igrac.aperkat_timer_start = time.time()
@@ -1312,6 +1349,7 @@ def provjeraNogeINogatanje(igrac, pritisnuta_tipka, trazena_tipka):
         elif igrac.stamina < 1:
             pass
         else:
+            pygame.mixer.Sound.play(igrac.kickzvuk)
             if igrac.varijable["jumping"] == True:
                 igrac.varijable["jumpingkick"] = True
                 igrac.windmill_timer_start = time.time()
@@ -1342,6 +1380,8 @@ def provjeraDamagea(igrac1, igrac2):
                     igrac2.varijable["stunned"] = True
                     igrac2.stunned_timer_start = time.time()
                     igrac2.health -= 1
+                    pygame.mixer.Sound.play(igrac2.primakickzvuk)
+                    pygame.mixer.Sound.play(pogodeniudaraczvuk)
                     igrac1.pocinjen_damage = True
             else:
                 pass
@@ -1351,6 +1391,8 @@ def provjeraDamagea(igrac1, igrac2):
             else:
                 igrac1.udario_u_blok = True
                 igrac2.blokirano += 1
+                pygame.mixer.Sound.play(igrac2.primaudaracblokzvuk)
+                pygame.mixer.Sound.play(pogodeniudaraczvuk)
                 igrac2.stamina -= 0.5
                 igrac2.promjena_stamine = time.time()
         elif igrac2.varijable["defeated"] == True:
@@ -1358,6 +1400,8 @@ def provjeraDamagea(igrac1, igrac2):
         elif pygame.sprite.spritecollide(igrac1.damageRect, igrac2.rectangles, False, pygame.sprite.collide_rect):
             igrac2.varijable["stunned"] = True
             igrac2.stunned_timer_start = time.time()
+            pygame.mixer.Sound.play(igrac2.primakickzvuk)
+            pygame.mixer.Sound.play(pogodeniudaraczvuk)
             igrac2.health -= 1
             igrac1.pocinjen_damage = True
             igrac1.hit += 1
@@ -1373,6 +1417,8 @@ def provjeraDamagea(igrac1, igrac2):
                     igrac1.varijable["stunned"] = True
                     igrac1.stunned_timer_start = time.time()
                     igrac1.health -= 1
+                    pygame.mixer.Sound.play(igrac1.primakickzvuk)
+                    pygame.mixer.Sound.play(pogodeniudaraczvuk)
                     igrac2.pocinjen_damage = True
             else:
                 pass
@@ -1383,6 +1429,8 @@ def provjeraDamagea(igrac1, igrac2):
                 igrac2.udario_u_blok = True
                 igrac1.blokirano += 1
                 igrac1.stamina -= 0.5
+                pygame.mixer.Sound.play(igrac1.primaudaracblokzvuk)
+                pygame.mixer.Sound.play(pogodeniudaraczvuk)
                 igrac1.promjena_stamine = time.time()
         elif igrac1.varijable["defeated"] == True:
             pass
@@ -1390,6 +1438,8 @@ def provjeraDamagea(igrac1, igrac2):
             igrac1.varijable["stunned"] = True
             igrac1.stunned_timer_start = time.time()
             igrac1.health -= 1
+            pygame.mixer.Sound.play(igrac1.primakickzvuk)
+            pygame.mixer.Sound.play(pogodeniudaraczvuk)
             igrac2.pocinjen_damage = True
             igrac2.hit += 1
         else:
@@ -1585,6 +1635,7 @@ def escape_screen():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if da.provjeraSudara(mouse_position):
+                    pygame.mixer.Sound.play(KLIK_GUMB_ZVUK)
                     return True
                 if ne.provjeraSudara(mouse_position):
                     return False
@@ -2059,6 +2110,7 @@ def odabir_borca1():
     andrej_odabran = False
     broz_odabran = False
     run = True
+    pygame.mixer.Sound.play(chooseyourcharacterzvuk)
     while run == True:
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
@@ -2139,6 +2191,7 @@ def odabir_borca2():
     broz_odabran = False
     read_data()
     poredak()
+    pygame.mixer.Sound.play(chooseyourcharacterzvuk)
     run = True
     while run == True:
         SCREEN.fill("Black")
@@ -2509,6 +2562,8 @@ def provjeraJeLiTkoDefeated(igrac1, igrac2):
         update_achievementa(IGRACI[1].profil_broj, 4)
         if pocetak_kraja == False:
             igrac2.score += 1
+            pygame.mixer.Sound.play(igrac1.mrtavzvuk)
+            pygame.mixer.Sound.play(igrac2.kadapobijedizvuk)
             pocetak_kraja = True
             krajnji_counter = time.time()
     if (igrac1.health == 0) and (igrac2.health == 10):
@@ -2516,12 +2571,16 @@ def provjeraJeLiTkoDefeated(igrac1, igrac2):
         update_achievementa(IGRACI[1].profil_broj, 5)
         if pocetak_kraja == False:
             igrac2.score += 1
+            pygame.mixer.Sound.play(igrac1.mrtavzvuk)
+            pygame.mixer.Sound.play(igrac2.kadapobijedizvuk)
             pocetak_kraja = True
             krajnji_counter = time.time()
     if igrac1.health == 0:
         igrac1.varijable["defeated"] = True
         if pocetak_kraja == False:
             igrac2.score += 1
+            pygame.mixer.Sound.play(igrac1.mrtavzvuk)
+            pygame.mixer.Sound.play(igrac2.kadapobijedizvuk)
             pocetak_kraja = True
             krajnji_counter = time.time()
         ime_font = pygame.font.Font(None, 100)
@@ -2535,6 +2594,8 @@ def provjeraJeLiTkoDefeated(igrac1, igrac2):
         update_achievementa(IGRACI[0].profil_broj, 4)
         if pocetak_kraja == False:
             igrac1.score += 1
+            pygame.mixer.Sound.play(igrac2.mrtavzvuk)
+            pygame.mixer.Sound.play(igrac1.kadapobijedizvuk)
             pocetak_kraja = True
             krajnji_counter = time.time()
     if (igrac2.health == 0) and (igrac1.health == 10):
@@ -2542,12 +2603,16 @@ def provjeraJeLiTkoDefeated(igrac1, igrac2):
         update_achievementa(IGRACI[0].profil_broj, 5)
         if pocetak_kraja == False:
             igrac1.score += 1
+            pygame.mixer.Sound.play(igrac2.mrtavzvuk)
+            pygame.mixer.Sound.play(igrac1.kadapobijedizvuk)
             pocetak_kraja = True
             krajnji_counter = time.time()
     if igrac2.health == 0:
         igrac2.varijable["defeated"] = True
         if pocetak_kraja == False:
             igrac1.score += 1
+            pygame.mixer.Sound.play(igrac2.mrtavzvuk)
+            pygame.mixer.Sound.play(igrac1.kadapobijedizvuk)
             pocetak_kraja = True
             krajnji_counter = time.time()
         ime_font = pygame.font.Font(None, 100)
