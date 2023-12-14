@@ -2189,7 +2189,6 @@ def odabir_borca2():
     odabran_borac = False
     andrej_odabran = False
     broz_odabran = False
-    pygame.mixer.Sound.play(chooseyourcharacterzvuk)
     run = True
     while run == True:
         SCREEN.fill("Black")
