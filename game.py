@@ -164,6 +164,8 @@ class Andrej(pygame.sprite.Sprite):
         elif igrac == "drugi":
             self.pozicija_borca = "desno"
 
+        self.borac = "Andrej"
+
         self.varijable = {"jumping" : False, "crouching" : False, "blocking" : False, "stunned" : False, "defeated" : False, "kicking" : False, "punching" : False, "jumpingpunch" : False, "jumpingkick" : False, "crouchingpunch" : False}
 
         self.dictionary = {"left":0, "right":0, "up":0, "down":0, "punch":0, "kick":0, "block":0}
@@ -657,6 +659,8 @@ class Broz(Andrej):
             self.pozicija_borca = "lijevo"
         elif igrac == "drugi":
             self.pozicija_borca = "desno"
+
+        self.borac = "Broz"
 
         self.varijable = {"jumping" : False, "crouching" : False, "blocking" : False, "stunned" : False, "defeated" : False, "kicking" : False, "punching" : False, "jumpingpunch" : False, "jumpingkick" : False, "crouchingpunch" : False}
 
@@ -1480,13 +1484,6 @@ class Player:
         self.achievements = achievements
         self.profil_broj = profil_broj
 
-    def postotak(self):
-        ukupno_igara = self.Ws + self.Ls
-        return (self.Ws / ukupno_igara) * 100 if ukupno_igara > 0 else 0
-    
-    def ispisi(self):
-        print(self.achievements)
-
 IGRACI = []
 def read_data():
     global selektirani_profili
@@ -1659,7 +1656,6 @@ def main():
         PLAYERI_IMENA.clear()
         IGRACI.clear()
         SVI_IGRACI.clear()
-
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
         if promjena >= 2.9:
@@ -1779,7 +1775,7 @@ def draw_buttons():
     global SVI_IGRACI
     buttons = []
     buttons = []
-    button_width = 360
+    button_width = 380
     button_height = 120
     button_spacing = 50
     x_offset_increase = 300
@@ -1789,7 +1785,7 @@ def draw_buttons():
         x_offset = -button_width / 2 - button_spacing / 2 - x_offset_increase if i % 2 == 0 else button_spacing / 2 + x_offset_increase
         x = start_position[0] + x_offset
         y = start_position[1] + (i // 2) * (button_height + button_spacing)
-        button = Button(f"{igrac.ime} - W{igrac.Ws}/L{igrac.Ls}", 70, "#E1E193", (button_width, button_height), "#0A0A09", "#064719", (x, y))
+        button = Button(f"{igrac.ime}, W{igrac.Ws}-L{igrac.Ls}", 70, "#E1E193", (button_width, button_height), "#0A0A09", "#064719", (x, y))
         button.dodaj(igrac)
         buttons.append(button)
 
@@ -1802,7 +1798,6 @@ def prije_postignuca():
     imali()
     BACK_GUMBIC = SlikeGumbi(BACK_GUMB, BACK_GUMB_HOVER, 10, 10)
     gumbici = draw_buttons()
-
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render("ODABERI PROFIL:", False, "#0A0A09")
     naslov_rectangle = naslov_surface.get_rect(topleft = (150, 20))
@@ -1876,6 +1871,8 @@ with open("Podzemne borbe\profili.txt",encoding="utf-8") as datoteka:
     profili = datoteka.readlines()
 with open("Podzemne borbe\score.txt",encoding="utf-8") as datoteka:
     score = datoteka.readlines()
+with open("Podzemne borbe\Achievements.txt",encoding="utf-8") as datoteka:
+    postignucici = datoteka.readlines()
 
 imenovanje_profila_bool = True
 biranje_profila_bool = True
@@ -1883,6 +1880,7 @@ biranje_profila_bool = True
 def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezultata
     global score
     global profili
+    global postignucici
     global PLAYERI_IMENA
     global PLAYERI_SELEKTIRANI
     global biranje_profila_bool
@@ -1945,6 +1943,7 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
                         pass
                     else:
                         score[i] = "0,0\n"
+                        postignucici[i] = "ne,ne,ne,ne,ne,ne\n"
                       
                 for i in range(8):
                     
@@ -1974,7 +1973,9 @@ def imenovanje_profila(): #upisivanje imena igrača/profila za pamćenje rezulta
                             with open("Podzemne borbe\profili.txt","wt",encoding="utf-8",) as datoteka:
                                 datoteka.writelines(profili)
                             with open("Podzemne borbe\score.txt","wt",encoding="utf-8",) as datoteka:
-                                datoteka.writelines(score)  
+                                datoteka.writelines(score)
+                            with open("Podzemne borbe\Achievements.txt","wt",encoding="utf-8",) as datoteka:
+                                datoteka.writelines(postignucici)
                             imenovanje_profila_bool = False
                         
                         
@@ -2164,17 +2165,17 @@ def odabir_borca1():
                     if DALJE_GUMB.provjeraSudara(mouse_position):
                         run = False
                 if A_GUMB.provjeraSudara(mouse_position):
+                    BORCI["igrac1"] = 0
                     odabran_borac = True
                     andrej_odabran = True
                     broz_odabran = False
                     BORCI["igrac1"] = Andrej("prvi")
-                    update_achievementa(IGRACI[0].profil_broj, 2)
                 if B_GUMB.provjeraSudara(mouse_position):
+                    BORCI["igrac1"] = 0
                     odabran_borac = True
                     andrej_odabran = False
                     broz_odabran = True
                     BORCI["igrac1"] = Broz("prvi")
-                    update_achievementa(IGRACI[0].profil_broj, 3)
                 
         pygame.display.update()
         clock.tick(FPS)
@@ -2189,8 +2190,6 @@ def odabir_borca2():
     odabran_borac = False
     andrej_odabran = False
     broz_odabran = False
-    read_data()
-    poredak()
     pygame.mixer.Sound.play(chooseyourcharacterzvuk)
     run = True
     while run == True:
@@ -2246,17 +2245,17 @@ def odabir_borca2():
                     if DALJE_GUMB.provjeraSudara(mouse_position):
                         run = False
                 if A_GUMB.provjeraSudara(mouse_position):
+                    BORCI["igrac2"] = 0
                     odabran_borac = True
                     andrej_odabran = True
                     broz_odabran = False
                     BORCI["igrac2"] = Andrej("drugi")
-                    update_achievementa(IGRACI[1].profil_broj, 2)
                 if B_GUMB.provjeraSudara(mouse_position):
+                    BORCI["igrac2"] = 0
                     odabran_borac = True
                     andrej_odabran = False
                     broz_odabran = True
                     BORCI["igrac2"] = Broz("drugi")
-                    update_achievementa(IGRACI[1].profil_broj, 3)
                 
         pygame.display.update()
         clock.tick(FPS)
@@ -2267,7 +2266,7 @@ def odabir_borca2():
 
 def keybind_screen1():
     global selektirani_profili, odabrano, preset1, preset2, preset3, otprije1, otprije2, otprije3
-    global BORCI
+    global BORCI, IGRACI
     odabrano = False
     preset1 = False
     preset2 = False
@@ -2275,11 +2274,20 @@ def keybind_screen1():
     otprije1 = False
     otprije2  = False
     otprije3 = False
-    hover = False
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render(f"{selektirani_profili[0]}, odaberi svoje kontrole ", False, "Black")
     naslov_rectangle = naslov_surface.get_rect(topleft = (10, 10))
     run = True
+    print(BORCI["igrac1"].borac)
+    print(BORCI["igrac2"].borac)
+    if BORCI["igrac1"].borac == "Broz":
+        update_achievementa(IGRACI[0].profil_broj, 3)
+    else:
+        update_achievementa(IGRACI[0].profil_broj, 2)
+    if BORCI["igrac2"].borac == "Broz":
+        update_achievementa(IGRACI[1].profil_broj, 3)
+    else:
+        update_achievementa(IGRACI[1].profil_broj, 2)
     while run == True:
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
@@ -2499,16 +2507,16 @@ def keybind_screen2():
 def odabir_rundi():
     global broj_rundi
     naslov_font = pygame.font.Font(None, 100)
-    naslov_surface = naslov_font.render("Na koliko rundi se igra?", False, "White")
+    naslov_surface = naslov_font.render("Na koliko rundi se igra?", False, "#0A0A09")
     naslov_rectangle = naslov_surface.get_rect(center = (WIDTH/2, 100))
     run = True
     while run == True:
-        SCREEN.fill("Black")
+        SCREEN.fill('#d0d0d0')
         mouse_position = pygame.mouse.get_pos()
-        JEDNA_GUMB = Button("1", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 300))
-        TRI_GUMB = Button("3", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 500))
-        SEDAM_GUMB = Button("7", 70, "White", (220, 120), "Grey", "Green", (WIDTH/2, 700))
-        NAZAD_GUMB = Button("Nazad", 35, "White", (120, 60), "Grey", "Red", (1500, 50))
+        JEDNA_GUMB = Button("1", 70, "#E1E193", (220, 120), "#0A0A09", "#064719", (WIDTH/2, 300))
+        TRI_GUMB = Button("3", 70, "#E1E193", (220, 120), "#0A0A09", "#064719", (WIDTH/2, 500))
+        SEDAM_GUMB = Button("7", 70, "#E1E193", (220, 120), "#0A0A09", "#064719", (WIDTH/2, 700))
+        NAZAD_GUMB = Button("Nazad", 35, "#E1E193", (120, 60), "#0A0A09", "#470606", (1500, 50))
         for gumb in [JEDNA_GUMB, SEDAM_GUMB, TRI_GUMB, NAZAD_GUMB]:
             if gumb.checkForCollision(mouse_position):
                 gumb.changeButtonColor()
@@ -2617,7 +2625,7 @@ def provjeraJeLiTkoDefeated(igrac1, igrac2):
             krajnji_counter = time.time()
         ime_font = pygame.font.Font(None, 100)
         ime_surface = ime_font.render(f"{selektirani_profili[0]} je pobjedio/la rundu!", True, "White")
-        ime_rectangle = ime_surface.get_rect(center = (WIDTH/2, HEIGHT/2))
+        ime_rectangle = ime_surface.get_rect(center = (WIDTH/2, 400))
         SCREEN.blit(ime_surface, ime_rectangle)
         if (time.time() - krajnji_counter) >= 5:
             reset_igre(igrac1, igrac2)
@@ -2798,28 +2806,32 @@ def winscreen():
     wrunde = stats_font.render(f"{shef.score}", False, "Black")
     wrunde_rect = wrunde.get_rect(center = (830, 340))
     wudarci = stats_font.render(f"{shef.udarci}", False, "Black")
-    wudarci_rect = wudarci.get_rect(center = (830, 440))
+    wudarci_rect = wudarci.get_rect(center = (830, 410))
     wpostotak = stats_font.render(f"{int(shef.hit / shef.udarci * 100)}%", False, "Black")
-    wpostotak_rect = wpostotak.get_rect(center = (830, 540))
+    wpostotak_rect = wpostotak.get_rect(center = (830, 510))
     wblokirano = stats_font.render(f"{shef.blokirano}", False, "Black")
-    wblokirano_rect = wblokirano.get_rect(center = (830, 640))
+    wblokirano_rect = wblokirano.get_rect(center = (830, 600))
     lrunde = stats_font.render(f"{luzer.score}", False, "Black")
-    lrunde_rect = lrunde.get_rect(center = (1300, 340))
+    lrunde_rect = lrunde.get_rect(center = (1330, 335))
     ludarci = stats_font.render(f"{luzer.udarci}", False, "Black")
-    ludarci_rect = ludarci.get_rect(center = (1300, 440))
-    lpostotak = stats_font.render(f"{int(luzer.hit / luzer.udarci * 100)}%", False, "Black")
-    lpostotak_rect = lpostotak.get_rect(center = (1300, 540))
+    ludarci_rect = ludarci.get_rect(center = (1330, 410))
+    try:
+        postotak_value = int(luzer.hit / luzer.udarci * 100)
+    except ZeroDivisionError:
+        postotak_value = 0 
+    lpostotak = stats_font.render(f"{postotak_value}%", False, "Black")
+    lpostotak_rect = lpostotak.get_rect(center = (1345, 500))
     lblokirano = stats_font.render(f"{luzer.blokirano}", False, "Black")
-    lblokirano_rect = lblokirano.get_rect(center = (1300, 640))
+    lblokirano_rect = lblokirano.get_rect(center = (1330, 590))
     dalje_botun = SlikeGumbi(dalje, dalje_hover, 1420, 750)
     run = True
     while run == True:
         mouse_position = pygame.mouse.get_pos()
         SCREEN.blit(bekigrunt, (0, 0))
-        if isinstance(shef, Andrej):
-            SCREEN.blit(andrew, (0, 0))
-        else:
+        if isinstance(shef, Broz):
             SCREEN.blit(bruce, (0, 0))
+        else:
+            SCREEN.blit(andrew, (0, 0))
         SCREEN.blit(naslov_surface, naslov_rectangle)
         SCREEN.blit(wrunde, wrunde_rect)
         SCREEN.blit(wudarci, wudarci_rect)
