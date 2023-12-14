@@ -16,3 +16,4 @@ igra se crasha ako uppercut ili kick iz čučnja bude prvi udarac(video dodan)
 može se ići dalje a nije selektiran keybinds preset
 crash ako se selektira broz li
 crash ako umre lik a nije udario ili se pomaknuo
+zadnji achievement ne radi
