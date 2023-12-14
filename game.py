@@ -2263,7 +2263,7 @@ def odabir_borca2():
         clock.tick(FPS)
 
 def keybind_screen1():
-    global selektirani_profili, odabrano, preset1, preset2, preset3, otprije1, otprije2, otprije3
+    global selektirani_profili, odabrano, preset1, preset2, preset3, otprije1, otprije2, otprije3, hover
     global BORCI, IGRACI
     odabrano = False
     preset1 = False
@@ -2272,6 +2272,7 @@ def keybind_screen1():
     otprije1 = False
     otprije2  = False
     otprije3 = False
+    hover = False
     naslov_font = pygame.font.Font(None, 100)
     naslov_surface = naslov_font.render(f"{selektirani_profili[0]}, odaberi svoje kontrole ", False, "Black")
     naslov_rectangle = naslov_surface.get_rect(topleft = (10, 10))
@@ -2310,29 +2311,42 @@ def keybind_screen1():
         else:
             DALJE_GUMB.crtanjeGumba(mouse_position)
 
-        if preset1 == True:
+        if preset1 == True and hover == True:
+            PRESET1_CLICK.crtanjeGumba(mouse_position)
+            hover = False
+        elif preset1 == True:
             PRESET1_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(old_school_info, (0,0))
         else:
             PRESET1.crtanjeGumba(mouse_position)
             if PRESET1.provjeraSudara(mouse_position):
                 SCREEN.blit(old_school_info, (0,0))
+                hover = True
 
-        if preset2 == True:
+
+        if preset2 == True and hover == True:
+            PRESET2_CLICK.crtanjeGumba(mouse_position)
+            hover = False
+        elif preset2 == True:
             PRESET2_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(builder_info, (0,0))
         else:
             PRESET2.crtanjeGumba(mouse_position)
             if PRESET2.provjeraSudara(mouse_position):
                 SCREEN.blit(builder_info, (0,0))
+                hover = True
 
-        if preset3 == True:
+        if preset3 == True and hover == True:
+            PRESET3_CLICK.crtanjeGumba(mouse_position)
+            hover = False
+        elif preset3 == True:
             PRESET3_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(combat_info, (0,0))
         else:
             PRESET3.crtanjeGumba(mouse_position)
             if PRESET3.provjeraSudara(mouse_position):
                 SCREEN.blit(combat_info, (0,0))
+                hover = True
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -2383,7 +2397,7 @@ def keybind_screen1():
         clock.tick(FPS)
 
 def keybind_screen2():
-    global selektirani_profili, odabrano, preset1, preset2, preset3, otprije1, otprije2, otprije3
+    global selektirani_profili, odabrano, preset1, preset2, preset3, otprije1, otprije2, otprije3, hover
     global BORCI
     odabrano = False
     preset1 = False
@@ -2393,6 +2407,7 @@ def keybind_screen2():
     naslov_surface = naslov_font.render(f"{selektirani_profili[1]}, odaberi svoje kontrole ", False, "Black")
     naslov_rectangle = naslov_surface.get_rect(topleft = (10, 10))
     run = True
+    hover = False
     while run == True:
         SCREEN.fill("Black")
         mouse_position = pygame.mouse.get_pos()
@@ -2420,7 +2435,10 @@ def keybind_screen2():
         else:
             DALJE_GUMB.crtanjeGumba(mouse_position)
 
-        if preset1 == True:
+        if preset1 == True and hover == True:
+            PRESET1_CLICK.crtanjeGumba(mouse_position)
+            hover = False
+        elif preset1 == True:
             PRESET1_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(old_school_info, (0,0))
         elif otprije1 == True:
@@ -2429,8 +2447,12 @@ def keybind_screen2():
             PRESET1.crtanjeGumba(mouse_position)
             if PRESET1.provjeraSudara(mouse_position):
                 SCREEN.blit(old_school_info, (0,0))
+                hover = True
 
-        if preset2 == True:
+        if preset2 == True and hover == True:
+            PRESET2_CLICK.crtanjeGumba(mouse_position)
+            hover = False
+        elif preset2 == True:
             PRESET2_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(builder_info, (0,0))
         elif otprije2 == True:
@@ -2439,8 +2461,12 @@ def keybind_screen2():
             PRESET2.crtanjeGumba(mouse_position)
             if PRESET2.provjeraSudara(mouse_position):
                 SCREEN.blit(builder_info, (0,0))
+                hover = True
 
-        if preset3 == True:
+        if preset3 == True and hover == True:
+            PRESET3_CLICK.crtanjeGumba(mouse_position)
+            hover = False
+        elif preset3 == True:
             PRESET3_CLICK.crtanjeGumba(mouse_position)
             SCREEN.blit(combat_info, (0,0))
         elif otprije3 == True:
@@ -2449,6 +2475,7 @@ def keybind_screen2():
             PRESET3.crtanjeGumba(mouse_position)
             if PRESET3.provjeraSudara(mouse_position):
                 SCREEN.blit(combat_info, (0,0))
+                hover = True
 
 
         for event in pygame.event.get():
@@ -2591,7 +2618,7 @@ def provjeraJeLiTkoDefeated(igrac1, igrac2):
             krajnji_counter = time.time()
         ime_font = pygame.font.Font(None, 100)
         ime_surface = ime_font.render(f"{selektirani_profili[1]} je pobjedio/la rundu!", True, "White")
-        ime_rectangle = ime_surface.get_rect(center = (WIDTH/2, HEIGHT/2))
+        ime_rectangle = ime_surface.get_rect(center = (WIDTH/2, 400))
         SCREEN.blit(ime_surface, ime_rectangle)
         if (time.time() - krajnji_counter) >= 5:
             reset_igre(igrac1, igrac2)
